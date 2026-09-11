@@ -1,0 +1,382 @@
+{
+  "timestamp": "2026-09-11T21:03:11.289681+00:00",
+  "experiments": {
+    "EXP01": {
+      "experiment_id": "EXP01_NORMAL_BASELINE",
+      "description": "24-Hour Nominal Diurnal Operation Benchmark",
+      "sample_count": 1440,
+      "seed": 42,
+      "detection_metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "true_negatives": 1440,
+        "false_negatives": 0,
+        "total_samples": 1440,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "performance_metrics": {
+        "mean_latency_ms": 0.952,
+        "p95_latency_ms": 1.189,
+        "p99_latency_ms": 1.272,
+        "throughput_obs_per_sec": 1048.23,
+        "total_execution_time_s": 1.3737
+      },
+      "asset_condition_metrics": {
+        "mean_health_index": 99.49,
+        "min_health_index": 99.49,
+        "mean_performance_ratio": 1.0
+      },
+      "audit_chain_valid": true
+    },
+    "EXP02": {
+      "experiment_id": "EXP02_SENSOR_FAILURE",
+      "description": "Sensor Fault & Impossible Telemetry Range Validation",
+      "sample_count": 600,
+      "injected_faults_count": 100,
+      "seed": 42,
+      "detection_metrics": {
+        "true_positives": 100,
+        "false_positives": 0,
+        "true_negatives": 500,
+        "false_negatives": 0,
+        "total_samples": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "audit_chain_valid": true
+    },
+    "EXP03": {
+      "experiment_id": "EXP03_COMMUNICATION_FAILURE",
+      "description": "Network Packet Drop & Watchdog Timeout Evaluation",
+      "tested_drop_rates": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "comm_evaluations": [
+        {
+          "drop_rate": 0.0,
+          "is_online": true,
+          "comm_subscore": 97.5,
+          "comm_confidence": 1.0,
+          "composite_health": 99.1,
+          "health_confidence": 1.0
+        },
+        {
+          "drop_rate": 0.25,
+          "is_online": true,
+          "comm_subscore": 68.44,
+          "comm_confidence": 1.0,
+          "composite_health": 97.97,
+          "health_confidence": 1.0
+        },
+        {
+          "drop_rate": 0.5,
+          "is_online": true,
+          "comm_subscore": 42.5,
+          "comm_confidence": 1.0,
+          "composite_health": 96.85,
+          "health_confidence": 1.0
+        },
+        {
+          "drop_rate": 0.75,
+          "is_online": true,
+          "comm_subscore": 19.69,
+          "comm_confidence": 1.0,
+          "composite_health": 95.72,
+          "health_confidence": 1.0
+        },
+        {
+          "drop_rate": 1.0,
+          "is_online": false,
+          "comm_subscore": 0.0,
+          "comm_confidence": 0.0,
+          "composite_health": 94.6,
+          "health_confidence": 0.86
+        }
+      ],
+      "timeout_detection": {
+        "true_positives": 1,
+        "false_positives": 0,
+        "true_negatives": 1,
+        "false_negatives": 0,
+        "total_samples": 2,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "audit_chain_valid": true
+    },
+    "EXP04": {
+      "experiment_id": "EXP04_MISSING_DATA",
+      "description": "Sparse Telemetry & Incomplete Evidence Evaluation",
+      "health_missingness_evaluations": [
+        {
+          "num_missing_dimensions": 0,
+          "health_score": 99.48,
+          "confidence": 1.0,
+          "is_uncertain": false,
+          "active_weights_sum": 1.0,
+          "missing_keys": []
+        },
+        {
+          "num_missing_dimensions": 1,
+          "health_score": 99.31,
+          "confidence": 0.75,
+          "is_uncertain": false,
+          "active_weights_sum": 1.0,
+          "missing_keys": [
+            "performance"
+          ]
+        },
+        {
+          "num_missing_dimensions": 2,
+          "health_score": 98.97,
+          "confidence": 0.5,
+          "is_uncertain": true,
+          "active_weights_sum": 1.0,
+          "missing_keys": [
+            "performance",
+            "thermal"
+          ]
+        },
+        {
+          "num_missing_dimensions": 3,
+          "health_score": 98.52,
+          "confidence": 0.35,
+          "is_uncertain": true,
+          "active_weights_sum": 1.0001,
+          "missing_keys": [
+            "performance",
+            "thermal",
+            "availability"
+          ]
+        },
+        {
+          "num_missing_dimensions": 4,
+          "health_score": 98.4,
+          "confidence": 0.3,
+          "is_uncertain": true,
+          "active_weights_sum": 1.0,
+          "missing_keys": [
+            "performance",
+            "thermal",
+            "availability",
+            "communication"
+          ]
+        },
+        {
+          "num_missing_dimensions": 5,
+          "health_score": 96.8,
+          "confidence": 0.15,
+          "is_uncertain": true,
+          "active_weights_sum": 1.0,
+          "missing_keys": [
+            "performance",
+            "thermal",
+            "availability",
+            "communication",
+            "fault_history"
+          ]
+        }
+      ],
+      "predictive_uncertainty_handling": {
+        "sparse_evidence_sufficiency": "INSUFFICIENT",
+        "rich_evidence_sufficiency": "SUFFICIENT",
+        "sparse_r2": 0.0,
+        "rich_r2": 1.0
+      }
+    },
+    "EXP05": {
+      "experiment_id": "EXP05_NOISY_DATA",
+      "description": "Additive Gaussian Noise & Statistical Filter Robustness",
+      "sample_count": 500,
+      "seed": 42,
+      "noise_evaluations": [
+        {
+          "noise_sigma_kw": 2.0,
+          "precision": 1.0,
+          "recall": 0.9901,
+          "f1_score": 0.995,
+          "false_positive_rate": 0.0,
+          "true_positives": 100,
+          "false_positives": 0
+        },
+        {
+          "noise_sigma_kw": 5.0,
+          "precision": 1.0,
+          "recall": 0.9901,
+          "f1_score": 0.995,
+          "false_positive_rate": 0.0,
+          "true_positives": 100,
+          "false_positives": 0
+        },
+        {
+          "noise_sigma_kw": 10.0,
+          "precision": 1.0,
+          "recall": 0.9901,
+          "f1_score": 0.995,
+          "false_positive_rate": 0.0,
+          "true_positives": 100,
+          "false_positives": 0
+        },
+        {
+          "noise_sigma_kw": 15.0,
+          "precision": 0.9798,
+          "recall": 0.9604,
+          "f1_score": 0.97,
+          "false_positive_rate": 0.005,
+          "true_positives": 97,
+          "false_positives": 2
+        }
+      ]
+    },
+    "EXP06": {
+      "experiment_id": "EXP06_ASSET_DEGRADATION",
+      "description": "Progressive Thermal Degradation & Weibull RUL Accuracy Benchmark",
+      "total_simulated_hours": 1000,
+      "evaluations_count": 41,
+      "ground_truth_failure_hour": 1000.0,
+      "early_warning_hour": 850.0,
+      "advance_warning_hours": 150.0,
+      "rul_prediction_metrics": {
+        "mae": 36.3216,
+        "rmse": 47.9732,
+        "r2": 0.9677,
+        "sample_count": 37
+      },
+      "priority_transitions": {
+        "initial_priority": "P4_LOW",
+        "final_priority": "P1_CRITICAL",
+        "p2_escalation_hour": 850.0,
+        "all_priorities": [
+          "P1_CRITICAL",
+          "P2_HIGH",
+          "P3_MEDIUM",
+          "P4_LOW"
+        ]
+      }
+    },
+    "EXP07": {
+      "experiment_id": "EXP07_EQUIPMENT_FAULTS",
+      "description": "Equipment Fault Injection & Immediate Detection Latency Benchmark",
+      "scenarios_count": 3,
+      "classification_metrics": {
+        "true_positives": 3,
+        "false_positives": 0,
+        "true_negatives": 0,
+        "false_negatives": 0,
+        "total_samples": 3,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "scenarios": [
+        {
+          "scenario": "BLOWER_FAN_FAILURE",
+          "detected": true,
+          "latency_samples": 0,
+          "alerts_dispatched": [
+            "ALT-EEFC5522",
+            "ALT-E7CBAB08"
+          ],
+          "work_order_created": "WO-24746ECA",
+          "work_order_status": "PENDING_HITL_APPROVAL",
+          "hitl_gate_enforced": true,
+          "financial_risk_usd": 2876.71
+        },
+        {
+          "scenario": "UNEXPECTED_SHUTDOWN",
+          "detected": true,
+          "latency_samples": 0,
+          "alerts_dispatched": [
+            "ALT-02AAE471"
+          ],
+          "work_order_created": "WO-114890CF",
+          "work_order_status": "PENDING_HITL_APPROVAL",
+          "hitl_gate_enforced": true,
+          "financial_risk_usd": 2920.6
+        },
+        {
+          "scenario": "GRID_AC_OVERVOLTAGE",
+          "detected": true,
+          "latency_samples": 0,
+          "alerts_dispatched": [],
+          "work_order_created": "WO-9EFCBC4E",
+          "work_order_status": "PENDING_HITL_APPROVAL",
+          "hitl_gate_enforced": true,
+          "financial_risk_usd": 2870.0
+        }
+      ],
+      "audit_chain_valid": true
+    },
+    "EXP08": {
+      "experiment_id": "EXP08_ENVIRONMENTAL_DISTURBANCES",
+      "description": "Rapid Cloud Transients & Weather-Adjusted False Alarm Rejection",
+      "samples_evaluated": 300,
+      "seed": 42,
+      "false_alarm_metrics": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "true_negatives": 300,
+        "false_negatives": 0,
+        "total_samples": 300,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "summary": {
+        "false_equipment_alarms": 0,
+        "false_positive_rate": 0.0,
+        "weather_adjusted_loss_success": true
+      }
+    },
+    "EXP09": {
+      "experiment_id": "EXP09_EDGE_DISCONNECTION",
+      "description": "Store-and-Forward Edge Disconnection & Backfill Synchronization",
+      "outage_records_buffered": 500,
+      "synced_records_count": 500,
+      "remaining_unacked_count": 0,
+      "data_loss_rate_pct": 0.0,
+      "fifo_order_preserved": true,
+      "performance_metrics": {
+        "buffering_time_s": 0.016,
+        "sync_time_s": 1.9359,
+        "backfill_throughput_obs_sec": 258.28
+      },
+      "audit_integrity": {
+        "is_valid": true,
+        "total_chain_entries": 372,
+        "broken_index": null
+      }
+    }
+  },
+  "benchmark_gates": {
+    "gate_01_normal_baseline_fpr_low": true,
+    "gate_02_sensor_fault_f1_high": true,
+    "gate_03_comm_timeout_recall_high": true,
+    "gate_04_missing_data_weight_normalization": true,
+    "gate_05_noise_filtering_f1_high": true,
+    "gate_06_degradation_early_warning_and_r2": true,
+    "gate_07_equipment_fault_latency_zero": true,
+    "gate_08_cloud_transient_no_false_alarm": true,
+    "gate_09_disconnection_zero_loss_audit_valid": true
+  },
+  "all_gates_passed": true,
+  "total_runtime_s": 6.104
+}

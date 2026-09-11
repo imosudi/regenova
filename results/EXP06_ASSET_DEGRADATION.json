@@ -1,0 +1,26 @@
+{
+  "experiment_id": "EXP06_ASSET_DEGRADATION",
+  "description": "Progressive Thermal Degradation & Weibull RUL Accuracy Benchmark",
+  "total_simulated_hours": 1000,
+  "evaluations_count": 41,
+  "ground_truth_failure_hour": 1000.0,
+  "early_warning_hour": 850.0,
+  "advance_warning_hours": 150.0,
+  "rul_prediction_metrics": {
+    "mae": 36.3216,
+    "rmse": 47.9732,
+    "r2": 0.9677,
+    "sample_count": 37
+  },
+  "priority_transitions": {
+    "initial_priority": "P4_LOW",
+    "final_priority": "P1_CRITICAL",
+    "p2_escalation_hour": 850.0,
+    "all_priorities": [
+      "P1_CRITICAL",
+      "P2_HIGH",
+      "P3_MEDIUM",
+      "P4_LOW"
+    ]
+  }
+}

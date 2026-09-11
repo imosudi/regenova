@@ -1,0 +1,66 @@
+{
+  "experiment_id": "EXP03_COMMUNICATION_FAILURE",
+  "description": "Network Packet Drop & Watchdog Timeout Evaluation",
+  "tested_drop_rates": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "comm_evaluations": [
+    {
+      "drop_rate": 0.0,
+      "is_online": true,
+      "comm_subscore": 97.5,
+      "comm_confidence": 1.0,
+      "composite_health": 99.1,
+      "health_confidence": 1.0
+    },
+    {
+      "drop_rate": 0.25,
+      "is_online": true,
+      "comm_subscore": 68.44,
+      "comm_confidence": 1.0,
+      "composite_health": 97.97,
+      "health_confidence": 1.0
+    },
+    {
+      "drop_rate": 0.5,
+      "is_online": true,
+      "comm_subscore": 42.5,
+      "comm_confidence": 1.0,
+      "composite_health": 96.85,
+      "health_confidence": 1.0
+    },
+    {
+      "drop_rate": 0.75,
+      "is_online": true,
+      "comm_subscore": 19.69,
+      "comm_confidence": 1.0,
+      "composite_health": 95.72,
+      "health_confidence": 1.0
+    },
+    {
+      "drop_rate": 1.0,
+      "is_online": false,
+      "comm_subscore": 0.0,
+      "comm_confidence": 0.0,
+      "composite_health": 94.6,
+      "health_confidence": 0.86
+    }
+  ],
+  "timeout_detection": {
+    "true_positives": 1,
+    "false_positives": 0,
+    "true_negatives": 1,
+    "false_negatives": 0,
+    "total_samples": 2,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0
+  },
+  "audit_chain_valid": true
+}

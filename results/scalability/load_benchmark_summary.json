@@ -1,0 +1,189 @@
+{
+  "timestamp": "2026-09-11T21:09:23.683737+00:00",
+  "total_runtime_s": 32.12,
+  "asset_scaling": {
+    "tier_10_assets": {
+      "registered_assets": 10,
+      "evaluated_assets": 10,
+      "total_observations_ingested": 50,
+      "registration_duration_s": 0.7675,
+      "ingestion_duration_s": 0.0182,
+      "throughput_obs_per_sec": 2743.62,
+      "throughput_packets_per_sec": 548.72,
+      "latency_p50_ms": 1.761,
+      "latency_p95_ms": 2.223,
+      "latency_p99_ms": 2.223,
+      "mean_latency_ms": 1.805,
+      "peak_memory_mb": 0.44,
+      "cpu_time_s": 0.787,
+      "memory_per_asset_kb": 44.76
+    },
+    "tier_100_assets": {
+      "registered_assets": 100,
+      "evaluated_assets": 100,
+      "total_observations_ingested": 500,
+      "registration_duration_s": 0.8028,
+      "ingestion_duration_s": 0.1589,
+      "throughput_obs_per_sec": 3147.36,
+      "throughput_packets_per_sec": 629.47,
+      "latency_p50_ms": 1.559,
+      "latency_p95_ms": 1.681,
+      "latency_p99_ms": 2.041,
+      "mean_latency_ms": 1.573,
+      "peak_memory_mb": 0.56,
+      "cpu_time_s": 0.963,
+      "memory_per_asset_kb": 5.77
+    },
+    "tier_1000_assets": {
+      "registered_assets": 1000,
+      "evaluated_assets": 1000,
+      "total_observations_ingested": 5000,
+      "registration_duration_s": 0.9821,
+      "ingestion_duration_s": 1.6208,
+      "throughput_obs_per_sec": 3084.98,
+      "throughput_packets_per_sec": 617.0,
+      "latency_p50_ms": 1.588,
+      "latency_p95_ms": 1.693,
+      "latency_p99_ms": 1.904,
+      "mean_latency_ms": 1.604,
+      "peak_memory_mb": 1.9,
+      "cpu_time_s": 2.604,
+      "memory_per_asset_kb": 1.95
+    },
+    "tier_10000_assets": {
+      "registered_assets": 10000,
+      "evaluated_assets": 2500,
+      "total_observations_ingested": 12500,
+      "registration_duration_s": 3.0928,
+      "ingestion_duration_s": 4.6916,
+      "throughput_obs_per_sec": 2664.36,
+      "throughput_packets_per_sec": 532.87,
+      "latency_p50_ms": 1.827,
+      "latency_p95_ms": 2.064,
+      "latency_p99_ms": 2.394,
+      "mean_latency_ms": 1.859,
+      "peak_memory_mb": 8.07,
+      "cpu_time_s": 7.783,
+      "memory_per_asset_kb": 0.83
+    }
+  },
+  "edge_fog_scaling": {
+    "tier_10_gateways": {
+      "gateway_count": 10,
+      "observations_per_gateway": 25,
+      "total_observations": 250,
+      "buffering_duration_s": 0.0113,
+      "buffering_throughput_obs_sec": 22185.12,
+      "sync_duration_s": 0.1349,
+      "sync_throughput_obs_sec": 1852.97,
+      "synced_count": 250,
+      "remaining_backlog": 0,
+      "data_loss_rate_pct": 0.0,
+      "backlog_drained": true
+    },
+    "tier_50_gateways": {
+      "gateway_count": 50,
+      "observations_per_gateway": 25,
+      "total_observations": 1250,
+      "buffering_duration_s": 0.0474,
+      "buffering_throughput_obs_sec": 26346.59,
+      "sync_duration_s": 0.9444,
+      "sync_throughput_obs_sec": 1323.61,
+      "synced_count": 1250,
+      "remaining_backlog": 0,
+      "data_loss_rate_pct": 0.0,
+      "backlog_drained": true
+    },
+    "tier_100_gateways": {
+      "gateway_count": 100,
+      "observations_per_gateway": 25,
+      "total_observations": 2500,
+      "buffering_duration_s": 0.0973,
+      "buffering_throughput_obs_sec": 25696.31,
+      "sync_duration_s": 2.6355,
+      "sync_throughput_obs_sec": 948.58,
+      "synced_count": 2500,
+      "remaining_backlog": 0,
+      "data_loss_rate_pct": 0.0,
+      "backlog_drained": true
+    },
+    "tier_250_gateways": {
+      "gateway_count": 250,
+      "observations_per_gateway": 25,
+      "total_observations": 6250,
+      "buffering_duration_s": 0.2413,
+      "buffering_throughput_obs_sec": 25906.25,
+      "sync_duration_s": 12.1394,
+      "sync_throughput_obs_sec": 514.85,
+      "synced_count": 6250,
+      "remaining_backlog": 0,
+      "data_loss_rate_pct": 0.0,
+      "backlog_drained": true
+    }
+  },
+  "database_performance": {
+    "dataset_rows": 25000,
+    "database_size_bytes": 3604480,
+    "bytes_per_observation": 144.18,
+    "batching_evaluations": [
+      {
+        "batch_size": 1,
+        "total_rows": 2000,
+        "duration_s": 0.053,
+        "throughput_rows_sec": 37702.93,
+        "latency_per_row_us": 26.52
+      },
+      {
+        "batch_size": 50,
+        "total_rows": 2000,
+        "duration_s": 0.0233,
+        "throughput_rows_sec": 85852.13,
+        "latency_per_row_us": 11.65
+      },
+      {
+        "batch_size": 250,
+        "total_rows": 2000,
+        "duration_s": 0.0217,
+        "throughput_rows_sec": 92376.52,
+        "latency_per_row_us": 10.83
+      },
+      {
+        "batch_size": 1000,
+        "total_rows": 2000,
+        "duration_s": 0.0217,
+        "throughput_rows_sec": 92127.87,
+        "latency_per_row_us": 10.85
+      }
+    ],
+    "query_evaluations": [
+      {
+        "query_type": "1_hour_window",
+        "rows_returned": 61,
+        "mean_latency_ms": 0.307,
+        "queries_per_sec": 3255.03
+      },
+      {
+        "query_type": "24_hour_window",
+        "rows_returned": 500,
+        "mean_latency_ms": 2.468,
+        "queries_per_sec": 405.11
+      }
+    ]
+  },
+  "gates": {
+    "gate_01_scaling_throughput_adequate": true,
+    "gate_02_sub_5ms_pipeline_latency": true,
+    "gate_03_memory_footprint_bounded": true,
+    "gate_04_edge_fog_zero_loss": true,
+    "gate_05_database_batching_efficiency": true,
+    "gate_06_database_sub_5ms_query": true,
+    "gate_07_gateway_crash_zero_loss": true,
+    "gate_08_broker_partition_fifo": true,
+    "gate_09_database_rollback_intact": true,
+    "gate_10_delayed_telemetry_stable": true,
+    "gate_11_cold_restart_audit_intact": true,
+    "gate_12_edge_autonomous_safety_trip": true,
+    "gate_13_burst_spike_zero_loss": true
+  },
+  "all_gates_passed": true
+}

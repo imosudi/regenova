@@ -1,0 +1,44 @@
+{
+  "experiment_id": "EXP05_NOISY_DATA",
+  "description": "Additive Gaussian Noise & Statistical Filter Robustness",
+  "sample_count": 500,
+  "seed": 42,
+  "noise_evaluations": [
+    {
+      "noise_sigma_kw": 2.0,
+      "precision": 1.0,
+      "recall": 0.9901,
+      "f1_score": 0.995,
+      "false_positive_rate": 0.0,
+      "true_positives": 100,
+      "false_positives": 0
+    },
+    {
+      "noise_sigma_kw": 5.0,
+      "precision": 1.0,
+      "recall": 0.9901,
+      "f1_score": 0.995,
+      "false_positive_rate": 0.0,
+      "true_positives": 100,
+      "false_positives": 0
+    },
+    {
+      "noise_sigma_kw": 10.0,
+      "precision": 1.0,
+      "recall": 0.9901,
+      "f1_score": 0.995,
+      "false_positive_rate": 0.0,
+      "true_positives": 100,
+      "false_positives": 0
+    },
+    {
+      "noise_sigma_kw": 15.0,
+      "precision": 0.9798,
+      "recall": 0.9604,
+      "f1_score": 0.97,
+      "false_positive_rate": 0.005,
+      "true_positives": 97,
+      "false_positives": 2
+    }
+  ]
+}

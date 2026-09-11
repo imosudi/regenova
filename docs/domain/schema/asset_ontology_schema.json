@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://reamp.org/schemas/asset_ontology_schema.json",
+  "title": "REAMP Renewable Energy Asset Ontology Schema",
+  "description": "JSON Schema specification for REAMP 8-Level Asset Hierarchy and Domain Model Entities",
+  "type": "object",
+  "definitions": {
+    "HierarchyLevel": {
+      "type": "string",
+      "enum": [
+        "ORGANISATION",
+        "PORTFOLIO",
+        "PROJECT",
+        "SITE",
+        "ENERGY_SYSTEM",
+        "ASSET",
+        "COMPONENT",
+        "SENSOR"
+      ]
+    },
+    "TechnologyType": {
+      "type": "string",
+      "enum": [
+        "SOLAR_PV",
+        "WIND",
+        "BESS",
+        "HYBRID",
+        "SUBSTATION",
+        "GENERIC"
+      ]
+    },
+    "LifecycleState": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "UNDER_CONSTRUCTION",
+        "COMMISSIONED",
+        "OPERATIONAL",
+        "DERATED",
+        "DEGRADED",
+        "MAINTENANCE",
+        "STANDBY",
+        "DECOMMISSIONED"
+      ]
+    },
+    "LocationValueObject": {
+      "type": "object",
+      "required": ["latitude", "longitude", "timezone"],
+      "properties": {
+        "latitude": { "type": "number", "minimum": -90.0, "maximum": 90.0 },
+        "longitude": { "type": "number", "minimum": -180.0, "maximum": 180.0 },
+        "altitude_m": { "type": "number" },
+        "address": { "type": "string" },
+        "timezone": { "type": "string" },
+        "tilt_deg": { "type": "number", "minimum": 0.0, "maximum": 90.0 },
+        "azimuth_deg": { "type": "number", "minimum": 0.0, "maximum": 360.0 },
+        "hub_height_m": { "type": "number", "minimum": 0.0 }
+      }
+    },
+    "CapacityValueObject": {
+      "type": "object",
+      "required": ["rating_value", "rating_unit"],
+      "properties": {
+        "rating_value": { "type": "number", "minimum": 0.0 },
+        "rating_unit": { "type": "string", "enum": ["kW", "MW", "kWp", "MWp", "kWh", "MWh", "kVA"] },
+        "power_factor": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "ManufacturerValueObject": {
+      "type": "object",
+      "required": ["make", "model_name"],
+      "properties": {
+        "make": { "type": "string" },
+        "model_name": { "type": "string" },
+        "serial_number": { "type": "string" },
+        "hardware_version": { "type": "string" },
+        "firmware_version": { "type": "string" }
+      }
+    },
+    "BaseEntity": {
+      "type": "object",
+      "required": ["id", "name", "code", "entity_level"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "entity_level": { "$ref": "#/definitions/HierarchyLevel" },
+        "parent_id": { "type": "string", "format": "uuid" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "EnergySystemEntity": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEntity" },
+        {
+          "type": "object",
+          "required": ["site_id", "technology_type", "lifecycle_state", "capacity"],
+          "properties": {
+            "site_id": { "type": "string", "format": "uuid" },
+            "technology_type": { "$ref": "#/definitions/TechnologyType" },
+            "lifecycle_state": { "$ref": "#/definitions/LifecycleState" },
+            "capacity": { "$ref": "#/definitions/CapacityValueObject" },
+            "technology_metadata": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "AssetEntity": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEntity" },
+        {
+          "type": "object",
+          "required": ["energy_system_id", "asset_type", "lifecycle_state"],
+          "properties": {
+            "energy_system_id": { "type": "string", "format": "uuid" },
+            "parent_asset_id": { "type": "string", "format": "uuid" },
+            "asset_type": { "type": "string" },
+            "lifecycle_state": { "$ref": "#/definitions/LifecycleState" },
+            "manufacturer_info": { "$ref": "#/definitions/ManufacturerValueObject" },
+            "capacity": { "$ref": "#/definitions/CapacityValueObject" },
+            "commissioning_date": { "type": "string", "format": "date" },
+            "technology_metadata": { "type": "object" }
+          }
+        }
+      ]
+    },
+    "SensorEntity": {
+      "allOf": [
+        { "$ref": "#/definitions/BaseEntity" },
+        {
+          "type": "object",
+          "required": ["sensor_type", "unit_of_measure"],
+          "properties": {
+            "asset_id": { "type": "string", "format": "uuid" },
+            "component_id": { "type": "string", "format": "uuid" },
+            "sensor_type": { "type": "string" },
+            "unit_of_measure": { "type": "string" },
+            "sampling_interval_sec": { "type": "integer", "minimum": 1 },
+            "modbus_address": { "type": "string" },
+            "opc_node_id": { "type": "string" },
+            "mqtt_topic": { "type": "string" }
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "organisation": { "$ref": "#/definitions/BaseEntity" },
+    "energy_systems": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/EnergySystemEntity" }
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/AssetEntity" }
+    },
+    "sensors": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SensorEntity" }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "experiment_id": "EXP07_EQUIPMENT_FAULTS",
+  "description": "Equipment Fault Injection & Immediate Detection Latency Benchmark",
+  "scenarios_count": 3,
+  "classification_metrics": {
+    "true_positives": 3,
+    "false_positives": 0,
+    "true_negatives": 0,
+    "false_negatives": 0,
+    "total_samples": 3,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0
+  },
+  "scenarios": [
+    {
+      "scenario": "BLOWER_FAN_FAILURE",
+      "detected": true,
+      "latency_samples": 0,
+      "alerts_dispatched": [
+        "ALT-4FFEF514",
+        "ALT-A2503FE3"
+      ],
+      "work_order_created": "WO-A4D72395",
+      "work_order_status": "PENDING_HITL_APPROVAL",
+      "hitl_gate_enforced": true,
+      "financial_risk_usd": 2876.71
+    },
+    {
+      "scenario": "UNEXPECTED_SHUTDOWN",
+      "detected": true,
+      "latency_samples": 0,
+      "alerts_dispatched": [
+        "ALT-933C3758"
+      ],
+      "work_order_created": "WO-F538B48A",
+      "work_order_status": "PENDING_HITL_APPROVAL",
+      "hitl_gate_enforced": true,
+      "financial_risk_usd": 2920.6
+    },
+    {
+      "scenario": "GRID_AC_OVERVOLTAGE",
+      "detected": true,
+      "latency_samples": 0,
+      "alerts_dispatched": [],
+      "work_order_created": "WO-A97C7F7C",
+      "work_order_status": "PENDING_HITL_APPROVAL",
+      "hitl_gate_enforced": true,
+      "financial_risk_usd": 2870.0
+    }
+  ],
+  "audit_chain_valid": true
+}

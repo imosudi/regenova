@@ -1,0 +1,183 @@
+/* ==========================================================================
+   REAMP — Renewable Energy Asset Intelligence & Management Platform
+   Requirement: FR-UI-001 / AC-FR-UI-001
+   "All UI screens build strictly with Bootstrap 5.3.x in LIGHT theme
+    without dark SCADA override."
+   ========================================================================== */
+
+@import url("vendor/bootstrap.min.css");
+@import url("vendor/bootstrap-icons.min.css");
+
+:root {
+  --reamp-primary: #0d6efd;
+  --reamp-success: #198754;
+  --reamp-warning: #ffc107;
+  --reamp-danger: #dc3545;
+  --reamp-info: #0dcaf0;
+  --reamp-body-bg: #f8fafc;
+  --reamp-card-bg: #ffffff;
+  --reamp-border: #e2e8f0;
+  --reamp-text-main: #0f172a;
+  --reamp-text-muted: #64748b;
+}
+
+body {
+  background-color: var(--reamp-body-bg);
+  color: var(--reamp-text-main);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Light Theme Navbar */
+.navbar-reamp {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--reamp-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  margin-right: 0.75rem;
+  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+}
+
+/* Cards & Statistics */
+.card-reamp {
+  background-color: var(--reamp-card-bg);
+  border: 1px solid var(--reamp-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-reamp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.07);
+  border-color: #cbd5e1;
+}
+
+.stat-kpi-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--reamp-text-main);
+  letter-spacing: -0.02em;
+}
+
+.stat-kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--reamp-text-muted);
+}
+
+/* Gauges in Light Theme */
+.gauge-svg {
+  width: 120px;
+  height: 120px;
+  transform: rotate(-90deg);
+}
+
+.gauge-bg {
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 10;
+}
+
+.gauge-bar {
+  fill: none;
+  stroke: #198754;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gauge-text {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-top: -75px;
+  margin-bottom: 50px;
+  font-family: monospace;
+}
+
+/* Pulse indicator */
+.pulse-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #198754;
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 6px rgba(25, 135, 84, 0.6);
+  animation: pulse-kf 2s infinite ease-in-out;
+}
+
+@keyframes pulse-kf {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* Asset Selector Items */
+.asset-item-btn {
+  border: 1px solid var(--reamp-border);
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.asset-item-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.asset-item-btn.active {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Tables in Light Theme */
+.table-reamp th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--reamp-border);
+}
+
+.table-reamp td {
+  vertical-align: middle;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Monospace text */
+.mono-font {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.82rem;
+}
+
+/* Footer */
+footer {
+  background-color: #ffffff;
+  border-top: 1px solid var(--reamp-border);
+  padding: 1.25rem 0;
+  margin-top: auto;
+  font-size: 0.825rem;
+  color: var(--reamp-text-muted);
+}

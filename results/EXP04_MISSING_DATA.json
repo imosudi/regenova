@@ -1,0 +1,80 @@
+{
+  "experiment_id": "EXP04_MISSING_DATA",
+  "description": "Sparse Telemetry & Incomplete Evidence Evaluation",
+  "health_missingness_evaluations": [
+    {
+      "num_missing_dimensions": 0,
+      "health_score": 99.48,
+      "confidence": 1.0,
+      "is_uncertain": false,
+      "active_weights_sum": 1.0,
+      "missing_keys": []
+    },
+    {
+      "num_missing_dimensions": 1,
+      "health_score": 99.31,
+      "confidence": 0.75,
+      "is_uncertain": false,
+      "active_weights_sum": 1.0,
+      "missing_keys": [
+        "performance"
+      ]
+    },
+    {
+      "num_missing_dimensions": 2,
+      "health_score": 98.97,
+      "confidence": 0.5,
+      "is_uncertain": true,
+      "active_weights_sum": 1.0,
+      "missing_keys": [
+        "performance",
+        "thermal"
+      ]
+    },
+    {
+      "num_missing_dimensions": 3,
+      "health_score": 98.52,
+      "confidence": 0.35,
+      "is_uncertain": true,
+      "active_weights_sum": 1.0001,
+      "missing_keys": [
+        "performance",
+        "thermal",
+        "availability"
+      ]
+    },
+    {
+      "num_missing_dimensions": 4,
+      "health_score": 98.4,
+      "confidence": 0.3,
+      "is_uncertain": true,
+      "active_weights_sum": 1.0,
+      "missing_keys": [
+        "performance",
+        "thermal",
+        "availability",
+        "communication"
+      ]
+    },
+    {
+      "num_missing_dimensions": 5,
+      "health_score": 96.8,
+      "confidence": 0.15,
+      "is_uncertain": true,
+      "active_weights_sum": 1.0,
+      "missing_keys": [
+        "performance",
+        "thermal",
+        "availability",
+        "communication",
+        "fault_history"
+      ]
+    }
+  ],
+  "predictive_uncertainty_handling": {
+    "sparse_evidence_sufficiency": "INSUFFICIENT",
+    "rich_evidence_sufficiency": "SUFFICIENT",
+    "sparse_r2": 0.0,
+    "rich_r2": 1.0
+  }
+}

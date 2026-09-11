@@ -1,0 +1,31 @@
+{
+  "experiment_id": "EXP01_NORMAL_BASELINE",
+  "description": "24-Hour Nominal Diurnal Operation Benchmark",
+  "sample_count": 1440,
+  "seed": 42,
+  "detection_metrics": {
+    "true_positives": 0,
+    "false_positives": 0,
+    "true_negatives": 1440,
+    "false_negatives": 0,
+    "total_samples": 1440,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0
+  },
+  "performance_metrics": {
+    "mean_latency_ms": 0.964,
+    "p95_latency_ms": 1.176,
+    "p99_latency_ms": 1.333,
+    "throughput_obs_per_sec": 1035.06,
+    "total_execution_time_s": 1.3912
+  },
+  "asset_condition_metrics": {
+    "mean_health_index": 99.49,
+    "min_health_index": 99.49,
+    "mean_performance_ratio": 1.0
+  },
+  "audit_chain_valid": true
+}

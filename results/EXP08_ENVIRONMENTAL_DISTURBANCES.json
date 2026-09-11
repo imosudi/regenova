@@ -1,0 +1,23 @@
+{
+  "experiment_id": "EXP08_ENVIRONMENTAL_DISTURBANCES",
+  "description": "Rapid Cloud Transients & Weather-Adjusted False Alarm Rejection",
+  "samples_evaluated": 300,
+  "seed": 42,
+  "false_alarm_metrics": {
+    "true_positives": 0,
+    "false_positives": 0,
+    "true_negatives": 300,
+    "false_negatives": 0,
+    "total_samples": 300,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "false_positive_rate": 0.0,
+    "false_negative_rate": 0.0
+  },
+  "summary": {
+    "false_equipment_alarms": 0,
+    "false_positive_rate": 0.0,
+    "weather_adjusted_loss_success": true
+  }
+}

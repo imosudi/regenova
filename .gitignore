@@ -216,3 +216,39 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# AI / Agent working material
+.agent/
+.agents/
+.antigravity/
+.agent-work/
+.agent-workspace/
+.agent-cache/
+.agent-artifacts/
+.agent-output/
+.agent-logs/
+agent-output/
+agent-artifacts/
+agent-logs/
+agent-cache/
+
+# Temporary development material
+.tmp/
+temp/
+tmp/
+scratch/
+sandbox/
+work/
+working/
+generated/
+drafts/
+prototypes/
+actions/
+
+
+# Local AI context
+.claude/
+.cursor/
+.gemini/
+.github/copilot/
+

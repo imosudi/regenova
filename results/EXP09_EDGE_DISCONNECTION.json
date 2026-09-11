@@ -1,0 +1,19 @@
+{
+  "experiment_id": "EXP09_EDGE_DISCONNECTION",
+  "description": "Store-and-Forward Edge Disconnection & Backfill Synchronization",
+  "outage_records_buffered": 500,
+  "synced_records_count": 500,
+  "remaining_unacked_count": 0,
+  "data_loss_rate_pct": 0.0,
+  "fifo_order_preserved": true,
+  "performance_metrics": {
+    "buffering_time_s": 0.0147,
+    "sync_time_s": 2.0608,
+    "backfill_throughput_obs_sec": 242.62
+  },
+  "audit_integrity": {
+    "is_valid": true,
+    "total_chain_entries": 372,
+    "broken_index": null
+  }
+}
