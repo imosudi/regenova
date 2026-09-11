@@ -1,4 +1,4 @@
-# REAMP — Research and Framework Contributions
+# REAMP - Research and Framework Contributions
 
 This document summarizes the core academic, architectural, and engineering contributions of the **Renewable Energy Asset Intelligence and Management Framework (REAMP)** to the domain of renewable energy systems engineering.
 
@@ -28,7 +28,7 @@ Empirical evaluation on 1,000 synthetic operational vectors demonstrated:
 
 ## 2. Refusal of Fake Precision (Epistemic Uncertainty Gating)
 
-A critical failure mode of commercial predictive maintenance software is "fake precision"—emitting a deterministic remaining useful life (e.g., "RUL = 1,421 hours") when telemetry is sparse, corrupt, or uncalibrated.
+A critical failure mode of commercial predictive maintenance software is "fake precision"-emitting a deterministic remaining useful life (e.g., "RUL = 1,421 hours") when telemetry is sparse, corrupt, or uncalibrated.
 
 ### REAMP Contribution
 REAMP establishes an uncompromising mathematical Quality Gate (`QualityGateValidator`):

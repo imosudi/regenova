@@ -1,5 +1,5 @@
 """
-REAMP Phase 15 — MVP Integration Automated Test Suite.
+REAMP Phase 15 - MVP Integration Automated Test Suite.
 
 Validates:
 1. Authentication & Security (HMAC token issue, tamper check, expiry)

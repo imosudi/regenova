@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-REAMP Phase 4 — Automated Schema, Data Quality & Multi-Technology Test Suite
+REAMP Phase 4 - Automated Schema, Data Quality & Multi-Technology Test Suite
 Validates canonical data models, SQLite edge buffer, telemetry validation,
 multi-tenant isolation, and representative Solar PV, Wind, and BESS datasets.
 """

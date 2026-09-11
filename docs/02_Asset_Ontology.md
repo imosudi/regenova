@@ -1,7 +1,7 @@
-# REAMP — Asset Ontology Specification
+# REAMP - Asset Ontology Specification
 
 **Document Identifier**: `REAMP-DOC-02`  
-**Phase**: Phase 2 — Asset Ontology and Domain Model  
+**Phase**: Phase 2 - Asset Ontology and Domain Model  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

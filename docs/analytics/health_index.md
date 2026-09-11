@@ -1,7 +1,7 @@
-# REAMP — Asset Health Index Mathematical Formulation
+# REAMP - Asset Health Index Mathematical Formulation
 
 **Document Identifier**: `REAMP-ANL-01`  
-**Phase**: Phase 6 — Asset Health Model  
+**Phase**: Phase 6 - Asset Health Model  
 **Status**: Approved / Mathematical Specification  
 **Last Updated**: 2026-09-11  
 

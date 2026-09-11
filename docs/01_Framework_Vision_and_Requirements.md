@@ -1,7 +1,7 @@
-# REAMP — Framework Vision and System Overview
+# REAMP - Framework Vision and System Overview
 
 **Document Identifier**: `REAMP-DOC-01`  
-**Phase**: Phase 1 — Framework Vision and Requirements  
+**Phase**: Phase 1 - Framework Vision and Requirements  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

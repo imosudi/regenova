@@ -1,4 +1,4 @@
-# REAMP Phase 14 — Governance, Compliance and Explainability Framework
+# REAMP Phase 14 - Governance, Compliance and Explainability Framework
 
 ## 1. Executive Summary & Governance Mission
 

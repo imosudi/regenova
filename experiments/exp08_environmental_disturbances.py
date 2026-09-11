@@ -1,5 +1,5 @@
 """
-REAMP Experiment 08 — Environmental Disturbances & Cloud Transients.
+REAMP Experiment 08 - Environmental Disturbances & Cloud Transients.
 
 Test Condition:
 - Evaluates system response under rapid weather fluctuations:

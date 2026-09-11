@@ -1,7 +1,7 @@
-# REAMP — Core Domain Model Specification
+# REAMP - Core Domain Model Specification
 
 **Document Identifier**: `REAMP-DOM-01`  
-**Phase**: Phase 2 — Asset Ontology and Domain Model  
+**Phase**: Phase 2 - Asset Ontology and Domain Model  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

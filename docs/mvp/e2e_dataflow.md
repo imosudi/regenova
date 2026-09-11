@@ -1,4 +1,4 @@
-# REAMP MVP — End-to-End Dataflow & Pipeline Specification
+# REAMP MVP - End-to-End Dataflow & Pipeline Specification
 
 ## 1. Overview of the 10-Stage Pipeline
 

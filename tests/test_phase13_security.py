@@ -1,5 +1,5 @@
 """
-REAMP Phase 13 Automated Verification Suite — Cybersecurity and Trust Framework.
+REAMP Phase 13 Automated Verification Suite - Cybersecurity and Trust Framework.
 Validates:
 1. Device telemetry HMAC signing, payload integrity, and anti-replay nonce protection.
 2. Multi-tenant isolation (ABAC) and role-based capability enforcement (RBAC).

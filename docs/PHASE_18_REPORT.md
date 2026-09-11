@@ -1,4 +1,4 @@
-# Phase 18 Completion Report — Multi-Technology Adaptive REAMP Framework
+# Phase 18 Completion Report - Multi-Technology Adaptive REAMP Framework
 
 ---
 

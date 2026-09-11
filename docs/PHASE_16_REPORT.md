@@ -17,7 +17,7 @@ All metrics reported in this document are derived directly from reproducible Pyt
 
 ## 2. Requirements Implemented
 
-The experimental suite validates all mandatory test conditions, metric categories, and quality gates specified in `actions/Phase 16 Agent Prompt — Experimental Validation.md`:
+The experimental suite validates all mandatory test conditions, metric categories, and quality gates specified in `actions/Phase 16 Agent Prompt - Experimental Validation.md`:
 
 | Requirement ID | Test Condition / Capability | Validation Method | Quantitative Result | Status |
 | :--- | :--- | :--- | :--- | :--- |

@@ -1,4 +1,4 @@
-# REAMP Phase 13 — Cybersecurity and Trust Framework
+# REAMP Phase 13 - Cybersecurity and Trust Framework
 
 ## 1. Executive Summary & Philosophy
 

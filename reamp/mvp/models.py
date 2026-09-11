@@ -1,5 +1,5 @@
 """
-REAMP MVP — Unified Domain Models.
+REAMP MVP - Unified Domain Models.
 
 Defines the entity hierarchy (Organization -> Portfolio -> Site -> Asset -> Sensor),
 as well as alert structures, dashboard state aggregates, and executive report models.

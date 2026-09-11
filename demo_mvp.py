@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-REAMP Minimum Viable Product (MVP) — End-to-End Demonstration CLI.
+REAMP Minimum Viable Product (MVP) - End-to-End Demonstration CLI.
 
 Demonstrates the unbroken 10-stage operational pipeline:
 Sensor -> Gateway -> Ingestion -> Storage -> Analytics -> Health -> Anomaly -> Alert -> Maintenance -> Report

@@ -1,4 +1,4 @@
-# REAMP Phase 7 — Performance Intelligence Framework
+# REAMP Phase 7 - Performance Intelligence Framework
 
 ## 1. Executive Summary & Objective
 
@@ -22,11 +22,11 @@ The REAMP Performance Intelligence Engine eliminates this ambiguity by computing
 ## 2. Theoretical Foundations & Standards Compliance
 
 The framework adheres to authoritative international engineering standards:
-- **IEC 61724-1:2021** (*Photovoltaic system performance monitoring — Guidelines for measurement, data exchange and analysis*):
+- **IEC 61724-1:2021** (*Photovoltaic system performance monitoring - Guidelines for measurement, data exchange and analysis*):
   Defines temperature-corrected performance ratio ($PR_{STC}$), weather adjustment methodology, and sensor accuracy requirements.
-- **IEC 61400-12-1:2022** (*Wind energy generation systems — Power performance measurements of electricity producing wind turbines*):
+- **IEC 61400-12-1:2022** (*Wind energy generation systems - Power performance measurements of electricity producing wind turbines*):
   Defines normalized power curves, air density corrections, and aerodynamic coefficient ($C_p$) tracking.
-- **IEC 62933-2-1:2017** (*Electrical energy storage (EES) systems — Part 2-1: Unit parameters and testing methods*):
+- **IEC 62933-2-1:2017** (*Electrical energy storage (EES) systems - Part 2-1: Unit parameters and testing methods*):
   Defines round-trip efficiency ($RTE$), auxiliary load losses, and capacity fade tracking.
 - **Sandia National Laboratories / PVsyst Cell Temperature Model**:
   Empirical formulations relating plane-of-array ($POA$) irradiance, ambient temperature ($T_{amb}$), and Nominal Module Operating Temperature ($NMOT$).

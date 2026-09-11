@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-Phase 9 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and validated in accordance with [`actions/Phase 9 Agent Prompt — Predictive Maintenance.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%209%20Agent%20Prompt%20%E2%80%94%20Predictive%20Maintenance.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
+Phase 9 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and validated in accordance with [`actions/Phase 9 Agent Prompt - Predictive Maintenance.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%209%20Agent%20Prompt%20%E2%80%94%20Predictive%20Maintenance.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
 
 Phase 9 bridges real-time condition intelligence (Health Indices from Phase 6, Performance Gaps from Phase 7, and Anomaly Events from Phase 8) into forward-looking maintenance predictions, failure horizons, and risk-ranked work orders.
 

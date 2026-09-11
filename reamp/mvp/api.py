@@ -1,5 +1,5 @@
 """
-REAMP MVP — Programmatic API Facade.
+REAMP MVP - Programmatic API Facade.
 
 Provides a clean, uniform interface for external SCADA, IoT edge gateways,
 and management web applications to interact with the REAMP MVP runtime.

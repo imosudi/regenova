@@ -1,4 +1,4 @@
-# Phase 13 Completion Report — Cybersecurity and Trust Framework
+# Phase 13 Completion Report - Cybersecurity and Trust Framework
 
 ## 1. Executive Summary
 

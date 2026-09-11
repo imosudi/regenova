@@ -1,5 +1,5 @@
 """
-REAMP Experiment 03 — Communication Failure & Network Dropout.
+REAMP Experiment 03 - Communication Failure & Network Dropout.
 
 Test Condition:
 - Evaluates asset behavior under varying network packet drop rates (0%, 25%, 50%, 75%, 100%)

@@ -1,4 +1,4 @@
-# REGENOVA — Renewable Energy Asset Intelligence & Management Framework
+# REGENOVA - Renewable Energy Asset Intelligence & Management Framework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://img.shields.io/badge/Tests-78%20Passed%20%7C%200%20Failed-success.svg)](#automated-testing)
@@ -24,7 +24,7 @@ Modern renewable generation fleets (Solar PV, Wind, Battery Storage, and co-loca
   - **Hybrid Power Plants**: Multi-technology co-located dispatch behind a shared Point of Interconnection (POI).
 - **Deterministic 7-Dimension Health Engine**: Linear-additive Asset Health Index ($AHI \in [0, 100]$) with Arrhenius thermal stress acceleration and full mathematical factor attribution;
 - **4-Tier Anomaly Detection Cascade**: Level 1 deterministic safety trip, Level 2 non-parametric statistical control charts (EWMA $\lambda = 0.2$, CUSUM $h = 4.0$), Level 3 multivariate Isolation Forest, and Level 4 physical state residuals ($\Delta P, \Delta T, \Delta\eta$) alongside peer cohort Median Absolute Deviation (MAD);
-- **Predictive Maintenance & Quality Gating**: Refuses "fake precision"—extrapolates Remaining Useful Life (RUL) with $95\%$ confidence prediction intervals only when empirical degradation history satisfies $N \ge 5, R^2 \ge 0.70$, otherwise explicitly reporting `status = UNCERTAIN`;
+- **Predictive Maintenance & Quality Gating**: Refuses "fake precision"-extrapolates Remaining Useful Life (RUL) with $95\%$ confidence prediction intervals only when empirical degradation history satisfies $N \ge 5, R^2 \ge 0.70$, otherwise explicitly reporting `status = UNCERTAIN`;
 - **CMMS & Work Order Automation**: Automated work order generation with warehouse inventory parts reservation, technician dispatch, and SLA management;
 - **Explainable AI (XAI)**: Ranked Shapley Additive Explanations (SHAP) attributing anomaly divergence directly to top sensor contributors (`AC-FR-XAI-001`);
 - **Cybersecurity & Trust**: HMAC-SHA256 telemetry packet signing, STRIDE threat mitigation, and an immutable SHA-256 tamper-evident audit ledger;
@@ -110,24 +110,24 @@ flowchart TB
 
 REGENOVA strictly adheres to a controlled 18-phase development roadmap. All 18 phases have been fully implemented, validated against automated test suites, and audited by an Independent Senior Systems Engineer:
 
-- [x] **Phase 1 — Framework Vision and Requirements** ([`docs/01_Framework_Vision_and_Requirements.md`](docs/01_Framework_Vision_and_Requirements.md))
-- [x] **Phase 2 — Asset Ontology and Domain Model** ([`docs/02_Literature_Review.md`](docs/02_Literature_Review.md))
-- [x] **Phase 3 — Reference Architecture** ([`docs/03_Architecture_Design.md`](docs/03_Architecture_Design.md))
-- [x] **Phase 4 — Data Architecture and Telemetry Model** ([`reamp/data/`](reamp/data/))
-- [x] **Phase 5 — Edge, Fog and IoT Integration** ([`reamp/edge/`](reamp/edge/))
-- [x] **Phase 6 — Asset Health Model** ([`reamp/health/`](reamp/health/))
-- [x] **Phase 7 — Performance Intelligence** ([`reamp/performance/`](reamp/performance/))
-- [x] **Phase 8 — Multi-Level Anomaly Detection** ([`reamp/anomaly/`](reamp/anomaly/))
-- [x] **Phase 9 — Predictive Maintenance** ([`reamp/maintenance/`](reamp/maintenance/))
-- [x] **Phase 10 — O&M and CMMS Integration** ([`reamp/cmms/`](reamp/cmms/))
-- [x] **Phase 11 — Risk and Financial Intelligence** ([`reamp/financial/`](reamp/financial/))
-- [x] **Phase 12 — Digital Twin and Asset State** ([`reamp/digital_twin/`](reamp/digital_twin/))
-- [x] **Phase 13 — Cybersecurity and Trust Framework** ([`reamp/security/`](reamp/security/))
-- [x] **Phase 14 — Governance and Explainable Intelligence** ([`reamp/governance/`](reamp/governance/))
-- [x] **Phase 15 — MVP Integration** ([`reamp/mvp/`](reamp/mvp/))
-- [x] **Phase 16 — Experimental Validation & Benchmarking** ([`benchmarks/`](benchmarks/))
-- [x] **Phase 17 — Scalability, Load Testing and Resilience** ([`docs/17_Scalability_and_Resilience.md`](docs/17_Scalability_and_Resilience.md))
-- [x] **Phase 18 — Multi-Technology Adaptive REAMP Framework** ([`docs/18_Final_REAMP_Framework.md`](docs/18_Final_REAMP_Framework.md))
+- [x] **Phase 1 - Framework Vision and Requirements** ([`docs/01_Framework_Vision_and_Requirements.md`](docs/01_Framework_Vision_and_Requirements.md))
+- [x] **Phase 2 - Asset Ontology and Domain Model** ([`docs/02_Literature_Review.md`](docs/02_Literature_Review.md))
+- [x] **Phase 3 - Reference Architecture** ([`docs/03_Architecture_Design.md`](docs/03_Architecture_Design.md))
+- [x] **Phase 4 - Data Architecture and Telemetry Model** ([`reamp/data/`](reamp/data/))
+- [x] **Phase 5 - Edge, Fog and IoT Integration** ([`reamp/edge/`](reamp/edge/))
+- [x] **Phase 6 - Asset Health Model** ([`reamp/health/`](reamp/health/))
+- [x] **Phase 7 - Performance Intelligence** ([`reamp/performance/`](reamp/performance/))
+- [x] **Phase 8 - Multi-Level Anomaly Detection** ([`reamp/anomaly/`](reamp/anomaly/))
+- [x] **Phase 9 - Predictive Maintenance** ([`reamp/maintenance/`](reamp/maintenance/))
+- [x] **Phase 10 - O&M and CMMS Integration** ([`reamp/cmms/`](reamp/cmms/))
+- [x] **Phase 11 - Risk and Financial Intelligence** ([`reamp/financial/`](reamp/financial/))
+- [x] **Phase 12 - Digital Twin and Asset State** ([`reamp/digital_twin/`](reamp/digital_twin/))
+- [x] **Phase 13 - Cybersecurity and Trust Framework** ([`reamp/security/`](reamp/security/))
+- [x] **Phase 14 - Governance and Explainable Intelligence** ([`reamp/governance/`](reamp/governance/))
+- [x] **Phase 15 - MVP Integration** ([`reamp/mvp/`](reamp/mvp/))
+- [x] **Phase 16 - Experimental Validation & Benchmarking** ([`benchmarks/`](benchmarks/))
+- [x] **Phase 17 - Scalability, Load Testing and Resilience** ([`docs/17_Scalability_and_Resilience.md`](docs/17_Scalability_and_Resilience.md))
+- [x] **Phase 18 - Multi-Technology Adaptive REAMP Framework** ([`docs/18_Final_REAMP_Framework.md`](docs/18_Final_REAMP_Framework.md))
 
 ---
 

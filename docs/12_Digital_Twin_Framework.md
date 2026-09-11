@@ -1,4 +1,4 @@
-# REAMP Phase 12 — Digital Twin and Asset State Framework
+# REAMP Phase 12 - Digital Twin and Asset State Framework
 
 ## 1. Executive Summary & Twin Philosophy
 

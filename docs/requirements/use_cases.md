@@ -1,7 +1,7 @@
-# REAMP — System Actors and Use Cases Specification
+# REAMP - System Actors and Use Cases Specification
 
 **Document Identifier**: `REAMP-REQ-UC-01`  
-**Phase**: Phase 1 — Framework Vision and Requirements  
+**Phase**: Phase 1 - Framework Vision and Requirements  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

@@ -1,7 +1,7 @@
-# Phase 6 Completion Report — Asset Health Model
+# Phase 6 Completion Report - Asset Health Model
 
 **Framework**: Renewable Energy Asset Intelligence and Management Framework (REAMP)  
-**Phase**: Phase 6 — Asset Health Model  
+**Phase**: Phase 6 - Asset Health Model  
 **Completion Date**: 2026-09-11  
 **Author**: Asset Health Intelligence Agent  
 **Status**: COMPLETE / READY FOR PHASE 7  
@@ -19,7 +19,7 @@ In strict compliance with Phase 6 instructions and `AGENTS.md` Rule 8 (AI safety
 4. Robust **missing-data handling** with dynamic weight redistribution and explicit evaluation **confidence scoring ($0.0–1.0$)**.
 5. Automated validation across **6 mandatory synthetic operational scenarios** (healthy, degraded, comms loss, thermal anomaly, performance loss, incomplete telemetry) demonstrating bitwise determinism and exact mathematical factor attribution.
 
-All quality gates set forth in `actions/Phase 6 Agent Prompt — Asset Health Model.md` have been fully validated and satisfied.
+All quality gates set forth in `actions/Phase 6 Agent Prompt - Asset Health Model.md` have been fully validated and satisfied.
 
 ---
 
@@ -156,4 +156,4 @@ Notice: Results derived from synthetic test suites in accordance with Phase 6 in
 READY
 ```
 
-Phase 6 has satisfied all quality gate requirements. The project is ready to proceed immediately to **Phase 7 — Performance Intelligence**.
+Phase 6 has satisfied all quality gate requirements. The project is ready to proceed immediately to **Phase 7 - Performance Intelligence**.

@@ -1,5 +1,5 @@
 """
-REAMP Experiment 01 — Normal Operation & Baseline Calibration.
+REAMP Experiment 01 - Normal Operation & Baseline Calibration.
 
 Test Condition:
 - Nominal 24-hour diurnal clear-sky cycle (1,440 continuous 1-minute observations).

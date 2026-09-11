@@ -1,5 +1,5 @@
 """
-REAMP Experiment 02 — Sensor Failure & Telemetry Validation.
+REAMP Experiment 02 - Sensor Failure & Telemetry Validation.
 
 Test Condition:
 - Mixed stream of 600 observations:

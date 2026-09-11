@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-REAMP Phase 6 — Automated Asset Health Intelligence Test Suite
+REAMP Phase 6 - Automated Asset Health Intelligence Test Suite
 Validates the 6 mandatory synthetic operational scenarios:
 1. Healthy Asset
 2. Degraded Asset

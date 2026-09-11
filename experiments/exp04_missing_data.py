@@ -1,5 +1,5 @@
 """
-REAMP Experiment 04 — Missing Data & Sparse Sampling Handling.
+REAMP Experiment 04 - Missing Data & Sparse Sampling Handling.
 
 Test Condition:
 - Evaluates health assessment and predictive maintenance behavior under varying levels of

@@ -1,7 +1,7 @@
-# REAMP — Asset Lifecycle State Machine Specification
+# REAMP - Asset Lifecycle State Machine Specification
 
 **Document Identifier**: `REAMP-DOM-02`  
-**Phase**: Phase 2 — Asset Ontology and Domain Model  
+**Phase**: Phase 2 - Asset Ontology and Domain Model  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 
@@ -50,15 +50,15 @@ The table below defines permitted state transitions ($T_{ij}$):
 
 | From \ To | `PLANNED` | `UNDER_CONSTRUCT` | `COMMISSIONED` | `OPERATIONAL` | `DERATED` | `DEGRADED` | `MAINTENANCE` | `STANDBY` | `DECOMMISSIONED` |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`PLANNED`** | — | **VALID** | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | **VALID** |
-| **`UNDER_CONSTRUCT`** | INVALID | — | **VALID** | INVALID | INVALID | INVALID | INVALID | INVALID | **VALID** |
-| **`COMMISSIONED`** | INVALID | INVALID | — | **VALID** | INVALID | INVALID | **VALID** | **VALID** | **VALID** |
-| **`OPERATIONAL`** | INVALID | INVALID | INVALID | — | **VALID** | **VALID** | **VALID** | **VALID** | **VALID** |
-| **`DERATED`** | INVALID | INVALID | INVALID | **VALID** | — | **VALID** | **VALID** | **VALID** | **VALID** |
-| **`DEGRADED`** | INVALID | INVALID | INVALID | **VALID** | **VALID** | — | **VALID** | **VALID** | **VALID** |
-| **`MAINTENANCE`** | INVALID | INVALID | **VALID** | **VALID** | **VALID** | **VALID** | — | **VALID** | **VALID** |
-| **`STANDBY`** | INVALID | INVALID | INVALID | **VALID** | **VALID** | **VALID** | **VALID** | — | **VALID** |
-| **`DECOMMISSIONED`**| INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | — |
+| **`PLANNED`** | - | **VALID** | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | **VALID** |
+| **`UNDER_CONSTRUCT`** | INVALID | - | **VALID** | INVALID | INVALID | INVALID | INVALID | INVALID | **VALID** |
+| **`COMMISSIONED`** | INVALID | INVALID | - | **VALID** | INVALID | INVALID | **VALID** | **VALID** | **VALID** |
+| **`OPERATIONAL`** | INVALID | INVALID | INVALID | - | **VALID** | **VALID** | **VALID** | **VALID** | **VALID** |
+| **`DERATED`** | INVALID | INVALID | INVALID | **VALID** | - | **VALID** | **VALID** | **VALID** | **VALID** |
+| **`DEGRADED`** | INVALID | INVALID | INVALID | **VALID** | **VALID** | - | **VALID** | **VALID** | **VALID** |
+| **`MAINTENANCE`** | INVALID | INVALID | **VALID** | **VALID** | **VALID** | **VALID** | - | **VALID** | **VALID** |
+| **`STANDBY`** | INVALID | INVALID | INVALID | **VALID** | **VALID** | **VALID** | **VALID** | - | **VALID** |
+| **`DECOMMISSIONED`**| INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | INVALID | - |
 
 ---
 

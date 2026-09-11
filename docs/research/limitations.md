@@ -1,4 +1,4 @@
-# REAMP — Framework Limitations and Assumptions
+# REAMP - Framework Limitations and Assumptions
 
 In compliance with **Rule 3 (Evidence over assumptions)** and **Rule 9 (No fake completion)**, this document records the known limitations, operational assumptions, and engineering trade-offs inherent in the current release of the REAMP framework.
 
@@ -20,7 +20,7 @@ In compliance with **Rule 3 (Evidence over assumptions)** and **Rule 9 (No fake 
 
 ### 2.1 Degradation Trajectory Assumptions
 - **Assumption**: The predictive maintenance engine models component wear using linear ($y = at + b$) and exponential ($y = a e^{bt}$) degradation curves.
-- **Limitation**: Certain mechanical and chemical failure modes—such as abrupt fatigue spalling in wind turbine gearbox bearings or sudden lithium dendrite short-circuits in BESS—exhibit non-monotonic, sudden-onset dynamics that defy simple curve-fitting and require particle filter state estimation or acoustic emission sensors.
+- **Limitation**: Certain mechanical and chemical failure modes-such as abrupt fatigue spalling in wind turbine gearbox bearings or sudden lithium dendrite short-circuits in BESS-exhibit non-monotonic, sudden-onset dynamics that defy simple curve-fitting and require particle filter state estimation or acoustic emission sensors.
 
 ### 2.2 Unsupervised Isolation Forest Tuning
 - **Assumption**: Unsupervised Isolation Forest operates with default contamination factor $\nu = 0.05$ and sub-sampling size $\psi = 64$.
@@ -36,4 +36,4 @@ In compliance with **Rule 3 (Evidence over assumptions)** and **Rule 9 (No fake 
 
 ### 3.2 Protocol Adapter Testing without Physical Hardware
 - **Current State**: Protocol adapters (`Modbus`, `OPC UA`, `MQTT`, `REST`) are verified using binary register decoders and simulated socket streams.
-- **Limitation**: Physical serial bus characteristics—such as RS-485 baud rate mismatch, token ring collisions, ground loops, and noisy analog-to-digital converters—were not physically replicated in software testing.
+- **Limitation**: Physical serial bus characteristics-such as RS-485 baud rate mismatch, token ring collisions, ground loops, and noisy analog-to-digital converters-were not physically replicated in software testing.

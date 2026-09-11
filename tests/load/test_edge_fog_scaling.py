@@ -1,5 +1,5 @@
 """
-REAMP Load Testing — Edge/Fog Gateway Scaling Benchmarks.
+REAMP Load Testing - Edge/Fog Gateway Scaling Benchmarks.
 Simulates distributed edge gateway architectures across scaling tiers:
 - 10 gateways
 - 50 gateways

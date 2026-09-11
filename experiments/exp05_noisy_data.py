@@ -1,5 +1,5 @@
 """
-REAMP Experiment 05 — Noisy Data & Measurement Noise Robustness.
+REAMP Experiment 05 - Noisy Data & Measurement Noise Robustness.
 
 Test Condition:
 - Evaluates Level 2 statistical filter (EWMA and CUSUM) robustness against additive Gaussian

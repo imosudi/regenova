@@ -1,4 +1,4 @@
-# Phase 12 Completion Report — Digital Twin and Asset State
+# Phase 12 Completion Report - Digital Twin and Asset State
 
 ## 1. Executive Summary
 

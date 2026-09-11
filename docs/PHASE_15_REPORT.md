@@ -1,4 +1,4 @@
-# REAMP Phase 15 Completion Report — MVP Integration
+# REAMP Phase 15 Completion Report - MVP Integration
 
 ## 1. Executive Summary
 
@@ -18,7 +18,7 @@ Rather than relying on mock stubs, speculative microservices, or disconnected sc
 - AI Decision Records and data provenance governance (`reamp.governance`)
 - Unified programmatic API facade (`reamp.mvp.api`)
 
-The working MVP is demonstrated with a utility-scale Solar PV reference plant (Mojave Solar Station — 50MW) executing an unbroken 10-stage operational pipeline:
+The working MVP is demonstrated with a utility-scale Solar PV reference plant (Mojave Solar Station - 50MW) executing an unbroken 10-stage operational pipeline:
 $$\text{Sensor} \to \text{Gateway} \to \text{Ingestion} \to \text{Storage} \to \text{Analytics} \to \text{Health} \to \text{Anomaly} \to \text{Alert} \to \text{Maintenance} \to \text{Report}$$
 
 ---

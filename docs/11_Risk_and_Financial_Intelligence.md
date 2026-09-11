@@ -1,4 +1,4 @@
-# REAMP Phase 11 — Risk and Financial Intelligence Framework
+# REAMP Phase 11 - Risk and Financial Intelligence Framework
 
 ## 1. Executive Summary & Framework Mission
 

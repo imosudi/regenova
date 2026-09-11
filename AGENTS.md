@@ -1,4 +1,4 @@
-# REAMP — Global AI Agent Operating Contract
+# REAMP - Global AI Agent Operating Contract
 
 ## Project
 
@@ -33,7 +33,7 @@ The objective is to create a reusable framework integrating:
 
 ## NON-NEGOTIABLE DEVELOPMENT RULES
 
-### Rule 1 — Phase discipline
+### Rule 1 - Phase discipline
 
 Work ONLY on the current phase.
 
@@ -47,7 +47,7 @@ If a requirement is ambiguous, identify the ambiguity and resolve it using the p
 
 ---
 
-### Rule 2 — Inspect before modifying
+### Rule 2 - Inspect before modifying
 
 Before changing anything:
 
@@ -65,7 +65,7 @@ Never recreate existing functionality unnecessarily.
 
 ---
 
-### Rule 3 — Evidence over assumptions
+### Rule 3 - Evidence over assumptions
 
 Do not invent:
 
@@ -92,7 +92,7 @@ Distinguish:
 
 ---
 
-### Rule 4 — Architecture before implementation
+### Rule 4 - Architecture before implementation
 
 For every significant capability:
 
@@ -102,7 +102,7 @@ Do not begin with code when the underlying design has not been established.
 
 ---
 
-### Rule 5 — Production quality
+### Rule 5 - Production quality
 
 Code must be:
 
@@ -122,7 +122,7 @@ Use modular architecture first. Introduce distributed services only when justifi
 
 ---
 
-### Rule 6 — Backward compatibility
+### Rule 6 - Backward compatibility
 
 Never break an already validated capability without explicitly identifying:
 
@@ -135,7 +135,7 @@ Run the existing test suite after significant changes.
 
 ---
 
-### Rule 7 — Data integrity
+### Rule 7 - Data integrity
 
 Never allow invalid, missing, stale or low-confidence telemetry to be silently treated as trustworthy data.
 
@@ -151,7 +151,7 @@ The framework must distinguish:
 
 ---
 
-### Rule 8 — AI safety and explainability
+### Rule 8 - AI safety and explainability
 
 AI/ML outputs must not be presented as unquestionable truth.
 
@@ -166,7 +166,7 @@ Every important AI result should support:
 
 ---
 
-### Rule 9 — No fake completion
+### Rule 9 - No fake completion
 
 Never claim:
 

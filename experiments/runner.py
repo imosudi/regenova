@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-REAMP Phase 16 — Master Experimental Validation Runner.
+REAMP Phase 16 - Master Experimental Validation Runner.
 
 Sequentially executes the 9 scientific experiment suites, collects quantitative metrics,
 verifies benchmark gates, and exports the consolidated results to results/benchmark_summary.json.
@@ -35,7 +35,7 @@ def print_banner(text: str):
 
 
 def main():
-    print_banner("REAMP Phase 16 — Scientific Experimental Validation Runner")
+    print_banner("REAMP Phase 16 - Scientific Experimental Validation Runner")
     print(f"Start Time: {datetime.datetime.now(datetime.timezone.utc).isoformat()}")
     print("Executing 9 automated experiment suites across detection, performance, prediction, and maintenance...\n")
 

@@ -1,7 +1,7 @@
-# REAMP — Asset Relationships and Topology Specification
+# REAMP - Asset Relationships and Topology Specification
 
 **Document Identifier**: `REAMP-DOM-03`  
-**Phase**: Phase 2 — Asset Ontology and Domain Model  
+**Phase**: Phase 2 - Asset Ontology and Domain Model  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

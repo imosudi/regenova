@@ -1,4 +1,4 @@
-# Phase 11 Completion Report — Risk and Financial Intelligence
+# Phase 11 Completion Report - Risk and Financial Intelligence
 
 ## 1. Executive Summary
 

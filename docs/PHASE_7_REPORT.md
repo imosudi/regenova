@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-Phase 7 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and validated in accordance with [`actions/Phase 7 Agent Prompt — Performance Intelligence.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%207%20Agent%20Prompt%20%E2%80%94%20Performance%20Intelligence.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
+Phase 7 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and validated in accordance with [`actions/Phase 7 Agent Prompt - Performance Intelligence.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%207%20Agent%20Prompt%20%E2%80%94%20Performance%20Intelligence.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
 
 Phase 7 establishes a physics-grounded, deterministic expected-performance modeling engine ($P_{expected} = f(\text{characteristics}, \text{environment}, \text{state})$) that computes real-time performance gaps ($\Delta P = P_{expected} - P_{actual}$) and decomposes total energy deficit into an explainable waterfall loss attribution. 
 

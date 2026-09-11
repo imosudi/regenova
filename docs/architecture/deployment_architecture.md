@@ -1,7 +1,7 @@
-# REAMP — Deployment Architecture Specification
+# REAMP - Deployment Architecture Specification
 
 **Document Identifier**: `REAMP-ARC-03`  
-**Phase**: Phase 3 — Reference Architecture  
+**Phase**: Phase 3 - Reference Architecture  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

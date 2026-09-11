@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-Phase 8 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and empirically validated in accordance with [`actions/Phase 8 Agent Prompt — Multi-Level Anomaly Detection.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%208%20Agent%20Prompt%20%E2%80%94%20Multi-Level%20Anomaly%20Detection.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
+Phase 8 of the Renewable Energy Asset Intelligence and Management Framework (REAMP) has been successfully designed, implemented, tested, and empirically validated in accordance with [`actions/Phase 8 Agent Prompt - Multi-Level Anomaly Detection.md`](file:///home/mosud/Documents/dev/regenova/actions/Phase%208%20Agent%20Prompt%20%E2%80%94%20Multi-Level%20Anomaly%20Detection.md) and [`AGENTS.md`](file:///home/mosud/Documents/dev/regenova/AGENTS.md).
 
 Phase 8 establishes a production-oriented, research-grade, **4-tier layered anomaly detection architecture**:
 1. **Level 1 (Rule-Based)**: Evaluates hard engineering limits, unexpected generation collapses under prime irradiance, communication heartbeat timeouts, and physically impossible telemetry.
@@ -18,10 +18,10 @@ Every detected anomaly generates a standardized, immutable, typed **Anomaly Obje
 
 | Prompt Requirement | Architectural Artifact / Code Symbol | Status |
 | :--- | :--- | :--- |
-| **Level 1 — Rule Based** | [`Level1RuleDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level1_rules.py) (thresholds, shutdown, comms timeout, impossible values) | **COMPLETED** |
-| **Level 2 — Statistical** | [`Level2StatisticalDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level2_statistical.py) (Z-score, EWMA, CUSUM change-point) | **COMPLETED** |
-| **Level 3 — Machine Learning** | [`Level3MLDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level3_ml.py) (Pure Python/NumPy Isolation Forest with path attribution) | **COMPLETED** |
-| **Level 4 — Contextual** | [`Level4ContextualDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level4_contextual.py) (P vs V*I, thermal coupling, peer array MAD) | **COMPLETED** |
+| **Level 1 - Rule Based** | [`Level1RuleDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level1_rules.py) (thresholds, shutdown, comms timeout, impossible values) | **COMPLETED** |
+| **Level 2 - Statistical** | [`Level2StatisticalDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level2_statistical.py) (Z-score, EWMA, CUSUM change-point) | **COMPLETED** |
+| **Level 3 - Machine Learning** | [`Level3MLDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level3_ml.py) (Pure Python/NumPy Isolation Forest with path attribution) | **COMPLETED** |
+| **Level 4 - Contextual** | [`Level4ContextualDetector`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/level4_contextual.py) (P vs V*I, thermal coupling, peer array MAD) | **COMPLETED** |
 | **Anomaly Object Schema** | [`AnomalyObject`](file:///home/mosud/Documents/dev/regenova/reamp/anomaly/models.py) (All 10 required fields: ID, asset, timestamp, type, severity, score, evidence, confidence, method, version) | **COMPLETED** |
 | **Required Artefacts** | [`docs/08_Anomaly_Detection_Framework.md`](file:///home/mosud/Documents/dev/regenova/docs/08_Anomaly_Detection_Framework.md), [`docs/analytics/anomaly_methods.md`](file:///home/mosud/Documents/dev/regenova/docs/analytics/anomaly_methods.md), [`docs/analytics/anomaly_evaluation.md`](file:///home/mosud/Documents/dev/regenova/docs/analytics/anomaly_evaluation.md) | **COMPLETED** |
 | **Validation Protocol** | Synthetic benchmark measuring Precision, Recall, F1, FPR, Latency in [`tests/test_phase8_anomaly.py`](file:///home/mosud/Documents/dev/regenova/tests/test_phase8_anomaly.py) | **COMPLETED** |

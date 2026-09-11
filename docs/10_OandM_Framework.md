@@ -1,4 +1,4 @@
-# REAMP Phase 10 — Operations & Maintenance (O&M) and CMMS Integration Framework
+# REAMP Phase 10 - Operations & Maintenance (O&M) and CMMS Integration Framework
 
 ## 1. Executive Summary & Framework Mission
 

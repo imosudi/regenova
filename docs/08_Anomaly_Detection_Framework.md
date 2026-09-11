@@ -1,4 +1,4 @@
-# REAMP Phase 8 — Multi-Level Anomaly Detection Framework
+# REAMP Phase 8 - Multi-Level Anomaly Detection Framework
 
 ## 1. Executive Summary & Objective
 
@@ -7,10 +7,10 @@ The **REAMP Anomaly Detection Framework** establishes a multi-tiered, defense-in
 Traditional SCADA systems suffer from severe alert fatigue: a single cloud edge may trigger dozens of concurrent "low power" alarms, while slow, insidious faults like PID (Potential Induced Degradation), progressive bearing wear, or pyranometer calibration drift go unnoticed for months until catastrophic failure or major financial loss occurs.
 
 The REAMP framework resolves this through a **4-tier layered architecture**:
-1. **Level 1 — Deterministic Rule-Based**: Sub-second edge detection of hard safety limits, unexpected trips, communication blackouts, and physically impossible telemetry.
-2. **Level 2 — Statistical & Time-Series**: Rolling statistical bands (Z-score, EWMA) and change-point algorithms (CUSUM) capturing transient spikes, step changes, and subtle mean drifts.
-3. **Level 3 — Unsupervised Machine Learning**: Multi-variate tree-based Isolation Forest models detecting non-linear interactions across high-dimensional feature spaces without requiring labelled historical failure data.
-4. **Level 4 — Contextual & Multi-Variate Residuals**: Physical first-principles constraint checking ($P_{ac}$ vs $V \cdot I$, $T_{cell}$ vs $P_{dc}$) and spatial peer comparisons (cross-inverter cohort Median Absolute Deviation analysis).
+1. **Level 1 - Deterministic Rule-Based**: Sub-second edge detection of hard safety limits, unexpected trips, communication blackouts, and physically impossible telemetry.
+2. **Level 2 - Statistical & Time-Series**: Rolling statistical bands (Z-score, EWMA) and change-point algorithms (CUSUM) capturing transient spikes, step changes, and subtle mean drifts.
+3. **Level 3 - Unsupervised Machine Learning**: Multi-variate tree-based Isolation Forest models detecting non-linear interactions across high-dimensional feature spaces without requiring labelled historical failure data.
+4. **Level 4 - Contextual & Multi-Variate Residuals**: Physical first-principles constraint checking ($P_{ac}$ vs $V \cdot I$, $T_{cell}$ vs $P_{dc}$) and spatial peer comparisons (cross-inverter cohort Median Absolute Deviation analysis).
 
 ---
 
@@ -20,7 +20,7 @@ The framework dynamically partitions analytical workloads across the REAMP edge-
 
 ```
 +-----------------------------------------------------------------------------------+
-| LEVEL 1: RULE-BASED DETECTOR (Edge / Gateway — Latency: < 10 ms)                  |
+| LEVEL 1: RULE-BASED DETECTOR (Edge / Gateway - Latency: < 10 ms)                  |
 | - Physical limit checks (Voltage, Current, Cell Temp, Inverter Heatsink)          |
 | - Unexpected shutdown detection (OperatingState == RUNNING but Active Power == 0) |
 | - Communication heartbeat watchdog (Signal loss > 30s)                            |
@@ -29,7 +29,7 @@ The framework dynamically partitions analytical workloads across the REAMP edge-
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
-| LEVEL 2: STATISTICAL DETECTOR (Edge / Fog — Latency: < 500 ms)                    |
+| LEVEL 2: STATISTICAL DETECTOR (Edge / Fog - Latency: < 500 ms)                    |
 | - Sliding window Z-score filter for transient spikes                              |
 | - Exponentially Weighted Moving Average (EWMA) with 3-sigma control limits        |
 | - Cumulative Sum (CUSUM) change-point detection for step shifts                   |
@@ -37,7 +37,7 @@ The framework dynamically partitions analytical workloads across the REAMP edge-
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
-| LEVEL 3: MACHINE LEARNING DETECTOR (Fog / Cloud — Latency: < 5 s)                 |
+| LEVEL 3: MACHINE LEARNING DETECTOR (Fog / Cloud - Latency: < 5 s)                 |
 | - Pure Python / NumPy Isolation Forest (zero heavy C-dependency lock-in)          |
 | - Multi-variate isolation depth path-length scoring                               |
 | - Non-linear interaction anomaly scoring s(x, n) in [0.0, 1.0]                    |
@@ -46,7 +46,7 @@ The framework dynamically partitions analytical workloads across the REAMP edge-
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
-| LEVEL 4: CONTEXTUAL & SPATIAL DETECTOR (Cloud / Central Server — Latency: < 30 s)  |
+| LEVEL 4: CONTEXTUAL & SPATIAL DETECTOR (Cloud / Central Server - Latency: < 30 s)  |
 | - Physical correlation residuals (P_ac vs V_ac * I_ac, Cell Temp vs DC Power)     |
 | - Cross-inverter spatial peer analysis (Median Absolute Deviation vs Array Cohort)|
 | - Weather-normalized residual check (Phase 7 expected-power comparison)           |

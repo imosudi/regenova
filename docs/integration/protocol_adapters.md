@@ -1,7 +1,7 @@
-# REAMP — Industrial Protocol Adapters Specification
+# REAMP - Industrial Protocol Adapters Specification
 
 **Document Identifier**: `REAMP-INT-01`  
-**Phase**: Phase 5 — Edge, Fog and IoT Integration  
+**Phase**: Phase 5 - Edge, Fog and IoT Integration  
 **Status**: Approved / Implementation Specification  
 **Last Updated**: 2026-09-11  
 

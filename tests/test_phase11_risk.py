@@ -1,5 +1,5 @@
 """
-REAMP Phase 11 Automated Verification Suite — Risk and Financial Intelligence.
+REAMP Phase 11 Automated Verification Suite - Risk and Financial Intelligence.
 Validates:
 1. Mathematical Risk Formulation: Risk = Probability x Consequence.
 2. Itemized Financial Loss: Lost Energy x Energy Value + Downtime + Maintenance + Replacement.

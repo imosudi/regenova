@@ -1,4 +1,4 @@
-# REAMP Phase 16 — Scientific Experimental Validation
+# REAMP Phase 16 - Scientific Experimental Validation
 
 ## 1. Executive Summary & Scientific Purpose
 

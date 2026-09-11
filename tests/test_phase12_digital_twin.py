@@ -1,5 +1,5 @@
 """
-REAMP Phase 12 Automated Verification Suite — Digital Twin and Asset State.
+REAMP Phase 12 Automated Verification Suite - Digital Twin and Asset State.
 Validates:
 1. Complete 10-dimensional digital representation for a reference Solar PV asset (Quality Gate).
 2. Physics-based expected state computation and real-time state residual tracking.

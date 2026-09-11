@@ -1,7 +1,7 @@
-# Phase 2 Completion Report — Asset Ontology and Domain Model
+# Phase 2 Completion Report - Asset Ontology and Domain Model
 
 **Framework**: Renewable Energy Asset Intelligence and Management Framework (REAMP)  
-**Phase**: Phase 2 — Asset Ontology and Domain Model  
+**Phase**: Phase 2 - Asset Ontology and Domain Model  
 **Completion Date**: 2026-09-11  
 **Author**: Domain Architecture Agent  
 **Status**: COMPLETE / READY FOR PHASE 3  
@@ -14,7 +14,7 @@ Phase 2 successfully establishes the technology-agnostic **Asset Ontology and Co
 
 Building directly upon the Phase 1 requirements, Phase 2 implements the canonical 8-level hierarchy (`Organisation → Portfolio → Project → Site → Energy System → Asset → Component → Sensor`), decouples technology-specific physics attributes into strongly-typed adapter schemas for Solar PV, Wind Energy, BESS, and Hybrid plants, specifies the lifecycle state machine, models 6 multi-dimensional relationship graph topologies, and delivers machine-readable Draft-07 JSON Schema validation definitions.
 
-All quality gates set forth in `actions/Phase 2 Agent Prompt — Asset Ontology and Domain Model.md` have been fully validated and satisfied.
+All quality gates set forth in `actions/Phase 2 Agent Prompt - Asset Ontology and Domain Model.md` have been fully validated and satisfied.
 
 ---
 
@@ -102,4 +102,4 @@ Data Architecture & Telemetry (Phase 4)
 READY
 ```
 
-Phase 2 has satisfied all quality gate requirements. The project is ready to proceed immediately to **Phase 3 — Reference Architecture**.
+Phase 2 has satisfied all quality gate requirements. The project is ready to proceed immediately to **Phase 3 - Reference Architecture**.

@@ -1,4 +1,4 @@
-# REAMP — Future Research and Engineering Directions
+# REAMP - Future Research and Engineering Directions
 
 This document delineates concrete technological, algorithmic, and operational roadmaps for advancing the **Renewable Energy Asset Intelligence and Management Framework (REAMP)** beyond the Phase 18 foundation.
 

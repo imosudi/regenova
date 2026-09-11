@@ -1,4 +1,4 @@
-# Phase 14 Completion Report — Governance, Compliance and Explainable Intelligence
+# Phase 14 Completion Report - Governance, Compliance and Explainable Intelligence
 
 ## 1. Executive Summary
 

@@ -1,5 +1,5 @@
 """
-REAMP Experiment 07 — Equipment Faults & Acute Thermal Runaway.
+REAMP Experiment 07 - Equipment Faults & Acute Thermal Runaway.
 
 Test Condition:
 - Evaluates detection speed, accuracy, and CMMS workflow triggering under acute physical faults:

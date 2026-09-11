@@ -1,5 +1,5 @@
 """
-REAMP MVP — Central Application Orchestrator.
+REAMP MVP - Central Application Orchestrator.
 
 Integrates all 14 framework capabilities:
 1. Authentication & Identity

@@ -26,7 +26,7 @@ def main() -> None:
     t_start = time.perf_counter()
     timestamp_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-    print_banner("REAMP PHASE 17 — SCALABILITY & RESILIENCE BENCHMARK RUNNER")
+    print_banner("REAMP PHASE 17 - SCALABILITY & RESILIENCE BENCHMARK RUNNER")
     print(f"Execution Start: {timestamp_iso}")
     print("Evaluating progressive load scaling (10 -> 10,000 assets) and infrastructure fault resilience...\n")
 

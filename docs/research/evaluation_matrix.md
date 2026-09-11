@@ -1,4 +1,4 @@
-# REAMP — Core Evaluation Matrix and Requirements Traceability
+# REAMP - Core Evaluation Matrix and Requirements Traceability
 
 This document provides definitive, evidence-backed answers to the **10 Core Evaluation Questions** and presents the complete, end-to-end **Requirements Traceability Matrix** across all 18 phases of the REAMP framework.
 
@@ -54,7 +54,7 @@ The dimensions span performance yield, Arrhenius thermal stress, availability, c
 ### Question 5: How does the predictive maintenance engine prevent premature or overdue work orders?
 **Answer**:
 REAMP solves this through a dual-mechanism approach:
-1. **The Epistemic Quality Gate**: Rejects "fake precision"—when telemetry confidence is below $0.80$, sample count $N < 5$, or trajectory goodness-of-fit $R^2 < 0.70$, the engine refuses point RUL estimation and marks status as `UNCERTAIN` ([`tests/test_phase9_maintenance.py`](file:///home/mosud/Documents/dev/regenova/tests/test_phase9_maintenance.py)).
+1. **The Epistemic Quality Gate**: Rejects "fake precision"-when telemetry confidence is below $0.80$, sample count $N < 5$, or trajectory goodness-of-fit $R^2 < 0.70$, the engine refuses point RUL estimation and marks status as `UNCERTAIN` ([`tests/test_phase9_maintenance.py`](file:///home/mosud/Documents/dev/regenova/tests/test_phase9_maintenance.py)).
 2. **Dynamic Risk-Weighted Priority Scoring**: Priorities (P1 Emergency to P4 Planned) are calculated as:
    $$\text{Priority Score} = w_{\text{RUL}} \cdot S_{\text{RUL}} + w_{\text{Health}} \cdot S_{\text{Health}} + w_{\text{Risk}} \cdot S_{\text{Risk}}$$
    Safety overrides guarantee that any critical thermal or electrical violation immediately escalates the work order to P1 Emergency, bypassing routine scheduling.

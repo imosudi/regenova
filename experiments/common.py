@@ -1,5 +1,5 @@
 """
-REAMP Phase 16 — Experimental Validation Common Utilities.
+REAMP Phase 16 - Experimental Validation Common Utilities.
 
 Provides shared scientific evaluation harnesses, mathematical metric computers
 (Precision, Recall, F1, FPR, FNR, MAE, RMSE, R2, Latency, Throughput),

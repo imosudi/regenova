@@ -1,7 +1,7 @@
-# REAMP — Canonical Telemetry Model Specification
+# REAMP - Canonical Telemetry Model Specification
 
 **Document Identifier**: `REAMP-DAT-02`  
-**Phase**: Phase 4 — Data Architecture and Telemetry Model  
+**Phase**: Phase 4 - Data Architecture and Telemetry Model  
 **Status**: Approved / Canonical Design  
 **Last Updated**: 2026-09-11  
 
@@ -11,7 +11,7 @@
 
 In compliance with `AGENTS.md` Rule 7 ("The framework must distinguish: value, timestamp, source, quality, confidence, availability, communication status"), the REAMP Telemetry Model defines a standardized, strongly typed telemetry observation schema.
 
-Every physical reading ingested into REAMP—whether from a central solar inverter, wind turbine vibration accelerometer, BESS battery cell, or pyranometer—is normalized into this canonical format before downstream persistence or analytical consumption.
+Every physical reading ingested into REAMP-whether from a central solar inverter, wind turbine vibration accelerometer, BESS battery cell, or pyranometer-is normalized into this canonical format before downstream persistence or analytical consumption.
 
 ---
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-REAMP Phase 5 — Automated Edge, Fog and IoT Integration Resilience Test Suite
+REAMP Phase 5 - Automated Edge, Fog and IoT Integration Resilience Test Suite
 Tests all 7 required failure modes and behaviors:
 1. Valid Telemetry
 2. Malformed Telemetry

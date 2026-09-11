@@ -1,5 +1,5 @@
 """
-REAMP Phase 14 Automated Verification Suite — Governance, Compliance and Explainability.
+REAMP Phase 14 Automated Verification Suite - Governance, Compliance and Explainability.
 Validates:
 1. The Canonical 8-Stage AI Decision Record:
    Input Data -> Model -> Model Version -> Output -> Confidence -> Evidence -> Recommendation -> Human Decision.

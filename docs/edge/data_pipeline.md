@@ -1,7 +1,7 @@
-# REAMP — Edge Local Data Pipeline Specification
+# REAMP - Edge Local Data Pipeline Specification
 
 **Document Identifier**: `REAMP-EDG-02`  
-**Phase**: Phase 5 — Edge, Fog and IoT Integration  
+**Phase**: Phase 5 - Edge, Fog and IoT Integration  
 **Status**: Approved / Implementation Specification  
 **Last Updated**: 2026-09-11  
 

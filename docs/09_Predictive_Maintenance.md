@@ -1,8 +1,8 @@
-# REAMP Phase 9 — Predictive Maintenance Framework
+# REAMP Phase 9 - Predictive Maintenance Framework
 
 ## 1. Executive Summary & Objective
 
-The **REAMP Predictive Maintenance Framework** transforms real-time asset intelligence—synthesizing condition assessments (Phase 6), performance gaps (Phase 7), and multi-level anomalies (Phase 8)—into actionable maintenance predictions, failure horizons, and prioritized work orders.
+The **REAMP Predictive Maintenance Framework** transforms real-time asset intelligence-synthesizing condition assessments (Phase 6), performance gaps (Phase 7), and multi-level anomalies (Phase 8)-into actionable maintenance predictions, failure horizons, and prioritized work orders.
 
 Historically, renewable energy operations have relied on two inefficient extremes:
 1. **Unplanned Reactive Maintenance**: Running equipment to failure, resulting in catastrophic collateral damage, emergency technician dispatches, and prolonged uncompensated downtime.

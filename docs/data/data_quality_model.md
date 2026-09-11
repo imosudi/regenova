@@ -1,7 +1,7 @@
-# REAMP — Data Quality & Provenance Model Specification
+# REAMP - Data Quality & Provenance Model Specification
 
 **Document Identifier**: `REAMP-DAT-03`  
-**Phase**: Phase 4 — Data Architecture and Telemetry Model  
+**Phase**: Phase 4 - Data Architecture and Telemetry Model  
 **Status**: Approved / Canonical Design  
 **Last Updated**: 2026-09-11  
 

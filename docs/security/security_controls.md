@@ -3,7 +3,7 @@
 ## 1. Overview & Regulatory Mapping
 
 This document specifies the technical security controls implemented across the REAMP architecture. Controls are mapped directly against:
-- **IEC 62443**: Industrial communication networks — IT security for industrial automation and control systems (Security Levels 1–3);
+- **IEC 62443**: Industrial communication networks - IT security for industrial automation and control systems (Security Levels 1–3);
 - **ISO/IEC 27001**: Information security management controls (Annex A);
 - **NERC CIP**: North American Electric Reliability Corporation Critical Infrastructure Protection standards.
 

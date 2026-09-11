@@ -1,5 +1,5 @@
 """
-REAMP Load Testing — Asset Scaling Benchmarks.
+REAMP Load Testing - Asset Scaling Benchmarks.
 Evaluates progressive asset scale tiers:
 Tier 1: 10 assets
 Tier 2: 100 assets

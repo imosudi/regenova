@@ -1,7 +1,7 @@
-# REAMP — Container Architecture Specification
+# REAMP - Container Architecture Specification
 
 **Document Identifier**: `REAMP-ARC-01`  
-**Phase**: Phase 3 — Reference Architecture  
+**Phase**: Phase 3 - Reference Architecture  
 **Status**: Approved / Quality Gate Passed  
 **Last Updated**: 2026-09-11  
 

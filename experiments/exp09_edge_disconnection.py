@@ -1,5 +1,5 @@
 """
-REAMP Experiment 09 — Edge/Cloud Disconnection & Store-and-Forward Resilience.
+REAMP Experiment 09 - Edge/Cloud Disconnection & Store-and-Forward Resilience.
 
 Test Condition:
 - Simulates an edge gateway experiencing a complete WAN connection failure:

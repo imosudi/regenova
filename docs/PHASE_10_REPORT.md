@@ -1,4 +1,4 @@
-# Phase 10 Completion Report — Operations & Maintenance (O&M) and CMMS Integration
+# Phase 10 Completion Report - Operations & Maintenance (O&M) and CMMS Integration
 
 ## 1. Executive Summary
 

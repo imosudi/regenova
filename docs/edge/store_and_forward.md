@@ -1,7 +1,7 @@
-# REAMP — Store-and-Forward Protocol Specification
+# REAMP - Store-and-Forward Protocol Specification
 
 **Document Identifier**: `REAMP-EDG-01`  
-**Phase**: Phase 5 — Edge, Fog and IoT Integration  
+**Phase**: Phase 5 - Edge, Fog and IoT Integration  
 **Status**: Approved / Implementation Specification  
 **Last Updated**: 2026-09-11  
 
@@ -9,7 +9,7 @@
 
 ## 1. Overview & Resilience Objective
 
-In renewable energy operating environments—often located in desert, offshore, or mountain regions—WAN connectivity over cellular (4G/5G LTE) or satellite links is inherently subject to transient dropouts, weather fading, and maintenance outages.
+In renewable energy operating environments-often located in desert, offshore, or mountain regions-WAN connectivity over cellular (4G/5G LTE) or satellite links is inherently subject to transient dropouts, weather fading, and maintenance outages.
 
 The **REAMP Store-and-Forward Protocol** ensures zero telemetry data loss during WAN blackouts of up to **72 continuous hours** (`FR-ING-002`, `NFR-AVL-002`, `NFR-RES-001`).
 

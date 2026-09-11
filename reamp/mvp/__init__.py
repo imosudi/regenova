@@ -1,5 +1,5 @@
 """
-REAMP MVP — Minimum Viable Product Integration Package.
+REAMP MVP - Minimum Viable Product Integration Package.
 """
 
 from reamp.mvp.models import (

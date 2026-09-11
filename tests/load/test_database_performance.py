@@ -1,5 +1,5 @@
 """
-REAMP Load Testing — Database & Storage Engine Performance.
+REAMP Load Testing - Database & Storage Engine Performance.
 Evaluates time-series database scalability:
 1. Transaction commit batching performance (Single vs 50 vs 250 vs 1000 rows/batch)
 2. Time-series temporal window query latency (B-Tree index efficiency on 20,000+ observations)

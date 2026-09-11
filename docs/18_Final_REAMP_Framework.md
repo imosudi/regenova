@@ -1,4 +1,4 @@
-# REAMP — Renewable Energy Asset Intelligence and Management Framework
+# REAMP - Renewable Energy Asset Intelligence and Management Framework
 
 ## Final Capstone Architecture Document (Phase 18)
 

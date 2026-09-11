@@ -1,4 +1,4 @@
-# REAMP MVP — Setup and Execution Guide
+# REAMP MVP - Setup and Execution Guide
 
 ## 1. System Requirements & Environment
 
@@ -31,7 +31,7 @@ python3 demo_mvp.py
 
 ### Expected Output Summary:
 The demonstration script executes the complete 10-stage pipeline:
-1. **Hierarchy Initialization**: Creates Organization (`Helios Clean Energy`), Portfolio (`Southwest Utility Fleet`), Site (`Mojave Solar Station — 50MW`), Asset (`INV-01 — 2.5MW Central Inverter`), and Sensors (POA Pyranometer, Heatsink PT100, DC Power Meter, AC Power Meter).
+1. **Hierarchy Initialization**: Creates Organization (`Helios Clean Energy`), Portfolio (`Southwest Utility Fleet`), Site (`Mojave Solar Station - 50MW`), Asset (`INV-01 - 2.5MW Central Inverter`), and Sensors (POA Pyranometer, Heatsink PT100, DC Power Meter, AC Power Meter).
 2. **Ingestion & Security**: Generates HMAC-SHA256 signed edge packets, validates cryptographic nonces, and buffers them to the time-series store.
 3. **Analytics & Twin Execution**: Feeds sensor readings to the Digital Twin and IEC 61724-1 loss engine, evaluating performance ratio ($PR$) and thermal equilibrium.
 4. **Health & Anomaly**: Detects heatsink cooling degradation ($\Delta T = +24^\circ\text{C}$), computes multi-level anomaly scores, and derates the Inverter Health Index ($HI$).

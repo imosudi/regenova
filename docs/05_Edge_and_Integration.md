@@ -1,7 +1,7 @@
-# REAMP — Edge, Fog and IoT Integration Specification
+# REAMP - Edge, Fog and IoT Integration Specification
 
 **Document Identifier**: `REAMP-DOC-05`  
-**Phase**: Phase 5 — Edge, Fog and IoT Integration  
+**Phase**: Phase 5 - Edge, Fog and IoT Integration  
 **Status**: Approved / Implementation Specification  
 **Last Updated**: 2026-09-11  
 

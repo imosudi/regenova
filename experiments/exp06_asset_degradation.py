@@ -1,5 +1,5 @@
 """
-REAMP Experiment 06 — Asset Degradation & Predictive RUL Validation.
+REAMP Experiment 06 - Asset Degradation & Predictive RUL Validation.
 
 Test Condition:
 - Simulates 1,000 operational hours of an asset undergoing progressive thermal degradation

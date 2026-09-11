@@ -1,4 +1,4 @@
-# REAMP Phase 15 — MVP Integration Architecture
+# REAMP Phase 15 - MVP Integration Architecture
 
 ## 1. Executive Summary & Objective
 

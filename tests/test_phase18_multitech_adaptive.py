@@ -1,5 +1,5 @@
 """
-REAMP Phase 18 — Multi-Technology Adaptive Framework Automated Test Suite.
+REAMP Phase 18 - Multi-Technology Adaptive Framework Automated Test Suite.
 
 Validates:
 1. Solar PV Reference Pipeline (IEC 61724-1, inverter/meter, thermal, health, alerts).

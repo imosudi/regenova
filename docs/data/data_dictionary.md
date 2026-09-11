@@ -1,7 +1,7 @@
-# REAMP — Canonical Data Dictionary
+# REAMP - Canonical Data Dictionary
 
 **Document Identifier**: `REAMP-DAT-04`  
-**Phase**: Phase 4 — Data Architecture and Telemetry Model  
+**Phase**: Phase 4 - Data Architecture and Telemetry Model  
 **Status**: Approved / Canonical Design  
 **Last Updated**: 2026-09-11  
 
@@ -138,8 +138,8 @@ This document specifies the complete attribute dictionary for all 20 relational 
 
 | Column | Type | Null | Default | PK/FK | Description |
 | :--- | :--- | :---: | :--- | :---: | :--- |
-| `timestamp` | TIMESTAMPTZ | No | | PK | Physical sampling instant (UTC) — Hypertable time dimension |
-| `tenant_id` | UUID | No | | PK | Multi-tenant isolation key — Hypertable space partition |
+| `timestamp` | TIMESTAMPTZ | No | | PK | Physical sampling instant (UTC) - Hypertable time dimension |
+| `tenant_id` | UUID | No | | PK | Multi-tenant isolation key - Hypertable space partition |
 | `asset_id` | UUID | No | | PK | Parent Asset UUID |
 | `metric` | VARCHAR(64) | No | | PK | Metric key (e.g., `power_active_kw`) |
 | `sensor_id` | UUID | No | | | Transducer Sensor UUID |

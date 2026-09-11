@@ -1,5 +1,5 @@
 """
-REAMP Phase 10 Automated Verification Suite — O&M and CMMS Integration.
+REAMP Phase 10 Automated Verification Suite - O&M and CMMS Integration.
 Validates the complete 12-stage closed-loop maintenance lifecycle:
 Anomaly -> Diagnosis -> Severity -> Risk -> Production Impact -> Recommendation
 -> Work Order -> Assignment -> Execution -> Verification -> Closure -> Feedback.

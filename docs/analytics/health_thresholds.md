@@ -1,7 +1,7 @@
-# REAMP — Asset Health State Thresholds & Operational Mapping
+# REAMP - Asset Health State Thresholds & Operational Mapping
 
 **Document Identifier**: `REAMP-ANL-02`  
-**Phase**: Phase 6 — Asset Health Model  
+**Phase**: Phase 6 - Asset Health Model  
 **Status**: Approved / Operational Specification  
 **Last Updated**: 2026-09-11  
 

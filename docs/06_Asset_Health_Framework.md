@@ -1,7 +1,7 @@
-# REAMP — Asset Health Intelligence Framework
+# REAMP - Asset Health Intelligence Framework
 
 **Document Identifier**: `REAMP-DOC-06`  
-**Phase**: Phase 6 — Asset Health Model  
+**Phase**: Phase 6 - Asset Health Model  
 **Status**: Approved / Implementation Specification  
 **Last Updated**: 2026-09-11  
 
