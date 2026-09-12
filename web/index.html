@@ -62,11 +62,6 @@
           <a class="btn btn-sm btn-primary fw-semibold px-3 py-2" href="#pre-enrol">
             <i class="bi bi-building-add me-1"></i> Pre-Enrol Portfolio
           </a>
-
-          <!-- Backoffice Link -->
-          <a class="btn btn-sm btn-light border text-secondary fw-semibold px-2 py-2" href="https://backoffice.regenova.cloud/" target="_blank" title="Super-Admin Platform Backoffice">
-            <i class="bi bi-shield-lock me-1"></i> Admin
-          </a>
         </div>
       </div>
     </div>
@@ -121,7 +116,7 @@
                 </span>
                 <h6 class="fw-bold text-dark m-0 mt-1">Live Global Fleet Telemetry</h6>
               </div>
-              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">db.regenova.cloud</span>
+              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;"><i class="bi bi-broadcast text-success me-1"></i>Live Stream</span>
             </div>
 
             <div class="row g-3">
@@ -530,7 +525,7 @@
               </div>
               <div>
                 <strong class="text-dark">Immediate PostgreSQL 18.6 Persistence</strong>
-                <div class="small text-muted">Records synchronize to the canonical schema on db.regenova.cloud in real time.</div>
+                <div class="small text-muted">Records synchronize to the canonical enterprise schema in real time.</div>
               </div>
             </div>
           </div>
@@ -684,31 +679,32 @@
             ISO/IEC & IEEE 1547 Standards Compliant &bull; Bootstrap 5.3 Light Theme
           </div>
         </div>
-        <div class="col-6 col-md-2">
-          <h6 class="fw-bold text-dark small mb-3">Platform</h6>
+        <div class="col-6 col-md-3">
+          <h6 class="fw-bold text-dark small mb-3">Platform Architecture</h6>
           <ul class="list-unstyled small d-flex flex-column gap-2">
-            <li><a href="#overview" class="text-decoration-none text-muted">Overview</a></li>
-            <li><a href="#benefits" class="text-decoration-none text-muted">Benefits & ROI</a></li>
-            <li><a href="#technologies" class="text-decoration-none text-muted">Multi-Technology</a></li>
-            <li><a href="#pre-enrol" class="text-decoration-none text-muted">Pre-Enrolment</a></li>
+            <li><a href="#overview" class="text-decoration-none text-muted">Overview & Telemetry</a></li>
+            <li><a href="#benefits" class="text-decoration-none text-muted">Opportunities & Benefits</a></li>
+            <li><a href="#technologies" class="text-decoration-none text-muted">Multi-Technology Pipelines</a></li>
+            <li><a href="#architecture" class="text-decoration-none text-muted">8-Stage Closed Feedback Loop</a></li>
+            <li><a href="#pre-enrol" class="text-decoration-none text-muted">Pre-Enrolment Application</a></li>
           </ul>
         </div>
         <div class="col-6 col-md-2">
-          <h6 class="fw-bold text-dark small mb-3">Portals</h6>
+          <h6 class="fw-bold text-dark small mb-3">Operations Access</h6>
           <ul class="list-unstyled small d-flex flex-column gap-2">
             <li><a href="/portal.html" class="text-decoration-none text-primary fw-semibold"><i class="bi bi-speedometer2 me-1"></i> Operations Portal</a></li>
-            <li><a href="https://backoffice.regenova.cloud/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-shield-lock me-1"></i> Admin Backoffice</a></li>
-            <li><a href="https://api.regenova.cloud/api/overview" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-code-slash me-1"></i> REST API</a></li>
+            <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalPortalLogin" class="text-decoration-none text-secondary"><i class="bi bi-box-arrow-in-right me-1"></i> Operator Login</a></li>
+            <li><a href="#pre-enrol" class="text-decoration-none text-secondary"><i class="bi bi-building-add me-1"></i> Pre-Enrolment</a></li>
           </ul>
         </div>
-        <div class="col-12 col-md-3">
-          <h6 class="fw-bold text-dark small mb-3">Cloud Infrastructure</h6>
-          <div class="bg-light p-2 rounded border small font-monospace">
-            <div>Web: <span class="text-primary">regenova.cloud</span></div>
-            <div>API: <span class="text-success">api.regenova.cloud</span></div>
-            <div>Admin: <span class="text-indigo">backoffice.regenova.cloud</span></div>
-            <div>DB: <span class="text-dark">db.regenova.cloud:5432</span></div>
-          </div>
+        <div class="col-12 col-md-2">
+          <h6 class="fw-bold text-dark small mb-3">Standards & Governance</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
+            <li><i class="bi bi-check-circle-fill text-success me-1"></i> IEC 61724-1 (Solar)</li>
+            <li><i class="bi bi-check-circle-fill text-success me-1"></i> IEC 61400-12-1 (Wind)</li>
+            <li><i class="bi bi-check-circle-fill text-success me-1"></i> IEEE 1547 Grid</li>
+            <li><i class="bi bi-shield-check text-primary me-1"></i> 10% HITL Guardrail</li>
+          </ul>
         </div>
       </div>
 

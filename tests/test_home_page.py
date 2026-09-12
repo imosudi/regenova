@@ -43,6 +43,11 @@ class TestHomePageRouting(unittest.TestCase):
         # Ensure strict AC-FR-UI-001 light theme and zero em dashes
         self.assertIn('data-bs-theme="light"', body)
         self.assertNotIn("—", body)
+        # Infrastructure and Backoffice endpoints must be restricted to Backoffice only
+        self.assertNotIn("Cloud Infrastructure", body)
+        self.assertNotIn("db.regenova.cloud:5432", body)
+        self.assertNotIn("backoffice.regenova.cloud", body)
+        self.assertNotIn("Admin Backoffice", body)
 
     def test_operations_portal_serving(self):
         """Verify that GET /portal and GET /portal.html return the Operations Dashboard."""
