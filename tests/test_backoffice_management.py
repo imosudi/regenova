@@ -172,6 +172,8 @@ class TestBackofficeManagement(unittest.TestCase):
         self.assertIn('id="formAdminLogin"', html)
         self.assertIn('id="loginEmail"', html)
         self.assertIn('id="loginPassword"', html)
+        self.assertIn('id="checkShowPassword"', html)
+        self.assertIn('togglePasswordVisibility', html)
         self.assertIn('imosudi@gmail.com', html)
         self.assertIn('id="backofficeAppLayout"', html)
         self.assertIn('id="btnAdminLogout"', html)

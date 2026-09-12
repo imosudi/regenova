@@ -84,79 +84,94 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-function initAdminAuthGateway() {
-  const form = document.getElementById("formAdminLogin");
-  const alertBox = document.getElementById("loginAlert");
-  const toggleBtn = document.getElementById("togglePasswordBtn");
-  const passInput = document.getElementById("loginPassword");
-  const passIcon = document.getElementById("togglePasswordIcon");
+window.togglePasswordVisibility = function() {
+  const p = document.getElementById("loginPassword");
+  const icon = document.getElementById("togglePasswordIcon");
+  const chk = document.getElementById("checkShowPassword");
+  if (!p) return;
+  const isPass = (p.type === "password");
+  p.type = isPass ? "text" : "password";
+  if (icon) {
+    icon.className = isPass ? "bi bi-eye-slash-fill text-primary" : "bi bi-eye text-muted";
+  }
+  if (chk) {
+    chk.checked = isPass;
+  }
+};
 
-  if (toggleBtn && passInput && passIcon) {
-    toggleBtn.addEventListener("click", () => {
-      const isPass = passInput.type === "password";
-      passInput.type = isPass ? "text" : "password";
-      passIcon.className = isPass ? "bi bi-eye-slash text-muted" : "bi bi-eye text-muted";
-    });
+window.handleAdminLoginSubmit = async function(e) {
+  if (e) e.preventDefault();
+  const alertBox = document.getElementById("loginAlert");
+  const emailInput = document.getElementById("loginEmail");
+  const passInput = document.getElementById("loginPassword");
+  const submitBtn = document.getElementById("btnLoginSubmit");
+  const rememberInput = document.getElementById("rememberMe");
+
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = passInput ? passInput.value : "";
+  const remember = rememberInput ? rememberInput.checked : true;
+
+  if (!email || !password) {
+    if (alertBox) {
+      alertBox.className = "alert alert-warning py-2 px-3 small";
+      alertBox.innerText = "Please enter both administrator email and password.";
+      alertBox.classList.remove("d-none");
+    }
+    return;
   }
 
-  if (form) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById("loginEmail");
-      const submitBtn = document.getElementById("btnLoginSubmit");
-      const rememberInput = document.getElementById("rememberMe");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Authenticating...`;
+  }
+  if (alertBox) alertBox.classList.add("d-none");
 
-      const email = emailInput ? emailInput.value.trim() : "";
-      const password = passInput ? passInput.value : "";
-      const remember = rememberInput ? rememberInput.checked : true;
-
-      if (!email || !password) {
-        if (alertBox) {
-          alertBox.className = "alert alert-warning py-2 px-3 small";
-          alertBox.innerText = "Please enter both administrator email and password.";
-          alertBox.classList.remove("d-none");
-        }
-        return;
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Authenticating...`;
-      }
-      if (alertBox) alertBox.classList.add("d-none");
-
-      try {
-        const res = await apiFetch("/api/admin/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await res.json();
-        if (res.ok && data.status === "SUCCESS") {
-          setStoredAdminAuth(data, remember);
-          unlockConsole(data);
-        } else {
-          if (alertBox) {
-            alertBox.className = "alert alert-danger py-2 px-3 small";
-            alertBox.innerText = data.message || "Invalid administrator credentials. Access denied.";
-            alertBox.classList.remove("d-none");
-          }
-        }
-      } catch (err) {
-        console.error("Login request failed:", err);
-        if (alertBox) {
-          alertBox.className = "alert alert-danger py-2 px-3 small";
-          alertBox.innerText = "Authentication service error. Please try again.";
-          alertBox.classList.remove("d-none");
-        }
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = `<i class="bi bi-box-arrow-in-right me-2"></i><span>Authenticate & Access Console</span>`;
-        }
-      }
+  try {
+    const res = await apiFetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
     });
+
+    const data = await res.json();
+    if (res.ok && data.status === "SUCCESS") {
+      setStoredAdminAuth(data, remember);
+      unlockConsole(data);
+    } else {
+      if (alertBox) {
+        alertBox.className = "alert alert-danger py-2 px-3 small";
+        alertBox.innerText = data.message || "Invalid administrator credentials. Access denied.";
+        alertBox.classList.remove("d-none");
+      }
+    }
+  } catch (err) {
+    console.error("Login request failed:", err);
+    if (alertBox) {
+      alertBox.className = "alert alert-danger py-2 px-3 small";
+      alertBox.innerText = "Authentication service error. Please try again.";
+      alertBox.classList.remove("d-none");
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<i class="bi bi-box-arrow-in-right me-2"></i><span>Authenticate & Access Console</span>`;
+    }
+  }
+};
+
+function initAdminAuthGateway() {
+  const form = document.getElementById("formAdminLogin");
+  const toggleBtn = document.getElementById("togglePasswordBtn");
+  const checkShow = document.getElementById("checkShowPassword");
+
+  if (toggleBtn) {
+    toggleBtn.onclick = window.togglePasswordVisibility;
+  }
+  if (checkShow) {
+    checkShow.onchange = window.togglePasswordVisibility;
+  }
+  if (form) {
+    form.onsubmit = window.handleAdminLoginSubmit;
   }
 }
 
