@@ -4,1129 +4,724 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>REGENOVA - Renewable Energy Asset Intelligence & Management Framework</title>
-  <meta name="description" content="REGENOVA - Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets. Conforms strictly to AC-FR-UI-001 (Bootstrap 5.3 Light Theme).">
-  <!-- Bootstrap 5.3.3 CSS -->
+  <meta name="description" content="REGENOVA - Open research-grade framework for intelligent asset management, health assessment (AHI), Explainable AI anomaly detection, predictive maintenance, and multi-tenant operations across Solar PV, Wind, BESS, and Hybrid renewable energy systems. Strict AC-FR-UI-001 (Bootstrap 5.3 Light Theme).">
+  <!-- Bootstrap 5.3.3 CSS & Icons -->
   <link rel="stylesheet" href="vendor/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="home.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
 </head>
-<body class="bg-light text-dark">
+<body>
 
-  <div class="reamp-app-layout">
-    <!-- Backdrop for mobile drawer -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-
-    <!-- LEFT VERTICAL PANE (SIDEBAR) -->
-    <aside class="reamp-sidebar" id="reampSidebar">
-      <!-- Top Branding -->
-      <div class="reamp-sidebar-header d-flex align-items-center">
-        <div class="brand-icon">
+  <!-- 1. NAVIGATION BAR -->
+  <nav class="navbar navbar-expand-lg home-navbar py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center text-decoration-none" href="/">
+        <div class="brand-icon-home">
           <i class="bi bi-lightning-charge-fill"></i>
         </div>
         <div>
           <div class="d-flex align-items-center">
-            <span class="fs-5 fw-bold text-dark me-2">REGENOVA</span>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">v1.0 Capstone</span>
+            <span class="fs-4 fw-bold text-dark me-2">REGENOVA</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.7rem;">v1.0 Framework</span>
           </div>
-          <div class="small text-muted" style="font-size: 0.7rem; line-height: 1.1;">Asset Intelligence & Management</div>
+          <div class="small text-muted" style="font-size: 0.72rem; line-height: 1;">Asset Intelligence & Management</div>
         </div>
-      </div>
+      </a>
 
-      <!-- Active Tenant Context Switcher -->
-      <div class="reamp-sidebar-tenant">
-        <div class="d-flex align-items-center justify-content-between mb-1">
-          <span class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 0.06em;">Active Tenant</span>
-          <button class="btn btn-link p-0 text-decoration-none text-primary fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalEnrollTenant" title="Enrol new tenant organization" style="font-size: 0.72rem;">
-            <i class="bi bi-plus-circle me-1"></i>Enrol
-          </button>
-        </div>
-        <select class="form-select form-select-sm tenant-select" id="tenantContextSelect" onchange="switchTenant(this.value)">
-          <option value="ORG-HELIOS-GLOBAL" selected>Helios Global Renewables</option>
-          <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy</option>
-          <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia</option>
-        </select>
-      </div>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHomeContent" aria-controls="navbarHomeContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-      <!-- User & Tenant Card -->
-      <div class="reamp-sidebar-user d-flex align-items-center">
-        <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 34px; height: 34px; font-size: 0.9rem;" id="sidebar-user-avatar">
-          <i class="bi bi-person-badge"></i>
-        </div>
-        <div class="overflow-hidden flex-grow-1">
-          <div class="fw-bold text-dark text-truncate" id="sidebar-user-name" style="font-size: 0.8rem;">Dr. Elena Rostova</div>
-          <div class="text-muted text-truncate" id="sidebar-user-sub" style="font-size: 0.68rem;"><span id="sidebar-user-role">Chief Engineer</span> &bull; <span class="font-monospace" id="sidebar-user-org">ORG-HELIOS</span></div>
-        </div>
-      </div>
-
-      <!-- Vertical Nav Links (Tabs) -->
-      <div class="reamp-sidebar-nav">
-        <div class="text-uppercase text-muted fw-bold px-2 mb-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">Core Operations</div>
-        <ul class="nav nav-pills flex-column" id="reampTab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab" aria-selected="true">
-              <i class="bi bi-speedometer2 text-primary"></i>
-              <span>Fleet Overview</span>
-            </button>
+      <div class="collapse navbar-collapse" id="navbarHomeContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#overview">Overview</a>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="twin-tab" data-bs-toggle="tab" data-bs-target="#tab-twin" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-cpu text-info"></i>
-              <span>Digital Twin & Telemetry</span>
-            </button>
+          <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#benefits">Opportunities & Benefits</a>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="health-tab" data-bs-toggle="tab" data-bs-target="#tab-health" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-heart-pulse text-success"></i>
-              <span>7-Dimension Health (AHI)</span>
-            </button>
+          <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#technologies">Multi-Technology</a>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link position-relative" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#tab-alerts" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-exclamation-triangle text-danger"></i>
-              <span>Anomaly & Alerts</span>
-              <span class="badge bg-danger rounded-pill ms-auto" id="badge-alert-count">0</span>
-            </button>
+          <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#architecture">Architecture</a>
           </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="xai-tab" data-bs-toggle="tab" data-bs-target="#tab-xai" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-diagram-3 text-warning"></i>
-              <span>Explainable AI (SHAP)</span>
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="cmms-tab" data-bs-toggle="tab" data-bs-target="#tab-cmms" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-wrench-adjustable text-primary"></i>
-              <span>CMMS & HITL Queue</span>
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="adaptive-tab" data-bs-toggle="tab" data-bs-target="#tab-adaptive" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-sliders text-dark"></i>
-              <span>Adaptive Intelligence</span>
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#tab-audit" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-journal-text text-secondary"></i>
-              <span>Cryptographic Audit</span>
-            </button>
-          </li>
-
-          <div class="text-uppercase text-muted fw-bold px-2 mt-3 mb-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">Governance & Platform</div>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="onboard-tab" data-bs-toggle="tab" data-bs-target="#tab-onboard" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-person-plus text-primary"></i>
-              <span>Onboarding & Directory</span>
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#tab-database" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-database" style="color: var(--reamp-purple);"></i>
-              <span>Database & PostgreSQL</span>
-              <span class="badge bg-success-subtle text-success border border-success-subtle ms-auto small" id="badge-db-status">ONLINE</span>
-            </button>
+          <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#pre-enrol">Pre-Enrolment</a>
           </li>
         </ul>
-      </div>
 
-      <!-- Sidebar Bottom System Info -->
-      <div class="reamp-sidebar-footer">
-        <div class="d-flex align-items-center justify-content-between">
-          <div class="d-flex align-items-center">
-            <span class="pulse-live" id="sidebar-db-dot"></span>
-            <span class="fw-semibold text-dark" id="sidebar-db-status-text" style="font-size: 0.73rem;">PostgreSQL 18.6</span>
-          </div>
-          <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">db.regenova.cloud</span>
-        </div>
-        <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.7rem;">
-          <span><i class="bi bi-shield-check text-success me-1"></i>SHA-256 Ledger</span>
-          <span class="font-monospace text-dark" id="sidebar-utc-clock">--:--:-- UTC</span>
-        </div>
-      </div>
-    </aside>
-
-    <!-- RIGHT MAIN CONTENT PANE -->
-    <div class="reamp-main-pane">
-      <!-- Topbar Header -->
-      <header class="reamp-topbar px-4 d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-3">
-          <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
-            <i class="bi bi-list fs-5"></i>
+        <div class="d-flex align-items-center gap-2">
+          <!-- Operator Login Button (Opens Modal) -->
+          <button class="btn btn-sm btn-outline-primary fw-semibold px-3 py-2" type="button" data-bs-toggle="modal" data-bs-target="#modalPortalLogin">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Operator Login
           </button>
-          <div>
-            <h5 class="m-0 fw-bold text-dark d-flex align-items-center" id="topbar-section-title">
-              <i class="bi bi-speedometer2 text-primary me-2"></i> Fleet Overview
-            </h5>
-          </div>
-        </div>
 
-        <div class="d-flex align-items-center gap-3">
-          <!-- Live Telemetry Badge -->
-          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill d-none d-md-inline-flex align-items-center">
+          <!-- Pre-Enrol Button -->
+          <a class="btn btn-sm btn-primary fw-semibold px-3 py-2" href="#pre-enrol">
+            <i class="bi bi-building-add me-1"></i> Pre-Enrol Portfolio
+          </a>
+
+          <!-- Backoffice Link -->
+          <a class="btn btn-sm btn-light border text-secondary fw-semibold px-2 py-2" href="https://backoffice.regenova.cloud/" target="_blank" title="Super-Admin Platform Backoffice">
+            <i class="bi bi-shield-lock me-1"></i> Admin
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 2. HERO SECTION -->
+  <section class="home-hero" id="overview">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-12 col-lg-7">
+          <div class="hero-pill-badge mb-3">
             <span class="pulse-live"></span>
-            <span class="fw-semibold">1 Hz STREAMING</span>
-          </span>
-
-          <!-- Quick Scenario Trigger Dropdown -->
-          <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-semibold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-lightning-charge me-1 text-warning"></i> Simulate Scenario
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
-              <li><h6 class="dropdown-header">Real-Time Ingestion Scenarios</h6></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('nominal')"><i class="bi bi-check-circle text-success me-2"></i>Nominal Generation</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('high_temp_shadow')"><i class="bi bi-thermometer-high text-danger me-2"></i>Heatwave & Thermal Shadow</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('inverter_trip')"><i class="bi bi-exclamation-octagon text-danger me-2"></i>Emergency Inverter Trip</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('bess_discharge')"><i class="bi bi-battery-charging text-primary me-2"></i>BESS Peak Shaving Discharge</a></li>
-            </ul>
+            <span>IEC 61724-1 & IEC 61400-12-1 Compliant Framework</span>
           </div>
-
-          <!-- Refresh Button -->
-          <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="loadAllData()" title="Poll live telemetry">
-            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
-          </button>
-
-          <!-- Tenant Badge -->
-          <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace d-none d-sm-inline-flex align-items-center gap-1" id="topbar-tenant-badge">
-            <i class="bi bi-buildings"></i> <span id="topbar-tenant-text">ORG-HELIOS-GLOBAL</span>
-          </span>
-        </div>
-      </header>
-
-      <!-- Main Content Body -->
-      <main class="reamp-content-body">
-        <div class="tab-content" id="reampTabContent">
-
-          <!-- 1. FLEET OVERVIEW TAB -->
-          <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="overview-tab">
-        
-        <!-- Top KPI Metric Cards -->
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Fleet Generation</div>
-              <div class="stat-kpi-val text-primary" id="kpi-gen-mw">-- <small class="fs-6 text-muted">MW</small></div>
-              <div class="small text-muted mt-2">Rated: <span id="kpi-cap-mw" class="fw-semibold text-dark">-- MW</span></div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Fleet Health (AHI)</div>
-              <div class="stat-kpi-val text-success" id="kpi-health-score">-- <small class="fs-6 text-muted">/ 100</small></div>
-              <div class="small text-muted mt-2">7-Dimension Deterministic</div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Performance (PR_STC)</div>
-              <div class="stat-kpi-val text-info" id="kpi-pr-val">--</div>
-              <div class="small text-muted mt-2">IEC 61724-1 Standard</div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Active Anomalies</div>
-              <div class="stat-kpi-val text-danger" id="kpi-alerts-count">0</div>
-              <div class="small text-muted mt-2">CUSUM + EWMA + IsoForest</div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Revenue Loss Rate</div>
-              <div class="stat-kpi-val text-warning" id="kpi-rev-loss">$0.00</div>
-              <div class="small text-muted mt-2">PPA Tariff: $0.10 / kWh</div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-xl-2">
-            <div class="card card-reamp h-100 p-3">
-              <div class="stat-kpi-label mb-1">Avoided CO₂</div>
-              <div class="stat-kpi-val text-success" id="kpi-co2-val">-- <small class="fs-6 text-muted">Tons</small></div>
-              <div class="small text-muted mt-2">Clean Renewable Energy</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Portfolio Sites Grid -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold text-dark m-0"><i class="bi bi-geo-alt text-primary me-2"></i>Portfolio Sites & Generation Plants</h5>
-          <span class="badge bg-light text-secondary border">Solar PV • Wind • BESS • Hybrid</span>
-        </div>
-        <div class="row g-3 mb-4" id="sites-cards-row">
-          <!-- Populated dynamically -->
-        </div>
-
-        <!-- Generation & Storage Assets Grid -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold text-dark m-0"><i class="bi bi-boxes text-primary me-2"></i>Registered Renewable Energy Assets</h5>
-          <span class="badge bg-light text-secondary border">Click any asset card to view Digital Twin</span>
-        </div>
-        <div class="row g-3" id="assets-cards-row">
-          <!-- Populated dynamically -->
-        </div>
-
-      </div>
-
-      <!-- 2. DIGITAL TWIN & TELEMETRY TAB -->
-      <div class="tab-pane fade" id="tab-twin" role="tabpanel" aria-labelledby="twin-tab">
-        <div class="row g-4">
-          <!-- Left: Asset Selector Sidebar -->
-          <div class="col-12 col-lg-3">
-            <div class="card card-reamp p-3">
-              <h6 class="fw-bold text-dark mb-1"><i class="bi bi-list-check me-2 text-primary"></i>Select Asset</h6>
-              <p class="small text-muted mb-3">Switch active digital twin physics model</p>
-              <div class="d-flex flex-column gap-2" id="asset-selector-list">
-                <!-- Asset buttons populated dynamically -->
-              </div>
-            </div>
-          </div>
-
-          <!-- Right: Digital Twin Analytics -->
-          <div class="col-12 col-lg-9">
-            <!-- Asset Header Banner -->
-            <div class="card card-reamp p-4 mb-4">
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-                <div>
-                  <div class="small text-muted font-monospace" id="dt-asset-id">ASSET-INV-01</div>
-                  <h4 class="fw-bold text-dark m-0" id="dt-asset-name">Central Inverter #01</h4>
-                  <div class="small text-muted mt-1" id="dt-asset-site">Mojave Solar Station (50 MW)</div>
-                </div>
-                <div class="text-end">
-                  <span class="badge bg-primary fs-6 px-3 py-2" id="dt-tech-badge">SOLAR_PV</span>
-                  <div class="mt-2">
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" id="dt-state-badge">
-                      <i class="bi bi-check-circle me-1"></i> STATE: RUNNING (AC-FR-TWN-001)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- SVG Gauges Row (Light Theme) -->
-            <div class="row g-3 mb-4">
-              <div class="col-6 col-md-3">
-                <div class="card card-reamp p-3 text-center d-flex flex-column align-items-center">
-                  <svg class="gauge-svg" viewBox="0 0 100 100">
-                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
-                    <circle class="gauge-bar" id="dt-gauge-power" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="60" stroke="#0d6efd"></circle>
-                  </svg>
-                  <div class="gauge-text text-primary" id="dt-text-power">2085<small class="fs-6 text-muted">kW</small></div>
-                  <div class="stat-kpi-label">Active Power Output</div>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3">
-                <div class="card card-reamp p-3 text-center d-flex flex-column align-items-center">
-                  <svg class="gauge-svg" viewBox="0 0 100 100">
-                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
-                    <circle class="gauge-bar" id="dt-gauge-health" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="10" stroke="#198754"></circle>
-                  </svg>
-                  <div class="gauge-text text-success" id="dt-text-health">99.5</div>
-                  <div class="stat-kpi-label">Asset Health (AHI)</div>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3">
-                <div class="card card-reamp p-3 text-center d-flex flex-column align-items-center">
-                  <svg class="gauge-svg" viewBox="0 0 100 100">
-                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
-                    <circle class="gauge-bar" id="dt-gauge-pr" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="20" stroke="#fd7e14"></circle>
-                  </svg>
-                  <div class="gauge-text text-warning" id="dt-text-pr">1.05</div>
-                  <div class="stat-kpi-label">Perf. Ratio (PR_STC)</div>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3">
-                <div class="card card-reamp p-3 text-center d-flex flex-column align-items-center">
-                  <svg class="gauge-svg" viewBox="0 0 100 100">
-                    <circle class="gauge-bg" cx="50" cy="50" r="40"></circle>
-                    <circle class="gauge-bar" id="dt-gauge-temp" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="140" stroke="#dc3545"></circle>
-                  </svg>
-                  <div class="gauge-text text-danger" id="dt-text-temp">48.0<small class="fs-6 text-muted">°C</small></div>
-                  <div class="stat-kpi-label">Thermal Dissipation</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Digital Twin State Residuals -->
-            <div class="card card-reamp p-4 mb-4">
-              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-graph-up me-2 text-primary"></i>First-Principles Digital Twin State Residuals</h6>
-              <div class="row g-3">
-                <div class="col-12 col-md-4">
-                  <div class="p-3 bg-light rounded-3 border">
-                    <div class="stat-kpi-label">Power Residual (ΔP)</div>
-                    <div class="h4 fw-bold text-primary my-1 font-monospace" id="dt-res-power">+15.2 kW</div>
-                    <div class="small text-muted">Measured vs IEC 61724-1 Model</div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-4">
-                  <div class="p-3 bg-light rounded-3 border">
-                    <div class="stat-kpi-label">Thermal Residual (ΔT)</div>
-                    <div class="h4 fw-bold text-danger my-1 font-monospace" id="dt-res-temp">+1.4 °C</div>
-                    <div class="small text-muted">IGBT Heatsink vs R_th Physics</div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-4">
-                  <div class="p-3 bg-light rounded-3 border">
-                    <div class="stat-kpi-label">Baseline Multiplier</div>
-                    <div class="h4 fw-bold text-success my-1 font-monospace" id="dt-res-base">1.0000</div>
-                    <div class="small text-muted">Adaptive Soiling / Roughness Multiplier</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Interactive Fault & Telemetry Simulation Console -->
-            <div class="card card-reamp p-4">
-              <h6 class="fw-bold text-dark mb-1"><i class="bi bi-play-circle me-2 text-primary"></i>Interactive Telemetry & Fault Injection Console</h6>
-              <p class="small text-muted mb-3">Inject test telemetry into the selected asset to verify real-time CUSUM change-point triggers and digital twin state machine transitions:</p>
-              
-              <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-outline-success btn-sm fw-semibold" onclick="injectScenario('nominal')">
-                  <i class="bi bi-sun me-1"></i> Nominal Solar / Wind Telemetry
-                </button>
-                <button class="btn btn-outline-danger btn-sm fw-semibold" onclick="injectScenario('blower_fault')">
-                  <i class="bi bi-fire me-1"></i> Blower Failure (Overheat 87.5°C -> Triggers FAULT)
-                </button>
-                <button class="btn btn-outline-warning btn-sm fw-semibold" onclick="injectScenario('soiling_derate')">
-                  <i class="bi bi-wind me-1"></i> Progressive Soiling / Aerodynamic Loss
-                </button>
-                <button class="btn btn-outline-info btn-sm fw-semibold" onclick="injectScenario('wind_gust')">
-                  <i class="bi bi-tornado me-1"></i> Wind Velocity Surge (14.5 m/s)
-                </button>
-                <button class="btn btn-outline-primary btn-sm fw-semibold" onclick="injectScenario('bess_discharge')">
-                  <i class="bi bi-battery-charging me-1"></i> Fast BESS Discharge Response
-                </button>
-              </div>
-              <div class="alert alert-info mt-3 mb-0 small py-2 d-none" id="inject-feedback-box"></div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. 7-DIMENSION HEALTH TAB -->
-      <div class="tab-pane fade" id="tab-health" role="tabpanel" aria-labelledby="health-tab">
-        <div class="card card-reamp p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-heart-pulse text-success me-2"></i>7-Dimension Deterministic Health Assessment Engine</h5>
-              <div class="small text-muted mt-1">Conforms strictly to AC-FR-HLT-001 (Linear-additive mathematical formulation with Arrhenius thermal penalty)</div>
-            </div>
-            <span class="badge bg-success px-3 py-2 fs-6">Formula: AHI = ∑(w_i · s_i)</span>
-          </div>
-          
-          <div class="alert alert-light border mb-4 small">
-            <strong>Explainability Guarantee:</strong> REAMP enforces complete mathematical factor attribution. Every point deducted from 100 is traced directly to an exact physical dimension, eliminating black-box opacity.
-          </div>
-
-          <div id="health-progress-bars">
-            <!-- Dynamically populated progress bars -->
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. ANOMALY & ALERTS TAB -->
-      <div class="tab-pane fade" id="tab-alerts" role="tabpanel" aria-labelledby="alerts-tab">
-        <div class="card card-reamp p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold text-dark m-0"><i class="bi bi-exclamation-triangle text-danger me-2"></i>Active Anomaly & Alarm Stream</h5>
-            <span class="badge bg-light text-secondary border">4-Tier Diagnostic Cascade (L1-L4)</span>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-reamp">
-              <thead>
-                <tr>
-                  <th>Alert ID</th>
-                  <th>Asset</th>
-                  <th>Severity</th>
-                  <th>Detection Mechanism</th>
-                  <th>Description</th>
-                  <th>Timestamp</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="alerts-tbody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. EXPLAINABLE AI (SHAP) TAB -->
-      <div class="tab-pane fade" id="tab-xai" role="tabpanel" aria-labelledby="xai-tab">
-        <div class="card card-reamp p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-diagram-3 text-warning me-2"></i>Explainable AI: Ranked SHAP Feature Explanations</h5>
-              <div class="small text-muted mt-1">Conforms strictly to AC-FR-XAI-001 (Ranked SHAP feature list explaining top 3 contributing sensors)</div>
-            </div>
-            <span class="badge bg-warning text-dark px-3 py-2">XAI AUDIT COMPLIANT</span>
-          </div>
-
-          <p class="small text-secondary mb-4">
-            When an anomaly or health derating occurs, REAMP computes Shapley additive explanations (SHAP values) to attribute divergence directly to specific physical sensors:
+          <h1 class="hero-title mb-3">
+            Intelligent Renewable Energy <span class="hero-highlight">Asset Intelligence</span> & Management
+          </h1>
+          <p class="hero-subtitle mb-4">
+            An open, research-grade, production-ready framework integrating edge IoT telemetry, 7-dimension asset health assessment (AHI), Explainable AI (SHAP), closed-loop adaptive control, and cryptographic SHA-256 governance across Solar PV, Wind, BESS, and Hybrid power plants.
           </p>
+          <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+            <!-- Launch Operations Portal CTA -->
+            <button class="btn btn-primary btn-lg fw-semibold px-4 py-3 shadow-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalPortalLogin">
+              <i class="bi bi-speedometer2 me-2"></i> Launch Operations Portal
+            </button>
 
-          <div class="row g-3" id="shap-features-container">
-            <!-- Dynamically populated with top 3 SHAP cards -->
+            <!-- Pre-Enrol Organization CTA -->
+            <a class="btn btn-outline-secondary btn-lg fw-semibold px-4 py-3 bg-white" href="#pre-enrol">
+              <i class="bi bi-building-check me-2 text-primary"></i> Pre-Enrol Organization
+            </a>
+
+            <!-- Technical Architecture Anchor -->
+            <a class="btn btn-link text-decoration-none text-dark fw-semibold" href="#benefits">
+              Learn More <i class="bi bi-arrow-down ms-1"></i>
+            </a>
+          </div>
+
+          <div class="d-flex align-items-center gap-3 text-muted small">
+            <div><i class="bi bi-check2-circle text-success me-1"></i>Zero Dark SCADA Override</div>
+            <div><i class="bi bi-shield-check text-primary me-1"></i>Row Level Security (RLS)</div>
+            <div><i class="bi bi-lock-fill text-dark me-1"></i>HMAC-SHA256 Signed</div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+          <!-- Live Telemetry Card -->
+          <div class="hero-stats-ribbon">
+            <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
+              <div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                  <span class="pulse-live"></span> 1 Hz TELEMETRY STREAM
+                </span>
+                <h6 class="fw-bold text-dark m-0 mt-1">Live Global Fleet Telemetry</h6>
+              </div>
+              <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.72rem;">db.regenova.cloud</span>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="stat-metric-label">Contracted Capacity</div>
+                <div class="stat-metric-val text-primary" id="stat-hero-capacity">300.0 <small class="fs-6 text-muted">MW</small></div>
+                <div class="small text-muted">Active: <span id="stat-hero-gen" class="fw-bold text-success">226.4 MW</span></div>
+              </div>
+              <div class="col-6">
+                <div class="stat-metric-label">Fleet Health (AHI)</div>
+                <div class="stat-metric-val text-success" id="stat-hero-health">98.6 <small class="fs-6 text-muted">/ 100</small></div>
+                <div class="small text-muted">7-Dimension index</div>
+              </div>
+              <div class="col-6">
+                <div class="stat-metric-label">Connected Assets</div>
+                <div class="stat-metric-val text-dark" id="stat-hero-assets">12 <small class="fs-6 text-muted">assets</small></div>
+                <div class="small text-muted">Solar, Wind, BESS</div>
+              </div>
+              <div class="col-6">
+                <div class="stat-metric-label">Enterprise Tenants</div>
+                <div class="stat-metric-val text-purple" id="stat-hero-tenants" style="color: var(--reamp-purple);">3</div>
+                <div class="small text-muted">Isolated Partitions</div>
+              </div>
+            </div>
+
+            <div class="bg-light rounded p-3 mt-3 border">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-semibold text-dark"><i class="bi bi-shield-check text-success me-1"></i>Cryptographic Trust</span>
+                <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.68rem;">SHA-256 Ledger</span>
+              </div>
+              <div class="small text-muted" style="font-size: 0.75rem;">
+                All operational adjustments and HITL approvals are hashed into an immutable block sequence.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. OPPORTUNITIES & TECHNICAL BENEFITS SECTION -->
+  <section class="py-5" id="benefits">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2">Architectural Innovations</span>
+        <h2 class="fw-bold text-dark">Why Renewable Asset Operators Choose REGENOVA</h2>
+        <p class="text-muted">
+          Engineered to replace rigid, proprietary SCADA silos with a reusable, scientifically validated intelligence framework.
+        </p>
+      </div>
+
+      <div class="row g-4">
+        <!-- Benefit 1 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-primary">
+              <i class="bi bi-diagram-3-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Multi-Technology Dynamic Dispatch</h5>
+            <p class="text-muted small mb-0">
+              Unifies Solar PV (IEC 61724-1 irradiance yield and IGBT thermal models), Wind Turbines (IEC 61400-12-1 barometric air density normalization), Utility BESS (electrochemical setpoint tracking), and Co-located Hybrid POI arbitration under a single interface.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 2 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-success">
+              <i class="bi bi-heart-pulse-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">7-Dimension Asset Health Index (AHI)</h5>
+            <p class="text-muted small mb-0">
+              Continuous multi-criteria health scoring combining thermal degradation (Arrhenius aging), electrical efficiency, mechanical stress, communication uptime, and environmental stress with transparent factor attribution.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 3 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-warning">
+              <i class="bi bi-cpu-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">4-Level Explainable AI (SHAP)</h5>
+            <p class="text-muted small mb-0">
+              Hierarchical anomaly detection: Level 1 physical thresholding, Level 2 CUSUM/EWMA statistical drift, Level 3 Isolation Forest multivariate modeling, and Level 4 physical residual comparison with verified 95.96% precision and 100% recall.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 4 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-purple">
+              <i class="bi bi-sliders"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Closed-Loop Adaptive Intelligence</h5>
+            <p class="text-muted small mb-0">
+              Dynamic climate-adjusted warning thresholds that adapt to seasonal heatwaves while preserving hard emergency trip limits. Built-in 10% HITL guardrail blocks any shift exceeding &plusmn;10% without Chief Engineer authorization.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 5 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-info">
+              <i class="bi bi-building-lock"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Multi-Tenancy & Partition Isolation</h5>
+            <p class="text-muted small mb-0">
+              Enterprise partition isolation enforced across PostgreSQL 18.6 Row Level Security (RLS) and memory layers. Operators and assets from Helios, Aurora, and Solaria are strictly separated with zero cross-tenant leakage.
+            </p>
+          </div>
+        </div>
+
+        <!-- Benefit 6 -->
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card-benefit">
+            <div class="benefit-icon-wrapper bg-icon-indigo">
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">Cryptographic Trust & Governance</h5>
+            <p class="text-muted small mb-0">
+              Every telemetry observation, operator override, parameter adaptation, and maintenance dispatch is sealed into a SHA-256 block hash chain with genesis-to-tip validation for regulatory audit readiness.
+            </p>
           </div>
         </div>
       </div>
+    </div>
+  </section>
 
-      <!-- 6. CMMS & HITL QUEUE TAB -->
-      <div class="tab-pane fade" id="tab-cmms" role="tabpanel" aria-labelledby="cmms-tab">
-        <div class="card card-reamp p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-wrench-adjustable text-primary me-2"></i>CMMS Maintenance Work Orders & HITL Queue</h5>
-              <div class="small text-muted mt-1">Conforms strictly to AC-FR-MAIN-001 (RUL &lt; 120h auto-draft) and AC-FR-XAI-002 (Mandatory human APPROVE request)</div>
-            </div>
-            <span class="badge bg-primary px-3 py-2">Rule 8: Safety Gating</span>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-reamp">
-              <thead>
-                <tr>
-                  <th>Work Order ID</th>
-                  <th>Asset</th>
-                  <th>Priority</th>
-                  <th>Failure Mode / Title</th>
-                  <th>Status</th>
-                  <th>Assigned Tech</th>
-                  <th>Created</th>
-                  <th>HITL Approval Gate</th>
-                </tr>
-              </thead>
-              <tbody id="cmms-tbody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
+  <!-- 4. MULTI-TECHNOLOGY PIPELINE SHOWCASE -->
+  <section class="py-5 bg-white border-top border-bottom" id="technologies">
+    <div class="container py-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+        <div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-2">Heterogeneous Support</span>
+          <h2 class="fw-bold text-dark m-0">Multi-Technology Generation Reference Pipelines</h2>
         </div>
+        <div class="text-muted small">IEC 61724-1 &bull; IEC 61400-12-1 &bull; IEEE 1547-2018</div>
       </div>
 
-      <!-- 7. ADAPTIVE INTELLIGENCE TAB -->
-      <div class="tab-pane fade" id="tab-adaptive" role="tabpanel" aria-labelledby="adaptive-tab">
-        <div class="card card-reamp p-4 mb-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-sliders text-dark me-2"></i>Controlled Adaptive Intelligence & Closed Feedback Loop</h5>
-              <div class="small text-muted mt-1">Dynamic seasonal threshold adaptation and soiling baselines with strict 10% safety interlock</div>
-            </div>
-            <span class="badge bg-dark px-3 py-2">Guardrail: ±10% Gate</span>
-          </div>
+      <!-- Nav Pills for Tech Showcase -->
+      <ul class="nav nav-pills gap-2 mb-4" id="techShowcaseTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link tech-showcase-tab-btn active" id="tab-btn-solar" data-bs-toggle="pill" data-bs-target="#showcase-solar" type="button" role="tab">
+            <i class="bi bi-sun-fill text-warning me-2"></i> Solar PV Inverter
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link tech-showcase-tab-btn" id="tab-btn-wind" data-bs-toggle="pill" data-bs-target="#showcase-wind" type="button" role="tab">
+            <i class="bi bi-wind text-info me-2"></i> Wind Farm Array
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link tech-showcase-tab-btn" id="tab-btn-bess" data-bs-toggle="pill" data-bs-target="#showcase-bess" type="button" role="tab">
+            <i class="bi bi-battery-charging text-primary me-2"></i> Utility BESS
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link tech-showcase-tab-btn" id="tab-btn-hybrid" data-bs-toggle="pill" data-bs-target="#showcase-hybrid" type="button" role="tab">
+            <i class="bi bi-lightning-charge-fill text-success me-2"></i> Co-located Hybrid POI
+          </button>
+        </li>
+      </ul>
 
-          <div class="card bg-light border p-3 mb-4">
-            <h6 class="fw-bold mb-1">Interactive Safety Interlock Test</h6>
-            <p class="small text-muted mb-2">Propose an adaptation to observe autonomous approval vs. mandatory Chief Engineer gating:</p>
-            <div class="d-flex gap-2">
-              <button class="btn btn-warning btn-sm fw-semibold" onclick="proposeAdaptation(-15.0)">
-                <i class="bi bi-shield-exclamation me-1"></i> Propose -15% Shift (Triggers HITL Block)
-              </button>
-              <button class="btn btn-primary btn-sm fw-semibold" onclick="proposeAdaptation(-5.0)">
-                <i class="bi bi-check-circle me-1"></i> Propose -5% Shift (Autonomous Approval)
-              </button>
-            </div>
-            <div class="alert alert-warning mt-3 mb-0 small py-2 d-none" id="adapt-feedback-box"></div>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-reamp">
-              <thead>
-                <tr>
-                  <th>Action ID</th>
-                  <th>Asset</th>
-                  <th>Type</th>
-                  <th>Metric</th>
-                  <th>Shift (%)</th>
-                  <th>HITL Required</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="adaptive-tbody">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 8. CRYPTOGRAPHIC AUDIT TAB -->
-      <div class="tab-pane fade" id="tab-audit" role="tabpanel" aria-labelledby="audit-tab">
-        <div class="card card-reamp p-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-journal-text text-secondary me-2"></i>SHA-256 Tamper-Evident Audit Trail</h5>
-              <div class="small text-muted mt-1">Cryptographic hash chain: <code>Hash_i = SHA256(Hash_{i-1} || Payload)</code></div>
-            </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2" id="audit-chain-status">
-              <i class="bi bi-shield-check me-1"></i> CHAIN VERIFIED: UNTAMPERED
-            </span>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-hover table-reamp font-monospace">
-              <thead>
-                <tr>
-                  <th>Entry ID</th>
-                  <th>Timestamp</th>
-                  <th>Actor ID</th>
-                  <th>Action</th>
-                  <th>Resource</th>
-                  <th>Outcome</th>
-                  <th>SHA-256 Hash</th>
-                </tr>
-              </thead>
-              <tbody id="audit-tbody" class="small">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- 9. ONBOARDING & PROVISIONING TAB -->
-      <div class="tab-pane fade" id="tab-onboard" role="tabpanel" aria-labelledby="onboard-tab">
-        
-        <!-- Header Banner & Quick Stats -->
-        <div class="card card-reamp p-4 mb-4 border-start border-4 border-primary">
-          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Enterprise Provisioning</span>
-                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-shield-lock-fill me-1"></i>HMAC-SHA256 Signed</span>
-              </div>
-              <h4 class="fw-bold text-dark m-0">Asset, Facility & User Onboarding Hub</h4>
-              <div class="text-muted small mt-1">
-                Lifecycle provisioning engine for multi-tenant renewable energy infrastructures. Onboard operator identities with RBAC tokens, provision physical generation devices with edge sensor channels, and register multi-technology plant topologies.
-              </div>
-            </div>
-            <div class="d-flex gap-3 text-center">
-              <div class="bg-light rounded p-2 px-3 border">
-                <div class="small text-muted fw-bold">TOTAL USERS</div>
-                <div class="fs-4 fw-bold text-primary" id="stat-onboard-users">0</div>
-              </div>
-              <div class="bg-light rounded p-2 px-3 border">
-                <div class="small text-muted fw-bold">FACILITIES</div>
-                <div class="fs-4 fw-bold text-success" id="stat-onboard-facilities">0</div>
-              </div>
-              <div class="bg-light rounded p-2 px-3 border">
-                <div class="small text-muted fw-bold">DEVICES</div>
-                <div class="fs-4 fw-bold text-info" id="stat-onboard-devices">0</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3 Provisioning Forms in Grid -->
-        <div class="row g-4 mb-4">
-          
-          <!-- Form 1: User Onboarding -->
-          <div class="col-12 col-lg-4">
-            <div class="card card-reamp h-100 p-4">
-              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                <div class="p-2 rounded bg-primary-subtle text-primary">
-                  <i class="bi bi-person-badge fs-5"></i>
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark m-0">User & Operator Onboarding</h6>
-                  <div class="small text-muted">RBAC Role & HMAC Token Issuance</div>
-                </div>
-              </div>
-
-              <form id="form-onboard-user">
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Full Name</label>
-                  <input type="text" class="form-control form-control-sm" id="user-name" placeholder="e.g. Dr. Aisha Al-Mansoor" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Email Address</label>
-                  <input type="email" class="form-control form-control-sm" id="user-email" placeholder="e.g. aisha@helios.energy" required>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Assigned Role (RBAC)</label>
-                  <select class="form-select form-select-sm" id="user-role" required>
-                    <option value="OPERATOR" selected>Operator (Monitor & Dispatch WOs)</option>
-                    <option value="CHIEF_ENGINEER">Chief Engineer (Full HITL Approvals)</option>
-                    <option value="SECURITY_ADMIN">Security Admin (Audit & Config)</option>
-                    <option value="VIEWER">Viewer (Read-Only Telemetry)</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Tenant Organization</label>
-                  <select class="form-select form-select-sm" id="user-tenant" required>
-                    <option value="ORG-HELIOS-GLOBAL" selected>ORG-HELIOS-GLOBAL (Helios Global Renewables)</option>
-                    <option value="ORG-AURORA-NORDIC">ORG-AURORA-NORDIC (Aurora Nordic Clean Energy)</option>
-                    <option value="ORG-SOLARIA-ESP">ORG-SOLARIA-ESP (Solaria Iberia Energia)</option>
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">
-                  <i class="bi bi-person-plus-fill me-1"></i> Provision User & Issue Token
+      <div class="tab-content" id="techShowcaseContent">
+        <!-- 1. Solar PV -->
+        <div class="tab-pane fade show active" id="showcase-solar" role="tabpanel">
+          <div class="card card-reamp p-4">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-6">
+                <span class="badge bg-warning-subtle text-dark border border-warning-subtle mb-2">Photovoltaic Generation</span>
+                <h4 class="fw-bold text-dark">IEC 61724-1 Standardized Photovoltaic Modeling</h4>
+                <p class="text-muted small">
+                  Models DC-to-AC conversion efficiency, thermal clipping derating, and pyranometer plane-of-array (POA) irradiance response.
+                </p>
+                <ul class="list-unstyled small d-flex flex-column gap-2 mb-4 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Thermal Clipping:</strong> Derates power output above 50.0 °C heatsink temperature.</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Arrhenius Aging:</strong> Tracks thermal activation energy ($E_a = 0.45\text{ eV}$) across IGBT modules.</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Soiling Baseline Adaptation:</strong> Rolling 14-day exponential smoothing with automatic cleaning advisory.</li>
+                </ul>
+                <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="openLoginModalWithTenant('ORG-HELIOS-GLOBAL')">
+                  <i class="bi bi-speedometer2 me-1"></i> View Helios Mojave Solar (100 MW)
                 </button>
-              </form>
-              <div id="user-onboard-alert" class="mt-3 small d-none"></div>
-            </div>
-          </div>
-
-          <!-- Form 2: Facility Onboarding -->
-          <div class="col-12 col-lg-4">
-            <div class="card card-reamp h-100 p-4">
-              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                <div class="p-2 rounded bg-success-subtle text-success">
-                  <i class="bi bi-building-add fs-5"></i>
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark m-0">Facility (Site) Onboarding</h6>
-                  <div class="small text-muted">Plant Topology & Technology Registration</div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="bg-light p-3 rounded border font-monospace small">
+                  <div class="text-primary fw-bold mb-2">// IEC 61724-1 Physical Power Model</div>
+                  <div>P_expected = P_rated &times; (G_poa / 1000) &times; [1 + &gamma; &times; (T_cell - 25)]</div>
+                  <div class="mt-2 text-muted">// Arrhenius Reaction Derating</div>
+                  <div>k(T) = A &times; exp(-E_a / (k_B &times; T_kelvin))</div>
+                  <div class="mt-2 text-success">// Verified Test Residual Threshold: &plusmn;5.0%</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <form id="form-onboard-facility">
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Facility Name</label>
-                  <input type="text" class="form-control form-control-sm" id="facility-name" placeholder="e.g. Atacama Solar Park III" required>
+        <!-- 2. Wind Farm -->
+        <div class="tab-pane fade" id="showcase-wind" role="tabpanel">
+          <div class="card card-reamp p-4">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-6">
+                <span class="badge bg-info-subtle text-info border border-info-subtle mb-2">Aerodynamic Energy</span>
+                <h4 class="fw-bold text-dark">IEC 61400-12-1 Power Curve Normalization</h4>
+                <p class="text-muted small">
+                  Normalizes site-specific barometric air density against standard atmosphere ($\rho_0 = 1.225\text{ kg/m}^3$) with gearbox bearing thermal tracking.
+                </p>
+                <ul class="list-unstyled small d-flex flex-column gap-2 mb-4 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-info me-2"></i><strong>Density Correction:</strong> Continuous normalization using barometric pressure and nacelle ambient temperature.</li>
+                  <li><i class="bi bi-check-circle-fill text-info me-2"></i><strong>Gearbox Vibration Monitoring:</strong> Detects bearing misalignment and lubrication breakdown.</li>
+                  <li><i class="bi bi-check-circle-fill text-info me-2"></i><strong>Yaw Misalignment Tracking:</strong> Identifies cosine aerodynamic capture losses.</li>
+                </ul>
+                <button class="btn btn-sm btn-outline-info fw-semibold" onclick="openLoginModalWithTenant('ORG-AURORA-NORDIC')">
+                  <i class="bi bi-speedometer2 me-1"></i> View Aurora Fjord Wind (100 MW)
+                </button>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="bg-light p-3 rounded border font-monospace small">
+                  <div class="text-info fw-bold mb-2">// IEC 61400-12-1 Air Density Normalization</div>
+                  <div>v_norm = v_measured &times; (&rho;_site / 1.225)^(1/3)</div>
+                  <div class="mt-2 text-muted">// Barometric Density Formulation</div>
+                  <div>&rho;_site = P_barometric / (R_specific &times; T_kelvin)</div>
+                  <div class="mt-2 text-success">// Pitch Angle & Cut-Out Safety Envelope: 25.0 m/s</div>
                 </div>
-                <div class="row g-2 mb-3">
-                  <div class="col-7">
-                    <label class="form-label small fw-semibold text-dark">Site ID Code</label>
-                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="facility-id" placeholder="SITE-ATACAMA-03" required>
-                  </div>
-                  <div class="col-5">
-                    <label class="form-label small fw-semibold text-dark">Capacity (MW)</label>
-                    <input type="number" step="0.1" min="0.1" class="form-control form-control-sm" id="facility-capacity" placeholder="120.0" required>
-                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. BESS -->
+        <div class="tab-pane fade" id="showcase-bess" role="tabpanel">
+          <div class="card card-reamp p-4">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-6">
+                <span class="badge bg-purple text-white px-2 py-1 mb-2" style="background-color: var(--reamp-purple);">Electrochemical Storage</span>
+                <h4 class="fw-bold text-dark">Utility BESS Enclosure & Cycle Degradation</h4>
+                <p class="text-muted small">
+                  Models charge/discharge setpoints, state-of-charge boundaries (5% &le; SoC &le; 95%), and active thermal throttling.
+                </p>
+                <ul class="list-unstyled small d-flex flex-column gap-2 mb-4 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-purple me-2"></i><strong>Round-Trip Efficiency:</strong> Tracks coulombic efficiency losses across lithium iron phosphate racks.</li>
+                  <li><i class="bi bi-check-circle-fill text-purple me-2"></i><strong>BMS Thermal Throttling:</strong> Initiates operational derating if cell temperatures exceed 40.0 °C.</li>
+                  <li><i class="bi bi-check-circle-fill text-purple me-2"></i><strong>Peak Shaving Integration:</strong> Automatic discharge orchestration during high PPA revenue events.</li>
+                </ul>
+                <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="openLoginModalWithTenant('ORG-AURORA-NORDIC')">
+                  <i class="bi bi-speedometer2 me-1"></i> View Arctic Sub-Zero BESS (60 MW)
+                </button>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="bg-light p-3 rounded border font-monospace small">
+                  <div class="text-purple fw-bold mb-2">// Electrochemical Boundaries</div>
+                  <div>5.0% &le; SoC(t) &le; 95.0% (Cell Protection Window)</div>
+                  <div class="mt-2 text-muted">// State of Charge Integration</div>
+                  <div>SoC(t) = SoC(0) + &int; [ &eta;_c &times; I(t) / C_rated ] dt</div>
+                  <div class="mt-2 text-success">// C-Rate Maximum: 1.0C Charge / 1.5C Discharge</div>
                 </div>
-                <div class="mb-3">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Hybrid POI -->
+        <div class="tab-pane fade" id="showcase-hybrid" role="tabpanel">
+          <div class="card card-reamp p-4">
+            <div class="row align-items-center g-4">
+              <div class="col-12 col-lg-6">
+                <span class="badge bg-success-subtle text-success border border-success-subtle mb-2">Co-located Plant</span>
+                <h4 class="fw-bold text-dark">Co-located Hybrid Power Plant Arbitration</h4>
+                <p class="text-muted small">
+                  Dynamic arbitration orchestrating Solar PV, Wind Turbine, and BESS capacity behind a shared Point of Interconnection (POI).
+                </p>
+                <ul class="list-unstyled small d-flex flex-column gap-2 mb-4 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Curtailment Segregation:</strong> Distinguishes utility curtailment commands from physical asset failures.</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>BESS Ramp Smoothing:</strong> Absorbs wind gusts and cloud shadow transients to maintain grid compliance.</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i><strong>IEEE 1547 Interconnection:</strong> Automated voltage ride-through and frequency stabilization.</li>
+                </ul>
+                <button class="btn btn-sm btn-outline-success fw-semibold" onclick="openLoginModalWithTenant('ORG-HELIOS-GLOBAL')">
+                  <i class="bi bi-speedometer2 me-1"></i> View Desert Hybrid Center (100 MW)
+                </button>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="bg-light p-3 rounded border font-monospace small">
+                  <div class="text-success fw-bold mb-2">// Interconnection Point Arbitration</div>
+                  <div>P_poi(t) = P_solar(t) + P_wind(t) &plusmn; P_bess(t) &le; P_interconnection_limit</div>
+                  <div class="mt-2 text-muted">// Ramp Rate Regulation</div>
+                  <div>|dP_poi / dt| &le; R_grid_code (Max 10% rated / min)</div>
+                  <div class="mt-2 text-primary">// Curtailment Reason Tag: UTILITY_CURTAILMENT</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ARCHITECTURAL & RESEARCH INNOVATIONS -->
+  <section class="py-5" id="architecture">
+    <div class="container py-4">
+      <div class="text-center max-w-700 mx-auto mb-5">
+        <span class="badge bg-purple text-white px-3 py-1 mb-2" style="background-color: var(--reamp-purple);">Autonomous Intelligence</span>
+        <h2 class="fw-bold text-dark">The 8-Stage Closed Feedback Loop</h2>
+        <p class="text-muted">
+          From high-frequency sensor ingestion to Human-in-the-Loop decision verification with verified state persistence.
+        </p>
+      </div>
+
+      <!-- 8-Stage Loop Horizontal Ribbon -->
+      <div class="row g-2 text-center font-monospace mb-5">
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-primary mb-2">Stage 1</span>
+            <div class="fw-bold text-dark">Observe</div>
+            <div class="small text-muted mt-1">1 Hz Telemetry</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-info mb-2">Stage 2</span>
+            <div class="fw-bold text-dark">Validate</div>
+            <div class="small text-muted mt-1">DQ Checks</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-success mb-2">Stage 3</span>
+            <div class="fw-bold text-dark">Assess</div>
+            <div class="small text-muted mt-1">7-Dim AHI</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-warning mb-2">Stage 4</span>
+            <div class="fw-bold text-dark">Detect</div>
+            <div class="small text-muted mt-1">4-Level AI</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-danger mb-2">Stage 5</span>
+            <div class="fw-bold text-dark">Predict</div>
+            <div class="small text-muted mt-1">RUL Horizon</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-purple text-white mb-2" style="background-color: var(--reamp-purple);">Stage 6</span>
+            <div class="fw-bold text-dark">Decide</div>
+            <div class="small text-muted mt-1">HITL Guardrail</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-secondary mb-2">Stage 7</span>
+            <div class="fw-bold text-dark">Act</div>
+            <div class="small text-muted mt-1">Adapt Baselines</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 col-xl">
+          <div class="p-3 bg-white border rounded shadow-sm h-100">
+            <span class="badge bg-dark mb-2">Stage 8</span>
+            <div class="fw-bold text-dark">Observe Again</div>
+            <div class="small text-muted mt-1">SHA-256 Seal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. INTERACTIVE PRE-ENROLMENT SECTION -->
+  <section class="section-pre-enrol" id="pre-enrol">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-12 col-lg-5">
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 mb-2">Enterprise Onboarding</span>
+          <h2 class="fw-bold text-dark">Pre-Enrol Your Generation Portfolio</h2>
+          <p class="text-muted">
+            Register your renewable energy enterprise, utility cooperative, or independent power plant (IPP) into REGENOVA's multi-tenant framework.
+          </p>
+          <div class="d-flex flex-column gap-3 my-4">
+            <div class="d-flex align-items-start gap-3">
+              <div class="p-2 rounded bg-success-subtle text-success fs-5">
+                <i class="bi bi-shield-check"></i>
+              </div>
+              <div>
+                <strong class="text-dark">Dedicated Tenant Partition</strong>
+                <div class="small text-muted">Complete Row Level Security (RLS) isolation. Zero cross-tenant data leakage guaranteed.</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="p-2 rounded bg-primary-subtle text-primary fs-5">
+                <i class="bi bi-key-fill"></i>
+              </div>
+              <div>
+                <strong class="text-dark">Instant HMAC-SHA256 Token Issuance</strong>
+                <div class="small text-muted">Receive cryptographically signed credentials for edge sensors and operator accounts.</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-start gap-3">
+              <div class="p-2 rounded bg-info-subtle text-info fs-5">
+                <i class="bi bi-database-check"></i>
+              </div>
+              <div>
+                <strong class="text-dark">Immediate PostgreSQL 18.6 Persistence</strong>
+                <div class="small text-muted">Records synchronize to the canonical schema on db.regenova.cloud in real time.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-7">
+          <div class="card-enrol-form">
+            <h5 class="fw-bold text-dark mb-1"><i class="bi bi-building-add text-primary me-2"></i>Organization Pre-Enrolment Application</h5>
+            <div class="text-muted small mb-4">Complete this form to instantiate your utility partition immediately.</div>
+
+            <div id="pre-enroll-alert" class="d-none"></div>
+
+            <form id="form-home-pre-enroll">
+              <div class="row g-3">
+                <div class="col-12 col-sm-6">
+                  <label class="form-label small fw-semibold text-dark">Tenant ID Code</label>
+                  <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="enrol-tenant-id" placeholder="ORG-NORDIC-WIND" required>
+                  <div class="form-text" style="font-size: 0.7rem;">Unique prefix for your enterprise partition</div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <label class="form-label small fw-semibold text-dark">Short Code</label>
+                  <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="enrol-short-code" placeholder="NORDIC" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-semibold text-dark">Organization Name</label>
+                  <input type="text" class="form-control form-control-sm" id="enrol-org-name" placeholder="Nordic Clean Power Utility Group" required>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <label class="form-label small fw-semibold text-dark">Billing Tier</label>
+                  <select class="form-select form-select-sm" id="enrol-billing-tier" required>
+                    <option value="ENTERPRISE_TIER_1" selected>Enterprise Tier 1 (Unlimited MW)</option>
+                    <option value="ENTERPRISE_TIER_2">Enterprise Tier 2 (Up to 500 MW)</option>
+                    <option value="UTILITY_COMMUNITY">Community Utility (Up to 100 MW)</option>
+                    <option value="PILOT_TRIAL">Research & Pilot Trial</option>
+                  </select>
+                </div>
+                <div class="col-12 col-sm-6">
                   <label class="form-label small fw-semibold text-dark">Primary Technology</label>
-                  <select class="form-select form-select-sm" id="facility-tech" required>
-                    <option value="SOLAR_PV" selected>Solar PV (Photovoltaic)</option>
-                    <option value="WIND">Wind Farm Array</option>
+                  <select class="form-select form-select-sm" id="enrol-tech">
+                    <option value="SOLAR_PV">Solar PV Inverter Parks</option>
+                    <option value="WIND" selected>Wind Turbine Arrays</option>
                     <option value="BESS">Battery Energy Storage (BESS)</option>
                     <option value="HYBRID">Multi-Resource Hybrid Plant</option>
                   </select>
                 </div>
-                <div class="row g-2 mb-3">
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Latitude (°)</label>
-                    <input type="number" step="0.0001" class="form-control form-control-sm" id="facility-lat" placeholder="-23.863" required>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Longitude (°)</label>
-                    <input type="number" step="0.0001" class="form-control form-control-sm" id="facility-lng" placeholder="-69.132" required>
-                  </div>
+                <div class="col-12 col-sm-6">
+                  <label class="form-label small fw-semibold text-dark">Primary Administrator Name</label>
+                  <input type="text" class="form-control form-control-sm" id="enrol-admin-name" placeholder="Astrid Lindholm" required>
                 </div>
-                <button type="submit" class="btn btn-sm btn-success w-100 mt-2">
-                  <i class="bi bi-building-check me-1"></i> Register Generation Facility
+                <div class="col-12 col-sm-6">
+                  <label class="form-label small fw-semibold text-dark">Administrator Email Address</label>
+                  <input type="email" class="form-control form-control-sm" id="enrol-admin-email" placeholder="astrid@nordicpower.se" required>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-2 border-top d-flex justify-content-between align-items-center">
+                <span class="small text-muted"><i class="bi bi-shield-lock me-1"></i>Instant Provisioning</span>
+                <button type="submit" class="btn btn-primary fw-semibold px-4 py-2" id="btn-submit-pre-enroll">
+                  <i class="bi bi-shield-check me-1"></i> Enrol Organization & Issue Token
                 </button>
-              </form>
-              <div id="facility-onboard-alert" class="mt-3 small d-none"></div>
-            </div>
-          </div>
-
-          <!-- Form 3: Device Onboarding -->
-          <div class="col-12 col-lg-4">
-            <div class="card card-reamp h-100 p-4">
-              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
-                <div class="p-2 rounded bg-info-subtle text-info">
-                  <i class="bi bi-cpu-fill fs-5"></i>
-                </div>
-                <div>
-                  <h6 class="fw-bold text-dark m-0">Device & Sensor Provisioning</h6>
-                  <div class="small text-muted">Edge Secrets, Sensors & Digital Twin</div>
-                </div>
               </div>
-
-              <form id="form-onboard-device">
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Device Name</label>
-                  <input type="text" class="form-control form-control-sm" id="device-name" placeholder="e.g. Central Inverter 04" required>
-                </div>
-                <div class="row g-2 mb-3">
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Device Asset ID</label>
-                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="device-id" placeholder="INV-CENTRAL-04" required>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Parent Facility</label>
-                    <select class="form-select form-select-sm" id="device-facility" required>
-                      <!-- Dynamically populated from active facilities -->
-                    </select>
-                  </div>
-                </div>
-                <div class="row g-2 mb-3">
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Asset Type</label>
-                    <select class="form-select form-select-sm" id="device-type" required>
-                      <option value="INVERTER" selected>Inverter</option>
-                      <option value="WIND_TURBINE">Wind Turbine</option>
-                      <option value="BESS_CONTAINER">BESS Enclosure</option>
-                      <option value="WEATHER_STATION">Weather Met Station</option>
-                    </select>
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Rated Power (kW)</label>
-                    <input type="number" step="1" min="1" class="form-control form-control-sm" id="device-power" placeholder="2500" required>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Equipment Model</label>
-                  <input type="text" class="form-control form-control-sm" id="device-model" placeholder="e.g. Sungrow SG3125HV" required>
-                </div>
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" role="switch" id="device-twin" checked>
-                  <label class="form-check-label small text-dark" for="device-twin">Auto-provision Digital Twin & Telemetry Sensors</label>
-                </div>
-                <button type="submit" class="btn btn-sm btn-info text-white w-100 mt-2">
-                  <i class="bi bi-cpu me-1"></i> Provision Device & Sensors
-                </button>
-              </form>
-              <div id="device-onboard-alert" class="mt-3 small d-none"></div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Directory Tables for Provisioned Entities -->
-        <div class="card card-reamp p-4">
-          <ul class="nav nav-pills mb-3" id="onboardDirectoryTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-              <button class="nav-link active btn-sm" id="pill-users-tab" data-bs-toggle="pill" data-bs-target="#pill-users" type="button" role="tab">
-                <i class="bi bi-people-fill me-1"></i> Registered Platform Users (<span id="count-pill-users">0</span>)
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link btn-sm" id="pill-facilities-tab" data-bs-toggle="pill" data-bs-target="#pill-facilities" type="button" role="tab">
-                <i class="bi bi-building me-1"></i> Facilities & Sites (<span id="count-pill-facilities">0</span>)
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
-              <button class="nav-link btn-sm" id="pill-devices-tab" data-bs-toggle="pill" data-bs-target="#pill-devices" type="button" role="tab">
-                <i class="bi bi-cpu me-1"></i> Devices & Physical Assets (<span id="count-pill-devices">0</span>)
-              </button>
-            </li>
-          </ul>
-
-          <div class="tab-content" id="onboardDirectoryContent">
-            
-            <!-- Users Directory & Management Table -->
-            <div class="tab-pane fade show active" id="pill-users" role="tabpanel">
-              <!-- Filtering & Control Bar -->
-              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 bg-light p-2 rounded border">
-                <div class="d-flex align-items-center gap-2">
-                  <span class="small fw-semibold text-secondary"><i class="bi bi-funnel me-1"></i>Filter Tenant:</span>
-                  <select class="form-select form-select-sm" id="filter-user-tenant" style="width: auto;" onchange="filterAndRenderUsers()">
-                    <option value="ALL">All Tenants</option>
-                    <option value="ORG-HELIOS-GLOBAL">Helios Global Renewables</option>
-                    <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy</option>
-                    <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia</option>
-                  </select>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="text" class="form-control form-control-sm" id="filter-user-search" placeholder="Search user by name or email..." oninput="filterAndRenderUsers()" style="width: 240px;">
-                  <button class="btn btn-sm btn-outline-secondary" onclick="fetchUsers()" title="Refresh Users">
-                    <i class="bi bi-arrow-clockwise"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="table-responsive">
-                <table class="table table-hover table-reamp align-middle">
-                  <thead>
-                    <tr>
-                      <th>User ID</th>
-                      <th>Name & Email</th>
-                      <th>Tenant Org</th>
-                      <th>RBAC Role</th>
-                      <th>Status</th>
-                      <th>Security Token</th>
-                      <th>Permissions</th>
-                      <th class="text-end">User Management Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="directory-users-tbody">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Facilities Directory Table -->
-            <div class="tab-pane fade" id="pill-facilities" role="tabpanel">
-              <div class="table-responsive">
-                <table class="table table-hover table-reamp">
-                  <thead>
-                    <tr>
-                      <th>Facility ID</th>
-                      <th>Facility Name</th>
-                      <th>Technology</th>
-                      <th>Rated Capacity (MW)</th>
-                      <th>Coordinates</th>
-                      <th>Assets Count</th>
-                      <th>Active Generation</th>
-                    </tr>
-                  </thead>
-                  <tbody id="directory-facilities-tbody">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Devices Directory Table -->
-            <div class="tab-pane fade" id="pill-devices" role="tabpanel">
-              <div class="table-responsive">
-                <table class="table table-hover table-reamp">
-                  <thead>
-                    <tr>
-                      <th>Asset ID</th>
-                      <th>Device Name</th>
-                      <th>Parent Site</th>
-                      <th>Asset Type</th>
-                      <th>Model</th>
-                      <th>Rated Power (kW)</th>
-                      <th>Status</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="directory-devices-tbody">
-                    <!-- Populated dynamically -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
+            </form>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- 10. DATABASE & POSTGRESQL TAB -->
-        <div class="tab-pane fade" id="tab-database" role="tabpanel" aria-labelledby="database-tab">
-          <div class="d-flex justify-content-between align-items-center mb-3">
+  <!-- 7. OPERATOR LOGIN & PORTAL ACCESS MODAL -->
+  <div class="modal fade" id="modalPortalLogin" tabindex="-1" aria-labelledby="modalPortalLoginLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light border-bottom">
+          <div class="d-flex align-items-center gap-2">
+            <div class="brand-icon-home" style="width: 32px; height: 32px; font-size: 1rem;">
+              <i class="bi bi-lightning-charge-fill"></i>
+            </div>
             <div>
-              <h5 class="fw-bold text-dark m-0"><i class="bi bi-database text-primary me-2"></i>PostgreSQL Relational & TimescaleDB Domain Storage</h5>
-              <div class="small text-muted mt-1">Multi-tenant persistence, entity registries, time-series observations, and cryptographic hash ledger</div>
-            </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-              <i class="bi bi-check-circle-fill me-1"></i> PostgreSQL 18.6 Live Connected
-            </span>
-          </div>
-
-          <!-- KPI Metrics Row -->
-          <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Database Engine</div>
-                <div class="stat-kpi-val text-primary" style="font-size: 1.4rem;">PostgreSQL</div>
-                <div class="small text-muted mt-2">Version: <span id="db-val-version" class="fw-semibold text-dark">18.6</span></div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Host & Port</div>
-                <div class="stat-kpi-val text-dark font-monospace" style="font-size: 1.2rem;" id="db-val-host">db.regenova.cloud:5432</div>
-                <div class="small text-muted mt-2">Loopback / Oracle Cloud</div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Database Name</div>
-                <div class="stat-kpi-val text-success font-monospace" style="font-size: 1.35rem;" id="db-val-name">regenova_db</div>
-                <div class="small text-muted mt-2">Owner: <span id="db-val-user" class="fw-semibold text-dark">regenova_db</span></div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Canonical Tables</div>
-                <div class="stat-kpi-val text-info" id="db-val-tables">21 Tables</div>
-                <div class="small text-muted mt-2">Public Schema Loaded</div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Multi-Tenancy</div>
-                <div class="stat-kpi-val text-success" style="font-size: 1.3rem;">RLS Active</div>
-                <div class="small text-muted mt-2">reamp.current_tenant_id</div>
-              </div>
-            </div>
-            <div class="col-12 col-sm-6 col-xl-2">
-              <div class="card card-reamp h-100 p-3">
-                <div class="stat-kpi-label mb-1">Python Driver</div>
-                <div class="stat-kpi-val text-primary" style="font-size: 1.35rem;" id="db-val-driver">psycopg2</div>
-                <div class="small text-muted mt-2">Thread-safe Connector</div>
-              </div>
+              <h5 class="modal-title fw-bold text-dark fs-6" id="modalPortalLoginLabel">Operations Portal Access</h5>
+              <div class="small text-muted">Select your enterprise tenant partition</div>
             </div>
           </div>
-
-          <!-- Database Schema Tables Directory -->
-          <div class="row g-4">
-            <div class="col-12 col-lg-8">
-              <div class="card card-reamp p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h6 class="fw-bold text-dark m-0"><i class="bi bi-table me-2 text-primary"></i>Canonical Database Tables (21 Entities)</h6>
-                  <span class="badge bg-light text-secondary border">001_initial_reamp_schema.sql</span>
-                </div>
-                <div class="table-responsive">
-                  <table class="table table-hover table-reamp">
-                    <thead>
-                      <tr>
-                        <th>Table Name</th>
-                        <th>Category</th>
-                        <th>Multi-Tenancy (RLS)</th>
-                        <th>Primary Key</th>
-                        <th>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr><td><code>organisations</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Corporate tenant root & billing metadata</td></tr>
-                      <tr><td><code>portfolios</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Regional generation portfolios & targets</td></tr>
-                      <tr><td><code>sites</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Geospatial generation facilities & coords</td></tr>
-                      <tr><td><code>energy_systems</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Multi-tech topologies (Solar, Wind, BESS)</td></tr>
-                      <tr><td><code>assets</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Physical equipment, nacelles, inverters</td></tr>
-                      <tr><td><code>components</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Subsystems, IGBTs, gearboxes, cells</td></tr>
-                      <tr><td><code>sensors</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Telemetry channels (Modbus, OPC-UA, MQTT)</td></tr>
-                      <tr><td><code>telemetry_observations</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>(timestamp, tenant, asset, metric)</code></td><td>Partitioned hypertable observations</td></tr>
-                      <tr><td><code>weather_observations</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Met station irradiance, wind, ambient</td></tr>
-                      <tr><td><code>generation_forecasts</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Day-ahead & hour-ahead yield forecasts</td></tr>
-                      <tr><td><code>alarms</code></td><td><span class="badge bg-warning text-dark">Intelligence</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Critical alarms & acknowledge states</td></tr>
-                      <tr><td><code>anomalies</code></td><td><span class="badge bg-warning text-dark">Intelligence</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>CUSUM, EWMA, IsoForest detections & SHAP</td></tr>
-                      <tr><td><code>work_orders</code></td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>CMMS work orders & HITL approval status</td></tr>
-                      <tr><td><code>maintenance_logs</code></td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Field technician corrective/preventive logs</td></tr>
-                      <tr><td><code>performance_metrics</code></td><td><span class="badge bg-success">Yield</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>IEC 61724-1 PR, degradation rates</td></tr>
-                      <tr><td><code>health_scores</code></td><td><span class="badge bg-success">Yield</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>7-dimension deterministic health scores</td></tr>
-                      <tr><td><code>financial_records</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>PPA revenue losses, curtailment costs</td></tr>
-                      <tr><td><code>users</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Enterprise RBAC users, HMAC tokens</td></tr>
-                      <tr><td><code>audit_logs</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Relational audit events & state changes</td></tr>
-                      <tr><td><code>events</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>SCADA grid events & operational transitions</td></tr>
-                      <tr><td><code>audit_chain_blocks</code></td><td><span class="badge bg-dark">Blockchain</span></td><td><span class="badge bg-info-subtle text-info border">GLOBAL</span></td><td><code>entry_id (VARCHAR)</code></td><td>SHA-256 tamper-evident hash ledger blocks</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-lg-4">
-              <div class="card card-reamp p-4 mb-4">
-                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-lock me-2 text-success"></i>Row Level Security (RLS)</h6>
-                <p class="small text-muted">Corporate multi-tenant isolation is hardware and database-enforced directly within the PostgreSQL engine:</p>
-                <div class="bg-light p-3 rounded-3 font-monospace small border mb-3">
-                  <div>SET LOCAL reamp.current_tenant_id = 'uuid';</div>
-                  <div class="text-success mt-1">// Enforced across all 20 domain tables</div>
-                </div>
-                <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
-                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Zero cross-tenant data leakage (NFR-SEC-002)</li>
-                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Non-bypassable at application layer</li>
-                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>TimescaleDB hypertable partition isolation</li>
-                </ul>
-              </div>
-
-              <div class="card card-reamp p-4">
-                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-activity me-2 text-primary"></i>Resilience & Recovery</h6>
-                <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
-                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Graceful fallback to SQLite / In-Memory (NFR-RES-001)</li>
-                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Store-and-forward edge buffering on WAN disconnect</li>
-                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>RTO &le; 30s streaming replication ready</li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
-      </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="reamp-footer">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <div>
-          <strong class="text-dark">REGENOVA</strong> - Renewable Energy Asset Intelligence & Management Framework
-          <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
-        </div>
-        <div class="font-monospace small">
-          API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold">ORG-HELIOS-GLOBAL</span>
-        </div>
-      </div>
-    </footer>
-
-  </div>
-</div>
-
-<!-- Tenant Enrolment Modal -->
-<div class="modal fade" id="modalEnrollTenant" tabindex="-1" aria-labelledby="modalEnrollTenantLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-light border-bottom">
-        <div class="d-flex align-items-center gap-2">
-          <div class="p-2 rounded bg-primary-subtle text-primary">
-            <i class="bi bi-building-plus fs-5"></i>
-          </div>
-          <div>
-            <h5 class="modal-title fw-bold text-dark fs-6" id="modalEnrollTenantLabel">Enrol Tenant Organization</h5>
-            <div class="small text-muted">Register an isolated enterprise tenant partition</div>
-          </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="form-enroll-tenant">
         <div class="modal-body p-4">
-          <div id="tenant-enroll-alert" class="alert alert-danger small d-none mb-3"></div>
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Tenant ID Code</label>
-            <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="tenant-org-id" placeholder="ORG-PACIFIC-GREEN" required>
-            <div class="form-text" style="font-size: 0.72rem;">Unique tenant identifier code prefix</div>
+            <label class="form-label small fw-semibold text-dark">Active Tenant Partition</label>
+            <select class="form-select" id="login-tenant-select">
+              <option value="ORG-HELIOS-GLOBAL" selected>Helios Global Renewables (ORG-HELIOS-GLOBAL)</option>
+              <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy (ORG-AURORA-NORDIC)</option>
+              <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia (ORG-SOLARIA-ESP)</option>
+            </select>
           </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Organization Name</label>
-            <input type="text" class="form-control form-control-sm" id="tenant-org-name" placeholder="Pacific Green Power Co." required>
-          </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-dark">Short Code</label>
-              <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="tenant-org-code" placeholder="PACIFIC" required>
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-dark">Billing Tier</label>
-              <select class="form-select form-select-sm" id="tenant-billing-tier" required>
-                <option value="ENTERPRISE_TIER_1" selected>Enterprise Tier 1</option>
-                <option value="ENTERPRISE_TIER_2">Enterprise Tier 2</option>
-                <option value="COMMUNITY_UTILITY">Community Utility</option>
-                <option value="PILOT_TRIAL">Pilot Trial</option>
-              </select>
-            </div>
-          </div>
-          <div class="border-top pt-3 mt-3">
-            <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-person-badge-fill text-primary me-1"></i>Primary Administrator</h6>
-            <div class="row g-2">
-              <div class="col-6">
-                <label class="form-label small fw-semibold text-dark">Admin Name</label>
-                <input type="text" class="form-control form-control-sm" id="tenant-admin-name" placeholder="Marcus Vance" required>
+
+          <div class="small text-muted fw-semibold mb-2">Or select a pre-seeded evaluation tenant:</div>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <div class="demo-tenant-tile selected" onclick="selectDemoTenant('ORG-HELIOS-GLOBAL', this)">
+              <div class="d-flex justify-content-between align-items-center">
+                <strong class="text-dark small">Helios Global Renewables</strong>
+                <span class="badge bg-primary-subtle text-primary">300 MW Portfolio</span>
               </div>
-              <div class="col-6">
-                <label class="form-label small fw-semibold text-dark">Admin Email</label>
-                <input type="email" class="form-control form-control-sm" id="tenant-admin-email" placeholder="marcus@pacificgreen.energy" required>
-              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Chief Engineer: Dr. Elena Rostova &bull; Mojave, North Sea, West BESS, Desert Hybrid</div>
             </div>
+
+            <div class="demo-tenant-tile" onclick="selectDemoTenant('ORG-AURORA-NORDIC', this)">
+              <div class="d-flex justify-content-between align-items-center">
+                <strong class="text-dark small">Aurora Nordic Clean Energy</strong>
+                <span class="badge bg-info-subtle text-info">160 MW Portfolio</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Site Lead: Astrid Lindholm &bull; Fjord Wind Park & Arctic Sub-Zero BESS</div>
+            </div>
+
+            <div class="demo-tenant-tile" onclick="selectDemoTenant('ORG-SOLARIA-ESP', this)">
+              <div class="d-flex justify-content-between align-items-center">
+                <strong class="text-dark small">Solaria Iberia Energia</strong>
+                <span class="badge bg-warning-subtle text-dark">80 MW Portfolio</span>
+              </div>
+              <div class="text-muted" style="font-size: 0.72rem;">Operations Mgr: Carlos Morales &bull; Andalusia Solar Generation Hub</div>
+            </div>
+          </div>
+
+          <div class="bg-light p-2 rounded border small text-muted">
+            <i class="bi bi-shield-check text-success me-1"></i>Session context will be preserved in portal with strict partition isolation.
           </div>
         </div>
-        <div class="modal-footer bg-light border-top py-2 px-4">
-          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-sm btn-primary fw-semibold" id="btn-submit-enroll-tenant">
-            <i class="bi bi-shield-check me-1"></i> Enrol Organization
+        <div class="modal-footer bg-light border-top py-2 px-4 d-flex justify-content-between">
+          <a href="#pre-enrol" class="btn btn-sm btn-link text-decoration-none" data-bs-dismiss="modal">Need a new tenant? Pre-enrol</a>
+          <button type="button" class="btn btn-primary fw-semibold" id="btn-enter-portal">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Enter Operations Portal
           </button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Bootstrap 5.3.3 Bundle JS -->
-<script src="vendor/bootstrap.bundle.min.js"></script>
-<!-- Client Application Logic -->
-<script src="app.js"></script>
+  <!-- 8. FOOTER -->
+  <footer class="home-footer">
+    <div class="container">
+      <div class="row g-4 pb-4 border-bottom">
+        <div class="col-12 col-md-5">
+          <div class="d-flex align-items-center mb-2">
+            <div class="brand-icon-home" style="width: 30px; height: 30px; font-size: 0.95rem;">
+              <i class="bi bi-lightning-charge-fill"></i>
+            </div>
+            <span class="fs-5 fw-bold text-dark">REGENOVA</span>
+          </div>
+          <p class="small text-muted mb-2">
+            Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.
+          </p>
+          <div class="font-monospace small text-secondary">
+            ISO/IEC & IEEE 1547 Standards Compliant &bull; Bootstrap 5.3 Light Theme
+          </div>
+        </div>
+        <div class="col-6 col-md-2">
+          <h6 class="fw-bold text-dark small mb-3">Platform</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="#overview" class="text-decoration-none text-muted">Overview</a></li>
+            <li><a href="#benefits" class="text-decoration-none text-muted">Benefits & ROI</a></li>
+            <li><a href="#technologies" class="text-decoration-none text-muted">Multi-Technology</a></li>
+            <li><a href="#pre-enrol" class="text-decoration-none text-muted">Pre-Enrolment</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-md-2">
+          <h6 class="fw-bold text-dark small mb-3">Portals</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="/portal.html" class="text-decoration-none text-primary fw-semibold"><i class="bi bi-speedometer2 me-1"></i> Operations Portal</a></li>
+            <li><a href="https://backoffice.regenova.cloud/" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-shield-lock me-1"></i> Admin Backoffice</a></li>
+            <li><a href="https://api.regenova.cloud/api/overview" target="_blank" class="text-decoration-none text-secondary"><i class="bi bi-code-slash me-1"></i> REST API</a></li>
+          </ul>
+        </div>
+        <div class="col-12 col-md-3">
+          <h6 class="fw-bold text-dark small mb-3">Cloud Infrastructure</h6>
+          <div class="bg-light p-2 rounded border small font-monospace">
+            <div>Web: <span class="text-primary">regenova.cloud</span></div>
+            <div>API: <span class="text-success">api.regenova.cloud</span></div>
+            <div>Admin: <span class="text-indigo">backoffice.regenova.cloud</span></div>
+            <div>DB: <span class="text-dark">db.regenova.cloud:5432</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center pt-3 small">
+        <div>&copy; 2026 REGENOVA Framework. Open Research & Industry Architecture.</div>
+        <div>Strict AC-FR-UI-001 Conformance &bull; Zero Em Dashes</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3.3 Bundle JS -->
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <!-- Home Page Client Controller -->
+  <script src="home.js"></script>
 </body>
 </html>

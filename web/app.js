@@ -26,10 +26,16 @@ function apiFetch(endpoint, options = {}) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tenantParam = urlParams.get("tenant_id");
+  if (tenantParam) {
+    currentTenantId = tenantParam;
+  }
   initSidebarInteractions();
   initOnboardingForms();
   initTenantEnrolmentForm();
   fetchTenants();
+  switchTenant(currentTenantId);
   loadAllData();
   // Poll every 3 seconds for live telemetry updates
   pollTimer = setInterval(loadAllData, 3000);

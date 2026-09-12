@@ -16,11 +16,11 @@
     "false_negative_rate": 0.0
   },
   "performance_metrics": {
-    "mean_latency_ms": 0.964,
-    "p95_latency_ms": 1.176,
-    "p99_latency_ms": 1.333,
-    "throughput_obs_per_sec": 1035.06,
-    "total_execution_time_s": 1.3912
+    "mean_latency_ms": 0.885,
+    "p95_latency_ms": 0.949,
+    "p99_latency_ms": 1.016,
+    "throughput_obs_per_sec": 1128.28,
+    "total_execution_time_s": 1.2763
   },
   "asset_condition_metrics": {
     "mean_health_index": 99.49,

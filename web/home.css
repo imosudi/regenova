@@ -1,0 +1,294 @@
+/* ==========================================================================
+   REGENOVA Public Home Page Stylesheet (Bootstrap 5.3 Light Theme)
+   Requirement: FR-UI-001 / AC-FR-UI-001
+   Modern, beautiful, dynamic landing design with zero dark SCADA override
+   ========================================================================== */
+
+@import url("vendor/bootstrap.min.css");
+@import url("vendor/bootstrap-icons.min.css");
+
+:root {
+  --reamp-primary: #0d6efd;
+  --reamp-primary-dark: #0b5ed7;
+  --reamp-primary-subtle: #e0edff;
+  --reamp-success: #10b981;
+  --reamp-success-subtle: #d1fae5;
+  --reamp-warning: #f59e0b;
+  --reamp-danger: #ef4444;
+  --reamp-info: #06b6d4;
+  --reamp-purple: #8b5cf6;
+  --reamp-indigo: #4f46e5;
+  --reamp-slate-dark: #0f172a;
+  --reamp-slate-body: #334155;
+  --reamp-slate-muted: #64748b;
+  --reamp-bg-light: #f8fafc;
+  --reamp-card-bg: #ffffff;
+  --reamp-border: #e2e8f0;
+  --reamp-border-subtle: #f1f5f9;
+}
+
+body {
+  background-color: var(--reamp-bg-light);
+  color: var(--reamp-slate-dark);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+.home-navbar {
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--reamp-border);
+  transition: all 0.2s ease;
+  position: sticky;
+  top: 0;
+  z-index: 1040;
+}
+
+.brand-icon-home {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #0d6efd 0%, #06b6d4 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  margin-right: 0.65rem;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.28);
+}
+
+.home-nav-link {
+  color: var(--reamp-slate-body) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.85rem !important;
+  transition: color 0.15s ease;
+}
+
+.home-nav-link:hover {
+  color: var(--reamp-primary) !important;
+}
+
+/* ==========================================================================
+   Hero Section
+   ========================================================================== */
+.home-hero {
+  position: relative;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+  padding: 5rem 0 4rem 0;
+  border-bottom: 1px solid var(--reamp-border);
+  overflow: hidden;
+}
+
+.hero-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 50rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--reamp-slate-dark);
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--reamp-slate-dark);
+}
+
+.hero-highlight {
+  background: linear-gradient(135deg, #0d6efd 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: 1.12rem;
+  color: var(--reamp-slate-muted);
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+/* Hero Live Telemetry Ribbon */
+.hero-stats-ribbon {
+  background: #ffffff;
+  border: 1px solid var(--reamp-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.stat-metric-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.stat-metric-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--reamp-slate-muted);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Card Styling & Micro-Interactions
+   ========================================================================== */
+.card-benefit {
+  background: #ffffff;
+  border: 1px solid var(--reamp-border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.card-benefit:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.benefit-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.bg-icon-primary {
+  background: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+}
+
+.bg-icon-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.bg-icon-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.bg-icon-purple {
+  background: rgba(139, 92, 246, 0.1);
+  color: #7c3aed;
+}
+
+.bg-icon-info {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+}
+
+.bg-icon-indigo {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+
+/* Multi-Tech Showcase */
+.tech-showcase-tab-btn {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  padding: 0.75rem 1.25rem !important;
+  font-size: 0.9rem !important;
+  color: var(--reamp-slate-body) !important;
+  transition: all 0.15s ease !important;
+  border: 1px solid var(--reamp-border) !important;
+  background-color: #ffffff !important;
+}
+
+.tech-showcase-tab-btn.active {
+  background: linear-gradient(135deg, #0d6efd 0%, #06b6d4 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3) !important;
+  border-color: transparent !important;
+}
+
+/* Pre-Enrolment Section */
+.section-pre-enrol {
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border-top: 1px solid var(--reamp-border);
+  padding: 5rem 0;
+}
+
+.card-enrol-form {
+  background: #ffffff;
+  border: 1px solid var(--reamp-border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  padding: 2.25rem;
+}
+
+/* Fast Demo Tenant Tile */
+.demo-tenant-tile {
+  border: 1px solid var(--reamp-border);
+  border-radius: 10px;
+  padding: 0.85rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.demo-tenant-tile:hover {
+  border-color: var(--reamp-primary);
+  background-color: #f8fafc;
+  transform: translateY(-2px);
+}
+
+.demo-tenant-tile.selected {
+  border-color: var(--reamp-primary);
+  background-color: #e0edff;
+}
+
+/* Pulse Live */
+.pulse-live {
+  width: 8px;
+  height: 8px;
+  background-color: var(--reamp-success);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Footer */
+footer.home-footer {
+  background-color: #ffffff;
+  border-top: 1px solid var(--reamp-border);
+  padding: 3rem 0 2rem 0;
+  color: var(--reamp-slate-muted);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.25rem;
+  }
+}

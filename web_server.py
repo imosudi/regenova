@@ -1319,6 +1319,8 @@ def application(environ, start_response):
     subpath = raw_path.lstrip("/")
     if not subpath or subpath == "":
         subpath = "index.html"
+    elif subpath == "portal":
+        subpath = "portal.html"
 
     file_path = os.path.abspath(os.path.join(web_dir, subpath))
     # Path traversal protection
