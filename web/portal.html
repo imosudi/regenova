@@ -30,19 +30,10 @@
 
         <form id="formOperatorLogin" onsubmit="handleOperatorLoginSubmit(event)">
           <div class="mb-3">
-            <label for="portalTenantSelect" class="form-label small fw-semibold text-dark">Tenant Organization Partition</label>
-            <select class="form-select form-select-sm" id="portalTenantSelect" required>
-              <option value="ORG-HELIOS-GLOBAL" selected>Helios Global Renewables (ORG-HELIOS-GLOBAL)</option>
-              <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy (ORG-AURORA-NORDIC)</option>
-              <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia (ORG-SOLARIA-ESP)</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
             <label for="portalLoginEmail" class="form-label small fw-semibold text-dark">Operator Work Email</label>
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
-              <input type="email" class="form-control border-start-0" id="portalLoginEmail" required value="elena.rostova@helios.energy" placeholder="operator@tenant.energy">
+              <input type="email" class="form-control border-start-0" id="portalLoginEmail" required placeholder="name@company.energy">
             </div>
           </div>
 
@@ -56,7 +47,7 @@
             </div>
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-key"></i></span>
-              <input type="password" class="form-control border-start-0 border-end-0" id="portalLoginPassword" required value="Helios2026!" placeholder="••••••••">
+              <input type="password" class="form-control border-start-0 border-end-0" id="portalLoginPassword" required placeholder="••••••••">
               <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" id="portalTogglePasswordBtn" onclick="toggleOperatorPasswordVisibility()" title="Show or hide password" aria-label="Toggle password visibility">
                 <i class="bi bi-eye text-muted" id="portalTogglePasswordIcon"></i>
               </button>
@@ -76,25 +67,6 @@
             <span>Authenticate & Access Portal</span>
           </button>
         </form>
-
-        <!-- Quick Operator Selector for Evaluation -->
-        <div class="border-top pt-3 mt-3">
-          <div class="text-muted small fw-semibold mb-2" style="font-size: 0.72rem;">Quick Fill Operator Credentials:</div>
-          <div class="d-flex flex-column gap-1">
-            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-HELIOS-GLOBAL', 'elena.rostova@helios.energy', 'Helios2026!')">
-              <span class="small"><strong>Helios Global:</strong> Dr. Elena Rostova</span>
-              <span class="badge bg-primary-subtle text-primary" style="font-size: 0.65rem;">Chief Engineer</span>
-            </button>
-            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-AURORA-NORDIC', 'astrid.lindgren@aurora.energy', 'Aurora2026!')">
-              <span class="small"><strong>Aurora Nordic:</strong> Astrid Lindgren</span>
-              <span class="badge bg-info-subtle text-info" style="font-size: 0.65rem;">Chief Engineer</span>
-            </button>
-            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-SOLARIA-ESP', 'javier.morales@solaria.energy', 'Solaria2026!')">
-              <span class="small"><strong>Solaria Iberia:</strong> Javier Morales</span>
-              <span class="badge bg-warning-subtle text-dark" style="font-size: 0.65rem;">Chief Engineer</span>
-            </button>
-          </div>
-        </div>
 
         <div class="text-center mt-3">
           <a href="/" class="text-muted text-decoration-none small">

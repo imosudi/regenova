@@ -114,19 +114,25 @@ window.handleOperatorLoginSubmit = async function(event) {
   if (event) event.preventDefault();
   const alertBox = document.getElementById("portalLoginAlert");
   const submitBtn = document.getElementById("btnOperatorLoginSubmit");
-  const tenantSelect = document.getElementById("portalTenantSelect");
   const emailInput = document.getElementById("portalLoginEmail");
   const pwdInput = document.getElementById("portalLoginPassword");
   const rememberChk = document.getElementById("portalRememberMe");
 
   const email = emailInput ? emailInput.value.trim() : "";
   const password = pwdInput ? pwdInput.value : "";
-  const tenant_id = tenantSelect ? tenantSelect.value : currentTenantId;
   const remember = rememberChk ? rememberChk.checked : true;
 
   if (alertBox) {
     alertBox.classList.add("d-none");
     alertBox.innerText = "";
+  }
+  if (!email || !password) {
+    if (alertBox) {
+      alertBox.className = "alert alert-danger py-2 px-3 small";
+      alertBox.innerText = "Please enter both operator work email and access password.";
+      alertBox.classList.remove("d-none");
+    }
+    return;
   }
   if (submitBtn) {
     submitBtn.disabled = true;
@@ -137,7 +143,7 @@ window.handleOperatorLoginSubmit = async function(event) {
     const res = await fetch(`${API_BASE}/api/operator/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, tenant_id })
+      body: JSON.stringify({ email, password })
     });
     const data = await res.json();
     if (res.ok && data.status === "SUCCESS") {
@@ -175,15 +181,6 @@ window.handleOperatorLogout = function() {
   }
 };
 
-window.fillDemoOperator = function(tenantId, email, pwd) {
-  const tenantSelect = document.getElementById("portalTenantSelect");
-  const emailInput = document.getElementById("portalLoginEmail");
-  const pwdInput = document.getElementById("portalLoginPassword");
-  if (tenantSelect) tenantSelect.value = tenantId;
-  if (emailInput) emailInput.value = email;
-  if (pwdInput) pwdInput.value = pwd;
-};
-
 window.toggleOperatorPasswordVisibility = function() {
   const p = document.getElementById("portalLoginPassword");
   const icon = document.getElementById("portalTogglePasswordIcon");
@@ -204,8 +201,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tenantParam = urlParams.get("tenant_id");
   if (tenantParam) {
     currentTenantId = tenantParam;
-    const portalTenantSelect = document.getElementById("portalTenantSelect");
-    if (portalTenantSelect) portalTenantSelect.value = tenantParam;
   }
   initSidebarInteractions();
   initOnboardingForms();

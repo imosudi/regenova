@@ -130,7 +130,8 @@ class TestOperatorAuthentication(unittest.TestCase):
 
         # Gateway exists
         self.assertIn('id="portalLoginScreen"', content)
-        self.assertIn('id="portalTenantSelect"', content)
+        self.assertNotIn('id="portalTenantSelect"', content)
+        self.assertNotIn('Quick Fill Operator Credentials', content)
         self.assertIn('id="portalLoginEmail"', content)
         self.assertIn('id="portalLoginPassword"', content)
         self.assertIn('id="portalCheckShowPassword"', content)

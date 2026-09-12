@@ -54,22 +54,10 @@ async function fetchLiveTelemetry() {
       const tenants = tData.tenants || [];
       const tenantCountEl = document.getElementById("stat-hero-tenants");
       if (tenantCountEl) tenantCountEl.innerText = tenants.length;
-
-      // Populate tenant selector in login modal if dynamic
-      populateLoginModalTenants(tenants);
     }
   } catch (err) {
     console.warn("Could not fetch live telemetry for home page:", err);
   }
-}
-
-function populateLoginModalTenants(tenants) {
-  const selectEl = document.getElementById("login-tenant-select");
-  if (!selectEl || tenants.length === 0) return;
-
-  selectEl.innerHTML = tenants.map(t => 
-    `<option value="${t.tenant_id}" ${t.tenant_id === selectedLoginTenant ? 'selected' : ''}>${t.name} (${t.tenant_id})</option>`
-  ).join("");
 }
 
 // ----------------------------------------------------------------------------
@@ -146,32 +134,7 @@ function initLoginModal() {
   const btnEnterPortal = document.getElementById("btn-enter-portal");
   if (btnEnterPortal) {
     btnEnterPortal.addEventListener("click", () => {
-      const selectEl = document.getElementById("login-tenant-select");
-      const tenantId = selectEl ? selectEl.value : selectedLoginTenant;
-      window.location.href = `/portal.html?tenant_id=${encodeURIComponent(tenantId)}`;
+      window.location.href = "/portal.html";
     });
-  }
-}
-
-function selectDemoTenant(tenantId, el) {
-  selectedLoginTenant = tenantId;
-  const selectEl = document.getElementById("login-tenant-select");
-  if (selectEl) selectEl.value = tenantId;
-
-  document.querySelectorAll(".demo-tenant-tile").forEach(tile => {
-    tile.classList.remove("selected");
-  });
-  if (el) el.classList.add("selected");
-}
-
-function openLoginModalWithTenant(tenantId) {
-  selectedLoginTenant = tenantId;
-  const selectEl = document.getElementById("login-tenant-select");
-  if (selectEl) selectEl.value = tenantId;
-
-  const modalEl = document.getElementById("modalPortalLogin");
-  if (modalEl) {
-    const modal = new bootstrap.Modal(modalEl);
-    modal.show();
   }
 }
