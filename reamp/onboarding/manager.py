@@ -11,6 +11,8 @@ from typing import Dict, Any, List, Optional
 
 from reamp.onboarding.models import (
     UserRecord,
+    TenantOnboardingRequest,
+    TenantRecord,
     FacilityOnboardingRequest,
     DeviceOnboardingRequest,
     OnboardingResult,
@@ -22,10 +24,11 @@ from reamp.digital_twin.models import TwinIdentity, InverterConfiguration
 
 
 class OnboardingManager:
-    """Manages lifecycle provisioning for users, facilities, and physical devices."""
+    """Manages lifecycle provisioning for organizations, users, facilities, and physical devices."""
 
     def __init__(self):
         self.users: Dict[str, UserRecord] = {}
+        self.tenants: Dict[str, TenantRecord] = {}
 
     def onboard_user(
         self,
@@ -263,8 +266,199 @@ class OnboardingManager:
             }
         )
 
-    def list_users(self) -> List[Dict[str, Any]]:
-        """Returns all registered users as dictionaries."""
+    def onboard_tenant(
+        self,
+        request: TenantOnboardingRequest,
+        actor_id: str = "SYSTEM_ADMIN",
+        audit_logger: Optional[Any] = None,
+    ) -> OnboardingResult:
+        """
+        Onboards a new corporate organization / tenant with isolation boundaries.
+        """
+        if request.tenant_id in self.tenants:
+            return OnboardingResult(
+                status="ERROR",
+                entity_id=request.tenant_id,
+                entity_type="TENANT",
+                message=f"Tenant '{request.tenant_id}' already exists.",
+            )
+
+        tenant = TenantRecord(
+            tenant_id=request.tenant_id,
+            name=request.name,
+            code=request.code,
+            billing_tier=request.billing_tier,
+            metadata=request.metadata,
+        )
+        self.tenants[request.tenant_id] = tenant
+
+        if audit_logger:
+            audit_logger.append_entry(
+                actor_id=actor_id,
+                tenant_id=request.tenant_id,
+                action="TENANT_ONBOARDED",
+                resource_id=request.tenant_id,
+                outcome="SUCCESS",
+                details={
+                    "name": request.name,
+                    "code": request.code,
+                    "billing_tier": request.billing_tier,
+                    "admin_email": request.admin_email,
+                },
+            )
+
+        return OnboardingResult(
+            status="SUCCESS",
+            entity_id=request.tenant_id,
+            entity_type="TENANT",
+            message=f"Tenant '{request.name}' ({request.tenant_id}) successfully enrolled.",
+            details={
+                "tenant_id": request.tenant_id,
+                "name": request.name,
+                "code": request.code,
+                "billing_tier": request.billing_tier,
+            },
+        )
+
+    def list_tenants(self) -> List[Dict[str, Any]]:
+        """Returns all enrolled tenants as dictionaries."""
+        return [
+            {
+                "tenant_id": t.tenant_id,
+                "name": t.name,
+                "code": t.code,
+                "billing_tier": t.billing_tier,
+                "created_at": t.created_at,
+                "status": t.status,
+                "sites_count": t.sites_count,
+                "assets_count": t.assets_count,
+                "users_count": sum(1 for u in self.users.values() if u.tenant_id == t.tenant_id),
+                "metadata": t.metadata,
+            }
+            for t in self.tenants.values()
+        ]
+
+    def get_tenant(self, tenant_id: str) -> Optional[TenantRecord]:
+        """Retrieves tenant record by ID."""
+        return self.tenants.get(tenant_id)
+
+    def update_user_role(
+        self,
+        user_id: str,
+        new_role: SecurityRole,
+        actor_id: str = "SYSTEM_ADMIN",
+        audit_logger: Optional[Any] = None,
+    ) -> UserRecord:
+        """
+        Updates a user's RBAC role and refreshes permissions.
+        """
+        user = self.users.get(user_id)
+        if not user:
+            raise ValueError(f"User '{user_id}' does not exist.")
+
+        old_role = user.role
+        user.role = new_role
+        user.permissions = [p.value for p in DEFAULT_ROLE_PERMISSIONS.get(new_role, [])]
+        user.updated_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        if audit_logger:
+            audit_logger.append_entry(
+                actor_id=actor_id,
+                tenant_id=user.tenant_id,
+                action="USER_ROLE_UPDATED",
+                resource_id=user_id,
+                outcome="SUCCESS",
+                details={
+                    "old_role": old_role.value if hasattr(old_role, "value") else str(old_role),
+                    "new_role": new_role.value if hasattr(new_role, "value") else str(new_role),
+                    "permissions_count": len(user.permissions),
+                },
+            )
+
+        return user
+
+    def update_user_status(
+        self,
+        user_id: str,
+        status: str,
+        actor_id: str = "SYSTEM_ADMIN",
+        audit_logger: Optional[Any] = None,
+    ) -> UserRecord:
+        """
+        Toggles a user's status between ACTIVE and SUSPENDED.
+        """
+        user = self.users.get(user_id)
+        if not user:
+            raise ValueError(f"User '{user_id}' does not exist.")
+
+        valid_statuses = ("ACTIVE", "SUSPENDED", "REVOKED")
+        if status.upper() not in valid_statuses:
+            raise ValueError(f"Invalid status '{status}'. Must be one of {valid_statuses}.")
+
+        old_status = user.status
+        user.status = status.upper()
+        user.updated_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        if audit_logger:
+            audit_logger.append_entry(
+                actor_id=actor_id,
+                tenant_id=user.tenant_id,
+                action="USER_STATUS_UPDATED",
+                resource_id=user_id,
+                outcome="SUCCESS",
+                details={
+                    "old_status": old_status,
+                    "new_status": user.status,
+                },
+            )
+
+        return user
+
+    def regenerate_user_token(
+        self,
+        user_id: str,
+        auth_manager: Any,
+        actor_id: str = "SYSTEM_ADMIN",
+        audit_logger: Optional[Any] = None,
+    ) -> str:
+        """
+        Regenerates HMAC security token for an active user.
+        """
+        user = self.users.get(user_id)
+        if not user:
+            raise ValueError(f"User '{user_id}' does not exist.")
+
+        from reamp.security.models import UserIdentity
+        user_ident = UserIdentity(
+            user_id=user.user_id,
+            username=user.name,
+            tenant_id=user.tenant_id,
+            role=user.role,
+        )
+        token = auth_manager.generate_token(user_ident)
+        user.token = token.token_id
+        user.updated_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        if audit_logger:
+            audit_logger.append_entry(
+                actor_id=actor_id,
+                tenant_id=user.tenant_id,
+                action="USER_TOKEN_REGENERATED",
+                resource_id=user_id,
+                outcome="SUCCESS",
+                details={"new_token_id": token.token_id},
+            )
+
+        return user.token
+
+    def list_users(self, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Returns all registered users as dictionaries, optionally filtered by tenant.
+        """
+        users_iter = self.users.values()
+        if tenant_id:
+            users_iter = [u for u in users_iter if u.tenant_id == tenant_id]
+
         return [
             {
                 "user_id": u.user_id,
@@ -275,9 +469,11 @@ class OnboardingManager:
                 "status": u.status,
                 "token": u.token,
                 "created_at": u.created_at,
+                "updated_at": getattr(u, "updated_at", u.created_at),
+                "last_active": getattr(u, "last_active", None),
                 "permissions": u.permissions,
             }
-            for u in self.users.values()
+            for u in users_iter
         ]
 
     def get_user(self, user_id: str) -> Optional[UserRecord]:

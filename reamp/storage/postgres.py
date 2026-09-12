@@ -323,3 +323,58 @@ class PostgresDatabaseManager:
         except Exception as e:
             logger.error(f"Failed to record telemetry for {asset_id} {metric}: {e}")
             return False
+
+    def list_organisations_pg(self) -> List[Dict[str, Any]]:
+        """Retrieves all registered organisations from PostgreSQL."""
+        if not self._connected and not self.test_connection():
+            return []
+        sql = "SELECT tenant_id, name, code, billing_tier, created_at FROM organisations ORDER BY name ASC;"
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql)
+                    rows = cur.fetchall()
+                    return [
+                        {
+                            "tenant_id": str(r[0]),
+                            "name": r[1],
+                            "code": r[2],
+                            "billing_tier": r[3],
+                            "created_at": r[4].isoformat() if hasattr(r[4], "isoformat") else str(r[4]),
+                        }
+                        for r in rows
+                    ]
+        except Exception as e:
+            logger.error(f"Failed to list organisations: {e}")
+            return []
+
+    def update_user_status_pg(self, user_id: str, is_active: bool) -> bool:
+        """Updates a user's active status in PostgreSQL."""
+        if not self._connected and not self.test_connection():
+            return False
+        user_uuid = to_uuid_str(user_id)
+        sql = "UPDATE users SET is_active = %s, updated_at = NOW() WHERE id = %s;"
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql, (is_active, user_uuid))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update user status for {user_id}: {e}")
+            return False
+
+    def update_user_role_pg(self, user_id: str, role: str) -> bool:
+        """Updates a user's role in PostgreSQL."""
+        if not self._connected and not self.test_connection():
+            return False
+        user_uuid = to_uuid_str(user_id)
+        sql = "UPDATE users SET role = %s, updated_at = NOW() WHERE id = %s;"
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(sql, (role, user_uuid))
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update user role for {user_id}: {e}")
+            return False
+

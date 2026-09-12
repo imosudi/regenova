@@ -22,6 +22,7 @@ API_VERSION = "1.0.0"
 SERVICE_NAME = "REGENOVA Renewable Energy Asset Intelligence & Management API"
 
 KNOWN_ENDPOINTS = [
+    "/api/tenants",
     "/api/overview",
     "/api/sites",
     "/api/assets",
@@ -36,6 +37,10 @@ KNOWN_ENDPOINTS = [
     "/api/adaptations/approve",
     "/api/audit-chain",
     "/api/users",
+    "/api/users/update-role",
+    "/api/users/toggle-status",
+    "/api/users/regenerate-token",
+    "/api/onboarding/tenant",
     "/api/onboarding/user",
     "/api/onboarding/facility",
     "/api/onboarding/device",
@@ -71,7 +76,7 @@ def application(environ, start_response):
             ("Content-Type", "text/plain"),
             ("Access-Control-Allow-Origin", "*"),
             ("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD"),
-            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Tenant-ID"),
             ("Access-Control-Max-Age", "86400"),
         ]
         start_response("204 No Content", headers)
@@ -87,7 +92,7 @@ def application(environ, start_response):
             ("Content-Length", str(len(resp_bytes))),
             ("Access-Control-Allow-Origin", "*"),
             ("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD"),
-            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Tenant-ID"),
         ]
         start_response("200 OK", headers)
         if method == "HEAD":
@@ -115,8 +120,16 @@ def application(environ, start_response):
             ])
             return [err_bytes]
 
+    headers_dict = {
+        "X-Tenant-ID": environ.get("HTTP_X_TENANT_ID"),
+        "Authorization": environ.get("HTTP_AUTHORIZATION"),
+        "Content-Type": environ.get("CONTENT_TYPE"),
+    }
+    from urllib.parse import parse_qs
+    query_params = {k: v[0] for k, v in parse_qs(environ.get("QUERY_STRING", "")).items()}
+
     # 4. Dispatch to Central API Router
-    status_code, data = dispatch_api_request(method, api_path, payload)
+    status_code, data = dispatch_api_request(method, api_path, payload, headers=headers_dict, query_params=query_params)
     resp_bytes = json.dumps(data, indent=2, default=str).encode("utf-8")
 
     status_text = "200 OK" if status_code == 200 else (
@@ -128,7 +141,7 @@ def application(environ, start_response):
         ("Content-Length", str(len(resp_bytes))),
         ("Access-Control-Allow-Origin", "*"),
         ("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD"),
-        ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With"),
+        ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-Tenant-ID"),
     ]
 
     start_response(status_text, headers)

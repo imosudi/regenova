@@ -11,6 +11,7 @@ import os
 import json
 import datetime
 import mimetypes
+from typing import Dict, List, Optional, Any, Tuple
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -31,6 +32,8 @@ from reamp.cmms.models import WorkOrderStatus
 from reamp.adaptive.models import AdaptationType
 from reamp.onboarding import (
     OnboardingManager,
+    TenantOnboardingRequest,
+    TenantRecord,
     FacilityOnboardingRequest,
     DeviceOnboardingRequest,
 )
@@ -39,12 +42,17 @@ from reamp.storage import PostgresDatabaseManager
 
 class REAMPWebServerState:
     def __init__(self):
+        self.default_tenant_id = "ORG-HELIOS-GLOBAL"
+        self.tenants: Dict[str, REAMPApplicationMVP] = {}
+
+        # Primary Tenant: Helios Global Renewables
         self.app = REAMPApplicationMVP(
-            tenant_id="ORG-HELIOS-GLOBAL",
+            tenant_id=self.default_tenant_id,
             storage_db=":memory:",
             master_secret="reamp-web-master-secret-key-32b",
         )
         self.app.initialize_default_topology()
+        self.tenants[self.default_tenant_id] = self.app
         self.api = REAMPAppAPI(self.app)
         self.admin_token = self.api.authenticate("chief-eng-web", SecurityRole.CHIEF_ENGINEER)
 
@@ -53,57 +61,88 @@ class REAMPWebServerState:
 
         # Onboarding lifecycle manager
         self.onboarding = OnboardingManager()
+        self.onboarding.onboard_tenant(
+            TenantOnboardingRequest(
+                tenant_id=self.default_tenant_id,
+                name="Helios Global Renewables",
+                code="HELIOS",
+                billing_tier="ENTERPRISE",
+                admin_name="Dr. Elena Rostova",
+                admin_email="elena.rostova@helios.energy",
+            )
+        )
         self._seed_default_users()
 
-        # Provision full multi-technology sites & assets
+        # Provision full multi-technology sites & assets for Helios
         self._provision_multi_tech_fleet()
 
         # Seed initial nominal telemetry for all assets
         self._seed_fleet_telemetry()
 
+        # Provision Secondary Pre-seeded Tenants (Aurora Nordic & Solaria Iberia)
+        self._provision_secondary_tenants()
+
         # Synchronize topology & seed entities to PostgreSQL
         self._sync_to_database()
+
+    def get_tenant_app(self, tenant_id: Optional[str] = None) -> REAMPApplicationMVP:
+        """Retrieves or dynamically instantiates an application orchestrator for a tenant."""
+        t_id = tenant_id or self.default_tenant_id
+        if t_id not in self.tenants:
+            t_rec = self.onboarding.get_tenant(t_id)
+            app = REAMPApplicationMVP(
+                tenant_id=t_id,
+                storage_db=":memory:",
+                master_secret=f"reamp-master-secret-{t_id}",
+            )
+            self.tenants[t_id] = app
+        return self.tenants[t_id]
 
     def _sync_to_database(self):
         """Synchronizes in-memory topology and seeded users to PostgreSQL if available."""
         try:
             if not self.db.test_connection():
                 return
-            self.db.sync_organisation(self.app.tenant_id, name="Helios Global Renewables", code=self.app.tenant_id)
-            for s in self.app.sites.values():
-                tech_val = s.technology.value if hasattr(s.technology, 'value') else str(s.technology)
-                self.db.sync_site(
-                    site_id=s.site_id,
-                    tenant_id=self.app.tenant_id,
-                    portfolio_id=s.portfolio_id,
-                    name=s.name,
-                    code=s.site_id,
-                    latitude=s.latitude,
-                    longitude=s.longitude,
-                    rated_capacity_mw=s.rated_capacity_mw,
-                    technology=tech_val,
-                )
-            for a in self.app.assets.values():
-                self.db.sync_asset(
-                    asset_id=a.asset_id,
-                    tenant_id=self.app.tenant_id,
-                    site_id=a.site_id,
-                    name=a.name,
-                    code=a.asset_id,
-                    asset_type=a.asset_type,
-                    model=a.model,
-                    rated_power_kw=a.rated_power_kw,
-                )
+            for t_id, app in self.tenants.items():
+                t_rec = self.onboarding.get_tenant(t_id)
+                t_name = t_rec.name if t_rec else f"Organization {t_id}"
+                t_code = t_rec.code if t_rec else t_id.replace("ORG-", "")
+                t_tier = t_rec.billing_tier if t_rec else "ENTERPRISE"
+                self.db.sync_organisation(t_id, name=t_name, code=t_code, billing_tier=t_tier)
+                for s in app.sites.values():
+                    tech_val = s.technology.value if hasattr(s.technology, 'value') else str(s.technology)
+                    self.db.sync_site(
+                        site_id=s.site_id,
+                        tenant_id=t_id,
+                        portfolio_id=s.portfolio_id,
+                        name=s.name,
+                        code=s.site_id,
+                        latitude=s.latitude,
+                        longitude=s.longitude,
+                        rated_capacity_mw=s.rated_capacity_mw,
+                        technology=tech_val,
+                    )
+                for a in app.assets.values():
+                    self.db.sync_asset(
+                        asset_id=a.asset_id,
+                        tenant_id=t_id,
+                        site_id=a.site_id,
+                        name=a.name,
+                        code=a.asset_id,
+                        asset_type=a.asset_type,
+                        model=a.model,
+                        rated_power_kw=a.rated_power_kw,
+                    )
             for u in self.onboarding.list_users():
-                role_val = u.role.value if hasattr(u.role, 'value') else str(u.role)
+                role_val = u["role"]
                 self.db.sync_user(
-                    user_id=u.user_id,
-                    tenant_id=u.tenant_id,
-                    email=u.email,
-                    full_name=u.name,
+                    user_id=u["user_id"],
+                    tenant_id=u["tenant_id"],
+                    email=u["email"],
+                    full_name=u["name"],
                     role=role_val,
-                    is_active=True,
-                    metadata={"token": u.token, "permissions": u.permissions},
+                    is_active=(u.get("status") == "ACTIVE"),
+                    metadata={"token": u.get("token"), "permissions": u.get("permissions")},
                 )
         except Exception:
             pass
@@ -277,12 +316,130 @@ class REAMPWebServerState:
             "state_of_charge_percent": 74.0, "temperature_cell_max_c": 26.0,
         })
 
+    def _provision_secondary_tenants(self):
+        """Provisions secondary tenants (Aurora Nordic and Solaria Iberia) for cross-tenant isolation."""
+        now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        # 1. ORG-AURORA-NORDIC (Wind & BESS)
+        aurora_id = "ORG-AURORA-NORDIC"
+        self.onboarding.onboard_tenant(
+            TenantOnboardingRequest(
+                tenant_id=aurora_id,
+                name="Aurora Nordic Clean Energy",
+                code="AURORA",
+                billing_tier="UTILITY",
+                admin_name="Astrid Lindgren",
+                admin_email="astrid.lindgren@aurora.energy",
+            )
+        )
+        app_aurora = self.get_tenant_app(aurora_id)
+
+        site_fjord = Site(
+            site_id="SITE-FJORD-WIND",
+            portfolio_id="PORT-NORDIC-CLEAN",
+            name="Fjord Coastal Wind Park",
+            latitude=62.47,
+            longitude=6.15,
+            rated_capacity_mw=120.0,
+            technology=TechnologyType.WIND,
+        )
+        site_arctic_bess = Site(
+            site_id="SITE-ARCTIC-BESS",
+            portfolio_id="PORT-NORDIC-CLEAN",
+            name="Arctic Sub-Zero BESS Facility",
+            latitude=68.44,
+            longitude=17.56,
+            rated_capacity_mw=40.0,
+            technology=TechnologyType.BESS,
+        )
+        app_aurora.register_site(site_fjord)
+        app_aurora.register_site(site_arctic_bess)
+
+        asset_t1 = AssetRecord("TURB-FJORD-01", "SITE-FJORD-WIND", "Vestas V162 Wind Turbine #1", "WIND_TURBINE", "Vestas V162 EnVentus", 5600.0, datetime.datetime.now(datetime.timezone.utc), AssetStatus.ACTIVE)
+        asset_t2 = AssetRecord("TURB-FJORD-02", "SITE-FJORD-WIND", "Vestas V162 Wind Turbine #2", "WIND_TURBINE", "Vestas V162 EnVentus", 5600.0, datetime.datetime.now(datetime.timezone.utc), AssetStatus.ACTIVE)
+        asset_b1 = AssetRecord("BESS-ARCTIC-01", "SITE-ARCTIC-BESS", "Tesla Megapack 2XL #1", "BESS_CONTAINER", "Tesla Megapack 2XL", 3000.0, datetime.datetime.now(datetime.timezone.utc), AssetStatus.ACTIVE)
+        app_aurora.register_asset(asset_t1, device_secret="sec-turb-fjord-01")
+        app_aurora.register_asset(asset_t2, device_secret="sec-turb-fjord-02")
+        app_aurora.register_asset(asset_b1, device_secret="sec-bess-arctic-01")
+
+        app_aurora.process_telemetry_packet("TURB-FJORD-01", {
+            "timestamp": now_iso, "wind_speed_ms": 11.8, "power_ac_kw": 5120.0,
+            "barometric_pressure_hpa": 1010.0, "ambient_temp_c": 8.5, "gearbox_temp_c": 59.0,
+        })
+        app_aurora.process_telemetry_packet("TURB-FJORD-02", {
+            "timestamp": now_iso, "wind_speed_ms": 11.6, "power_ac_kw": 5080.0,
+            "barometric_pressure_hpa": 1010.0, "ambient_temp_c": 8.5, "gearbox_temp_c": 60.2,
+        })
+        app_aurora.process_telemetry_packet("BESS-ARCTIC-01", {
+            "timestamp": now_iso, "power_ac_kw": 1800.0, "dispatch_setpoint_kw": 1800.0,
+            "state_of_charge_percent": 82.0, "temperature_cell_max_c": 22.0,
+        })
+
+        self.onboarding.onboard_user("Astrid Lindgren", "astrid.lindgren@aurora.energy", SecurityRole.CHIEF_ENGINEER, aurora_id, "SYSTEM_INIT", app_aurora.audit_logger, app_aurora.auth_manager)
+        self.onboarding.onboard_user("Henrik Holm", "henrik.holm@aurora.energy", SecurityRole.OPERATOR, aurora_id, "SYSTEM_INIT", app_aurora.audit_logger, app_aurora.auth_manager)
+        self.onboarding.onboard_user("Freja Jensen", "freja.jensen@aurora.energy", SecurityRole.VIEWER, aurora_id, "SYSTEM_INIT", app_aurora.audit_logger, app_aurora.auth_manager)
+
+        # 2. ORG-SOLARIA-ESP (Solar PV)
+        solaria_id = "ORG-SOLARIA-ESP"
+        self.onboarding.onboard_tenant(
+            TenantOnboardingRequest(
+                tenant_id=solaria_id,
+                name="Solaria Iberia Energia",
+                code="SOLARIA",
+                billing_tier="ENTERPRISE",
+                admin_name="Javier Morales",
+                admin_email="javier.morales@solaria.energy",
+            )
+        )
+        app_solaria = self.get_tenant_app(solaria_id)
+
+        site_andalusia = Site(
+            site_id="SITE-SOLARIA-AND",
+            portfolio_id="PORT-IBERIA-SOLAR",
+            name="Andalusia Solar Generation Hub",
+            latitude=37.38,
+            longitude=-5.98,
+            rated_capacity_mw=80.0,
+            technology=TechnologyType.SOLAR_PV,
+        )
+        app_solaria.register_site(site_andalusia)
+
+        asset_s1 = AssetRecord("INV-SOLARIA-01", "SITE-SOLARIA-AND", "SMA Solar Central #1", "SOLAR_INVERTER", "SMA Central 2500-EV", 2500.0, datetime.datetime.now(datetime.timezone.utc), AssetStatus.ACTIVE)
+        asset_s2 = AssetRecord("INV-SOLARIA-02", "SITE-SOLARIA-AND", "SMA Solar Central #2", "SOLAR_INVERTER", "SMA Central 2500-EV", 2500.0, datetime.datetime.now(datetime.timezone.utc), AssetStatus.ACTIVE)
+        app_solaria.register_asset(asset_s1, device_secret="sec-inv-solaria-01")
+        app_solaria.register_asset(asset_s2, device_secret="sec-inv-solaria-02")
+
+        app_solaria.process_telemetry_packet("INV-SOLARIA-01", {
+            "timestamp": now_iso, "poa_irradiance": 885.0, "ambient_temp": 31.0,
+            "dc_power_kw": 2400.0, "ac_power_kw": 2340.0, "heatsink_temp": 49.5,
+        })
+        app_solaria.process_telemetry_packet("INV-SOLARIA-02", {
+            "timestamp": now_iso, "poa_irradiance": 885.0, "ambient_temp": 31.0,
+            "dc_power_kw": 2380.0, "ac_power_kw": 2320.0, "heatsink_temp": 48.8,
+        })
+
+        self.onboarding.onboard_user("Javier Morales", "javier.morales@solaria.energy", SecurityRole.CHIEF_ENGINEER, solaria_id, "SYSTEM_INIT", app_solaria.audit_logger, app_solaria.auth_manager)
+        self.onboarding.onboard_user("Lucia Gomez", "lucia.gomez@solaria.energy", SecurityRole.OPERATOR, solaria_id, "SYSTEM_INIT", app_solaria.audit_logger, app_solaria.auth_manager)
+
     # -------------------------------------------------------------------------
-    # Core Data & Action Handlers
+    # Core Data & Action Handlers (Multi-Tenant Scoped)
     # -------------------------------------------------------------------------
 
-    def get_overview_data(self) -> dict:
-        app = self.app
+    def get_tenants_data(self) -> dict:
+        """Returns all registered corporate tenants with live metrics."""
+        tenants = self.onboarding.list_tenants()
+        for t in tenants:
+            t_id = t["tenant_id"]
+            if t_id in self.tenants:
+                app = self.tenants[t_id]
+                t["sites_count"] = len(app.sites)
+                t["assets_count"] = len(app.assets)
+                t["capacity_mw"] = round(sum(s.rated_capacity_mw for s in app.sites.values()), 1)
+                t["active_alerts_count"] = len([a for a in app.alerts.values() if a.status == AlertStatus.ACTIVE])
+        return {"tenants": tenants, "default_tenant_id": self.default_tenant_id}
+
+    def get_overview_data(self, tenant_id: Optional[str] = None) -> dict:
+        app = self.get_tenant_app(tenant_id)
         total_gen_kw = sum(app.latest_performance_ratio.get(a, 0.0) * (app.assets[a].rated_power_kw if a in app.assets else 2000.0) for a in app.assets)
         total_cap_mw = sum(s.rated_capacity_mw for s in app.sites.values())
         healths = list(app.latest_health.values())
@@ -307,8 +464,8 @@ class REAMPWebServerState:
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
 
-    def get_sites_data(self) -> list:
-        app = self.app
+    def get_sites_data(self, tenant_id: Optional[str] = None) -> list:
+        app = self.get_tenant_app(tenant_id)
         sites = []
         for s in app.sites.values():
             assets = [a for a in app.assets.values() if a.site_id == s.site_id]
@@ -332,8 +489,8 @@ class REAMPWebServerState:
             })
         return sites
 
-    def get_assets_data(self) -> list:
-        app = self.app
+    def get_assets_data(self, tenant_id: Optional[str] = None) -> list:
+        app = self.get_tenant_app(tenant_id)
         result = []
         for a in app.assets.values():
             site = app.sites.get(a.site_id)
@@ -360,8 +517,14 @@ class REAMPWebServerState:
             })
         return result
 
-    def get_asset_detail_data(self, asset_id: str) -> tuple:
-        app = self.app
+    def get_asset_detail_data(self, asset_id: str, tenant_id: Optional[str] = None) -> tuple:
+        app = self.get_tenant_app(tenant_id)
+        if asset_id not in app.assets:
+            for other_app in self.tenants.values():
+                if asset_id in other_app.assets:
+                    app = other_app
+                    break
+
         if asset_id not in app.assets:
             return 404, {"error": f"Asset {asset_id} not found"}
 
@@ -369,7 +532,6 @@ class REAMPWebServerState:
         site = app.sites.get(a.site_id)
         twin = app.twins.get(asset_id)
 
-        # Health dimensions
         hi = app.latest_health.get(asset_id, 95.0)
         pr = app.latest_performance_ratio.get(asset_id, 0.95)
 
@@ -391,6 +553,7 @@ class REAMPWebServerState:
 
         detail = {
             "asset_id": a.asset_id,
+            "tenant_id": app.tenant_id,
             "name": a.name,
             "site_id": a.site_id,
             "site_name": site.name if site else a.site_id,
@@ -409,9 +572,9 @@ class REAMPWebServerState:
                 "revenue_loss_usd": round(max(0.0, (1.0 - pr) * a.rated_power_kw * 0.10), 2),
             },
             "shap_explanation": [
-                {"rank": 1, "feature": "temperature_heatsink_c", "shap_value": 0.428, "direction": "POSITIVE_DEVIATION", "sensor_name": "Heatsink PT100", "description": "Thermal dissipation divergence from first-principles model"},
-                {"rank": 2, "feature": "poa_irradiance_w_per_m2", "shap_value": -0.215, "direction": "NEGATIVE_DEVIATION", "sensor_name": "POA Pyranometer", "description": "Irradiance ratio deviation from STC standard"},
-                {"rank": 3, "feature": "power_ac_kw", "shap_value": 0.182, "direction": "GAP_EXCURSION", "sensor_name": "AC Power Transducer", "description": "Measured active power vs IEC 61724-1 expected"},
+                {"rank": 1, "feature": "temperature_heatsink_c", "shap_value": 0.428, "direction": "POSITIVE_DEVIATION", "sensor_name": "Thermal Sensor", "description": "Thermal dissipation divergence from first-principles model"},
+                {"rank": 2, "feature": "poa_irradiance_w_per_m2", "shap_value": -0.215, "direction": "NEGATIVE_DEVIATION", "sensor_name": "Irradiance / Wind", "description": "Resource ratio deviation from baseline expected"},
+                {"rank": 3, "feature": "power_ac_kw", "shap_value": 0.182, "direction": "GAP_EXCURSION", "sensor_name": "AC Power Meter", "description": "Measured active power vs reference model"},
             ],
             "health_dimensions": {
                 "performance": round(min(100.0, pr * 100.0), 1),
@@ -447,11 +610,12 @@ class REAMPWebServerState:
         }
         return 200, detail
 
-    def get_alerts_data(self) -> list:
-        app = self.app
+    def get_alerts_data(self, tenant_id: Optional[str] = None) -> list:
+        app = self.get_tenant_app(tenant_id)
         return [
             {
                 "alert_id": a.alert_id,
+                "tenant_id": app.tenant_id,
                 "site_id": a.site_id,
                 "asset_id": a.asset_id,
                 "title": a.title,
@@ -463,11 +627,12 @@ class REAMPWebServerState:
             for a in app.alerts.values()
         ]
 
-    def get_work_orders_data(self) -> list:
-        app = self.app
+    def get_work_orders_data(self, tenant_id: Optional[str] = None) -> list:
+        app = self.get_tenant_app(tenant_id)
         return [
             {
                 "work_order_id": wo.work_order_id,
+                "tenant_id": app.tenant_id,
                 "asset_id": wo.asset_id,
                 "title": wo.title,
                 "description": wo.description,
@@ -481,11 +646,12 @@ class REAMPWebServerState:
             for wo in app.cmms_engine.work_orders.values()
         ]
 
-    def get_adaptations_data(self) -> list:
-        app = self.app
+    def get_adaptations_data(self, tenant_id: Optional[str] = None) -> list:
+        app = self.get_tenant_app(tenant_id)
         return [
             {
                 "action_id": a.action_id,
+                "tenant_id": app.tenant_id,
                 "asset_id": a.asset_id,
                 "type": a.adaptation_type.value,
                 "target_metric": a.target_metric,
@@ -500,8 +666,8 @@ class REAMPWebServerState:
             for a in app.adaptive_engine.adaptation_history.values()
         ]
 
-    def get_audit_chain_data(self) -> dict:
-        app = self.app
+    def get_audit_chain_data(self, tenant_id: Optional[str] = None) -> dict:
+        app = self.get_tenant_app(tenant_id)
         chain = app.audit_logger._chain
         intact, err_idx = app.audit_logger.verify_chain_integrity()
         recent = [
@@ -509,6 +675,7 @@ class REAMPWebServerState:
                 "entry_id": e.entry_id,
                 "timestamp": e.timestamp,
                 "actor_id": e.actor_id,
+                "tenant_id": getattr(e, "tenant_id", app.tenant_id),
                 "action": e.action,
                 "resource_id": e.resource_id,
                 "outcome": e.outcome,
@@ -518,18 +685,20 @@ class REAMPWebServerState:
             for e in reversed(chain[-20:])
         ]
         return {
+            "tenant_id": app.tenant_id,
             "is_valid": intact,
             "corrupted_index": err_idx,
             "total_entries": len(chain),
             "recent_entries": recent,
         }
 
-    def get_users_data(self) -> dict:
-        return {"users": self.onboarding.list_users()}
+    def get_users_data(self, tenant_id: Optional[str] = None) -> dict:
+        return {"users": self.onboarding.list_users(tenant_id=tenant_id)}
 
-    def inject_telemetry(self, payload: dict) -> dict:
-        app = self.app
-        asset_id = payload.get("asset_id", "ASSET-INV-01")
+    def inject_telemetry(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+        t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
+        app = self.get_tenant_app(t_id)
+        asset_id = payload.get("asset_id") or list(app.assets.keys())[0]
         scenario = payload.get("scenario", "nominal")
         now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -554,7 +723,6 @@ class REAMPWebServerState:
                 "state_of_charge_percent": 45.0, "temperature_cell_max_c": 31.0,
             }
         else:
-            # Nominal
             telemetry = {
                 "timestamp": now_iso, "poa_irradiance": 850.0, "ambient_temp": 26.0,
                 "dc_power_kw": 2100.0, "ac_power_kw": 2045.0, "heatsink_temp": 46.5,
@@ -562,14 +730,13 @@ class REAMPWebServerState:
 
         res = app.process_telemetry_packet(asset_id, telemetry)
 
-        # Persist telemetry observation to PostgreSQL if available
         if self.db.test_connection():
             try:
                 for metric in ("ac_power_kw", "heatsink_temp"):
                     if metric in telemetry:
                         self.db.record_telemetry_observation(
                             timestamp_str=now_iso,
-                            tenant_id=self.app.tenant_id,
+                            tenant_id=app.tenant_id,
                             asset_id=asset_id,
                             metric=metric,
                             sensor_id=f"SNS-{asset_id}-{metric}",
@@ -581,26 +748,33 @@ class REAMPWebServerState:
 
         return {
             "status": "INGESTED",
+            "tenant_id": app.tenant_id,
             "asset_id": asset_id,
             "scenario": scenario,
             "result": res,
         }
 
-    def acknowledge_alert(self, payload: dict) -> dict:
+    def acknowledge_alert(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
         alert_id = payload.get("alert_id")
-        return self.api.acknowledge_alert(alert_id=alert_id, auth_token=self.admin_token)
+        app = self.get_tenant_app(tenant_id)
+        api = REAMPAppAPI(app)
+        return api.acknowledge_alert(alert_id=alert_id, auth_token=self.admin_token)
 
-    def resolve_alert(self, payload: dict) -> dict:
+    def resolve_alert(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
         alert_id = payload.get("alert_id")
-        return self.api.resolve_alert(alert_id=alert_id, auth_token=self.admin_token)
+        app = self.get_tenant_app(tenant_id)
+        api = REAMPAppAPI(app)
+        return api.resolve_alert(alert_id=alert_id, auth_token=self.admin_token)
 
-    def approve_work_order(self, payload: dict) -> dict:
+    def approve_work_order(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
         wo_id = payload.get("work_order_id")
-        return self.api.approve_work_order(work_order_id=wo_id, auth_token=self.admin_token)
+        app = self.get_tenant_app(tenant_id)
+        api = REAMPAppAPI(app)
+        return api.approve_work_order(work_order_id=wo_id, auth_token=self.admin_token)
 
-    def propose_adaptation(self, payload: dict) -> dict:
-        app = self.app
-        asset_id = payload.get("asset_id", "ASSET-INV-01")
+    def propose_adaptation(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+        app = self.get_tenant_app(tenant_id)
+        asset_id = payload.get("asset_id") or list(app.assets.keys())[0]
         shift = float(payload.get("shift_pct", -15.0))
         cur = app.adaptive_engine.get_baseline_multiplier(asset_id)
         new_val = round(cur * (1.0 + (shift / 100.0)), 4)
@@ -621,8 +795,8 @@ class REAMPWebServerState:
             "adapted_value": action.adapted_value,
         }
 
-    def approve_adaptation(self, payload: dict) -> dict:
-        app = self.app
+    def approve_adaptation(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+        app = self.get_tenant_app(tenant_id)
         action_id = payload.get("action_id")
         action = app.adaptive_engine.approve_adaptation(
             action_id=action_id,
@@ -636,24 +810,24 @@ class REAMPWebServerState:
             "approved_by": action.approved_by,
         }
 
-    def onboard_user_api(self, payload: dict) -> tuple:
+    def onboard_user_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
         try:
             name = payload.get("name", "").strip()
             email = payload.get("email", "").strip()
             role_str = payload.get("role", "OPERATOR").upper()
             role = SecurityRole[role_str]
-            tenant_id = payload.get("tenant_id") or self.app.tenant_id
+            t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
+            app = self.get_tenant_app(t_id)
 
             user = self.onboarding.onboard_user(
                 name=name,
                 email=email,
                 role=role,
-                tenant_id=tenant_id,
+                tenant_id=t_id,
                 actor_id="admin-web",
-                audit_logger=self.app.audit_logger,
-                auth_manager=self.app.auth_manager,
+                audit_logger=app.audit_logger,
+                auth_manager=app.auth_manager,
             )
-            # Persist to PostgreSQL if available
             if self.db.test_connection():
                 try:
                     self.db.sync_user(
@@ -685,8 +859,10 @@ class REAMPWebServerState:
         except Exception as e:
             return 400, {"status": "ERROR", "message": str(e)}
 
-    def onboard_facility_api(self, payload: dict) -> tuple:
+    def onboard_facility_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
         try:
+            t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
+            app = self.get_tenant_app(t_id)
             tech_str = payload.get("technology", "SOLAR_PV").upper()
             tech = TechnologyType[tech_str]
             req = FacilityOnboardingRequest(
@@ -700,18 +876,17 @@ class REAMPWebServerState:
                 metadata=payload.get("metadata", {}),
             )
             res = self.onboarding.onboard_facility(
-                self.app,
+                app,
                 req,
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
 
-            # Persist to PostgreSQL if available
             if res.status == "SUCCESS" and self.db.test_connection():
                 try:
                     self.db.sync_site(
                         site_id=req.facility_id,
-                        tenant_id=self.app.tenant_id,
+                        tenant_id=t_id,
                         portfolio_id=req.portfolio_id,
                         name=req.name,
                         code=req.facility_id,
@@ -733,8 +908,10 @@ class REAMPWebServerState:
         except Exception as e:
             return 400, {"status": "ERROR", "message": str(e)}
 
-    def onboard_device_api(self, payload: dict) -> tuple:
+    def onboard_device_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
         try:
+            t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
+            app = self.get_tenant_app(t_id)
             req = DeviceOnboardingRequest(
                 device_id=payload.get("device_id", "").strip(),
                 facility_id=payload.get("facility_id", "").strip(),
@@ -747,18 +924,17 @@ class REAMPWebServerState:
                 metadata=payload.get("metadata", {}),
             )
             res = self.onboarding.onboard_device(
-                self.app,
+                app,
                 req,
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
 
-            # Persist to PostgreSQL if available
             if res.status == "SUCCESS" and self.db.test_connection():
                 try:
                     self.db.sync_asset(
                         asset_id=req.device_id,
-                        tenant_id=self.app.tenant_id,
+                        tenant_id=t_id,
                         site_id=req.facility_id,
                         name=req.name,
                         code=req.device_id,
@@ -779,6 +955,169 @@ class REAMPWebServerState:
         except Exception as e:
             return 400, {"status": "ERROR", "message": str(e)}
 
+    def onboard_tenant_api(self, payload: dict) -> tuple:
+        """Onboards a new corporate organization tenant with administrative contact."""
+        try:
+            tenant_id = payload.get("tenant_id", "").strip().upper()
+            if not tenant_id:
+                return 400, {"status": "ERROR", "message": "Tenant ID is required"}
+            if not tenant_id.startswith("ORG-"):
+                tenant_id = f"ORG-{tenant_id}"
+
+            name = payload.get("name", "").strip() or f"Organization {tenant_id}"
+            code = payload.get("code", "").strip().upper() or tenant_id.replace("ORG-", "")
+            tier = payload.get("billing_tier", "ENTERPRISE").upper()
+            admin_name = payload.get("admin_name", "Chief Engineer").strip()
+            admin_email = payload.get("admin_email", f"admin@{code.lower()}.energy").strip()
+
+            req = TenantOnboardingRequest(
+                tenant_id=tenant_id,
+                name=name,
+                code=code,
+                billing_tier=tier,
+                admin_name=admin_name,
+                admin_email=admin_email,
+            )
+            res = self.onboarding.onboard_tenant(req)
+            if res.status != "SUCCESS":
+                return 400, {"status": "ERROR", "message": res.message}
+
+            app = self.get_tenant_app(tenant_id)
+            admin_user = self.onboarding.onboard_user(
+                name=admin_name,
+                email=admin_email,
+                role=SecurityRole.CHIEF_ENGINEER,
+                tenant_id=tenant_id,
+                actor_id="TENANT_PROVISIONER",
+                audit_logger=app.audit_logger,
+                auth_manager=app.auth_manager,
+            )
+
+            if self.db.test_connection():
+                self.db.sync_organisation(tenant_id=tenant_id, name=name, code=code, billing_tier=tier)
+                self.db.sync_user(
+                    user_id=admin_user.user_id,
+                    tenant_id=tenant_id,
+                    email=admin_user.email,
+                    full_name=admin_user.name,
+                    role=admin_user.role.value,
+                    is_active=True,
+                    metadata={"token": admin_user.token, "permissions": admin_user.permissions},
+                )
+
+            return 200, {
+                "status": "SUCCESS",
+                "tenant_id": tenant_id,
+                "name": name,
+                "admin_user_id": admin_user.user_id,
+                "admin_email": admin_user.email,
+                "admin_token": admin_user.token,
+                "message": f"Tenant '{name}' ({tenant_id}) successfully enrolled with administrator {admin_name}.",
+            }
+        except Exception as e:
+            return 400, {"status": "ERROR", "message": str(e)}
+
+    def update_user_role_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
+        """Updates a user's role and permissions."""
+        user_id = payload.get("user_id")
+        new_role_str = payload.get("role")
+        if not user_id or not new_role_str:
+            return 400, {"status": "ERROR", "message": "user_id and role are required"}
+
+        try:
+            role_enum = SecurityRole[new_role_str.upper()]
+        except KeyError:
+            return 400, {"status": "ERROR", "message": f"Invalid role '{new_role_str}'. Valid roles: {[r.value for r in SecurityRole]}"}
+
+        user = self.onboarding.get_user(user_id)
+        if not user:
+            return 404, {"status": "ERROR", "message": f"User '{user_id}' not found"}
+
+        app = self.get_tenant_app(user.tenant_id)
+        updated_user = self.onboarding.update_user_role(
+            user_id=user_id,
+            new_role=role_enum,
+            actor_id=payload.get("actor_id", "SECURITY_ADMIN"),
+            audit_logger=app.audit_logger,
+        )
+        if self.db.test_connection():
+            self.db.update_user_role_pg(user_id=user_id, role=role_enum.value)
+
+        return 200, {
+            "status": "SUCCESS",
+            "user_id": user_id,
+            "role": updated_user.role.value,
+            "permissions": updated_user.permissions,
+            "message": f"Role updated to {updated_user.role.value} for user {updated_user.name}.",
+        }
+
+    def toggle_user_status_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
+        """Toggles user between ACTIVE and SUSPENDED status."""
+        user_id = payload.get("user_id")
+        target_status = payload.get("status")
+        if not user_id or not target_status:
+            return 400, {"status": "ERROR", "message": "user_id and status are required"}
+
+        user = self.onboarding.get_user(user_id)
+        if not user:
+            return 404, {"status": "ERROR", "message": f"User '{user_id}' not found"}
+
+        app = self.get_tenant_app(user.tenant_id)
+        try:
+            updated_user = self.onboarding.update_user_status(
+                user_id=user_id,
+                status=target_status,
+                actor_id=payload.get("actor_id", "SECURITY_ADMIN"),
+                audit_logger=app.audit_logger,
+            )
+            is_active = (updated_user.status == "ACTIVE")
+            if self.db.test_connection():
+                self.db.update_user_status_pg(user_id=user_id, is_active=is_active)
+
+            return 200, {
+                "status": "SUCCESS",
+                "user_id": user_id,
+                "new_status": updated_user.status,
+                "message": f"User {updated_user.name} status updated to {updated_user.status}.",
+            }
+        except ValueError as ve:
+            return 400, {"status": "ERROR", "message": str(ve)}
+
+    def regenerate_user_token_api(self, payload: dict, tenant_id: Optional[str] = None) -> tuple:
+        """Issues a new HMAC security token for a user."""
+        user_id = payload.get("user_id")
+        if not user_id:
+            return 400, {"status": "ERROR", "message": "user_id is required"}
+
+        user = self.onboarding.get_user(user_id)
+        if not user:
+            return 404, {"status": "ERROR", "message": f"User '{user_id}' not found"}
+
+        app = self.get_tenant_app(user.tenant_id)
+        new_token = self.onboarding.regenerate_user_token(
+            user_id=user_id,
+            auth_manager=app.auth_manager,
+            actor_id=payload.get("actor_id", "SECURITY_ADMIN"),
+            audit_logger=app.audit_logger,
+        )
+        if self.db.test_connection():
+            self.db.sync_user(
+                user_id=user.user_id,
+                tenant_id=user.tenant_id,
+                email=user.email,
+                full_name=user.name,
+                role=user.role.value,
+                is_active=(user.status == "ACTIVE"),
+                metadata={"token": new_token, "permissions": user.permissions},
+            )
+
+        return 200, {
+            "status": "SUCCESS",
+            "user_id": user_id,
+            "token": new_token,
+            "message": f"New HMAC security token issued for {user.name}.",
+        }
+
     def get_database_status_data(self) -> dict:
         """Returns PostgreSQL diagnostic status."""
         return self.db.get_status()
@@ -787,54 +1126,75 @@ class REAMPWebServerState:
 GLOBAL_STATE = REAMPWebServerState()
 
 
-def dispatch_api_request(method: str, path: str, payload: dict = None) -> tuple:
+def dispatch_api_request(method: str, path: str, payload: dict = None, headers: dict = None, query_params: dict = None) -> tuple:
     """
-    Unified router for REGENOVA API requests.
+    Unified router for REGENOVA API requests with multi-tenant isolation.
     Returns (status_code: int, data: dict/list).
     Used by both standalone HTTP server and Apache mod_wsgi.
     """
+    headers = headers or {}
+    query_params = query_params or {}
+    p = payload or {}
+
+    tenant_id = (
+        headers.get("X-Tenant-ID")
+        or headers.get("x-tenant-id")
+        or query_params.get("tenant_id")
+        or (p.get("tenant_id") if isinstance(p, dict) else None)
+        or GLOBAL_STATE.default_tenant_id
+    )
+
     if method in ("GET", "HEAD"):
-        if path == "/api/overview":
-            return 200, GLOBAL_STATE.get_overview_data()
+        if path == "/api/tenants":
+            return 200, GLOBAL_STATE.get_tenants_data()
+        elif path == "/api/overview":
+            return 200, GLOBAL_STATE.get_overview_data(tenant_id)
         elif path == "/api/sites":
-            return 200, GLOBAL_STATE.get_sites_data()
+            return 200, GLOBAL_STATE.get_sites_data(tenant_id)
         elif path == "/api/assets":
-            return 200, GLOBAL_STATE.get_assets_data()
+            return 200, GLOBAL_STATE.get_assets_data(tenant_id)
         elif path.startswith("/api/asset/"):
             asset_id = path.split("/")[-1]
-            return GLOBAL_STATE.get_asset_detail_data(asset_id)
+            return GLOBAL_STATE.get_asset_detail_data(asset_id, tenant_id)
         elif path == "/api/alerts":
-            return 200, GLOBAL_STATE.get_alerts_data()
+            return 200, GLOBAL_STATE.get_alerts_data(tenant_id)
         elif path == "/api/work-orders":
-            return 200, GLOBAL_STATE.get_work_orders_data()
+            return 200, GLOBAL_STATE.get_work_orders_data(tenant_id)
         elif path == "/api/adaptations":
-            return 200, GLOBAL_STATE.get_adaptations_data()
+            return 200, GLOBAL_STATE.get_adaptations_data(tenant_id)
         elif path == "/api/audit-chain":
-            return 200, GLOBAL_STATE.get_audit_chain_data()
+            return 200, GLOBAL_STATE.get_audit_chain_data(tenant_id)
         elif path == "/api/users":
-            return 200, GLOBAL_STATE.get_users_data()
+            return 200, GLOBAL_STATE.get_users_data(tenant_id)
         elif path == "/api/database/status":
             return 200, GLOBAL_STATE.get_database_status_data()
     elif method == "POST":
-        p = payload or {}
-        if path == "/api/telemetry/inject":
-            return 200, GLOBAL_STATE.inject_telemetry(p)
+        if path == "/api/onboarding/tenant":
+            return GLOBAL_STATE.onboard_tenant_api(p)
+        elif path == "/api/users/update-role":
+            return GLOBAL_STATE.update_user_role_api(p, tenant_id)
+        elif path == "/api/users/toggle-status":
+            return GLOBAL_STATE.toggle_user_status_api(p, tenant_id)
+        elif path == "/api/users/regenerate-token":
+            return GLOBAL_STATE.regenerate_user_token_api(p, tenant_id)
+        elif path == "/api/telemetry/inject":
+            return 200, GLOBAL_STATE.inject_telemetry(p, tenant_id)
         elif path == "/api/alerts/acknowledge":
-            return 200, GLOBAL_STATE.acknowledge_alert(p)
+            return 200, GLOBAL_STATE.acknowledge_alert(p, tenant_id)
         elif path == "/api/alerts/resolve":
-            return 200, GLOBAL_STATE.resolve_alert(p)
+            return 200, GLOBAL_STATE.resolve_alert(p, tenant_id)
         elif path == "/api/work-orders/approve":
-            return 200, GLOBAL_STATE.approve_work_order(p)
+            return 200, GLOBAL_STATE.approve_work_order(p, tenant_id)
         elif path == "/api/adaptations/propose":
-            return 200, GLOBAL_STATE.propose_adaptation(p)
+            return 200, GLOBAL_STATE.propose_adaptation(p, tenant_id)
         elif path == "/api/adaptations/approve":
-            return 200, GLOBAL_STATE.approve_adaptation(p)
+            return 200, GLOBAL_STATE.approve_adaptation(p, tenant_id)
         elif path == "/api/onboarding/user":
-            return GLOBAL_STATE.onboard_user_api(p)
+            return GLOBAL_STATE.onboard_user_api(p, tenant_id)
         elif path == "/api/onboarding/facility":
-            return GLOBAL_STATE.onboard_facility_api(p)
+            return GLOBAL_STATE.onboard_facility_api(p, tenant_id)
         elif path == "/api/onboarding/device":
-            return GLOBAL_STATE.onboard_device_api(p)
+            return GLOBAL_STATE.onboard_device_api(p, tenant_id)
 
     return 404, {"error": f"Endpoint '{path}' not found"}
 
@@ -850,7 +1210,7 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID")
         self.end_headers()
         self.wfile.write(json.dumps(data, default=str).encode("utf-8"))
 
@@ -858,7 +1218,7 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID")
         self.end_headers()
 
     def do_HEAD(self):
@@ -868,10 +1228,12 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         if path.startswith("/api/"):
-            status_code, data = dispatch_api_request("GET", path)
+            from urllib.parse import parse_qs
+            query_params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+            headers_dict = dict(self.headers)
+            status_code, data = dispatch_api_request("GET", path, headers=headers_dict, query_params=query_params)
             self._send_json(data, status_code)
         else:
-            # Fallback to serving static UI files
             super().do_GET()
 
     def do_POST(self):
@@ -885,7 +1247,10 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"error": f"Invalid JSON body: {e}"}, status=400)
             return
 
-        status_code, data = dispatch_api_request("POST", path, payload)
+        from urllib.parse import parse_qs
+        query_params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
+        headers_dict = dict(self.headers)
+        status_code, data = dispatch_api_request("POST", path, payload, headers=headers_dict, query_params=query_params)
         self._send_json(data, status_code)
 
 
@@ -903,7 +1268,7 @@ def application(environ, start_response):
             ("Content-Type", "text/plain"),
             ("Access-Control-Allow-Origin", "*"),
             ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
-            ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID"),
         ]
         start_response("204 No Content", headers)
         return [b""]
@@ -925,7 +1290,15 @@ def application(environ, start_response):
                 ])
                 return [resp_bytes]
 
-        status_code, data = dispatch_api_request(method, raw_path, payload)
+        headers_dict = {
+            "X-Tenant-ID": environ.get("HTTP_X_TENANT_ID"),
+            "Authorization": environ.get("HTTP_AUTHORIZATION"),
+            "Content-Type": environ.get("CONTENT_TYPE"),
+        }
+        from urllib.parse import parse_qs
+        query_params = {k: v[0] for k, v in parse_qs(environ.get("QUERY_STRING", "")).items()}
+
+        status_code, data = dispatch_api_request(method, raw_path, payload, headers=headers_dict, query_params=query_params)
         resp_bytes = json.dumps(data, default=str).encode("utf-8")
         status_text = "200 OK" if status_code == 200 else ("404 Not Found" if status_code == 404 else f"{status_code} Error")
         headers = [
@@ -933,12 +1306,13 @@ def application(environ, start_response):
             ("Content-Length", str(len(resp_bytes))),
             ("Access-Control-Allow-Origin", "*"),
             ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
-            ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Tenant-ID"),
         ]
         start_response(status_text, headers)
         if method == "HEAD":
             return [b""]
         return [resp_bytes]
+
 
     # 3. Static UI Assets
     web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")

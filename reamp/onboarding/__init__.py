@@ -5,6 +5,8 @@ Provides User, Facility (Site), and Device (Asset) onboarding lifecycle manageme
 
 from reamp.onboarding.models import (
     UserRecord,
+    TenantOnboardingRequest,
+    TenantRecord,
     FacilityOnboardingRequest,
     DeviceOnboardingRequest,
     OnboardingResult,
@@ -13,6 +15,8 @@ from reamp.onboarding.manager import OnboardingManager
 
 __all__ = [
     "UserRecord",
+    "TenantOnboardingRequest",
+    "TenantRecord",
     "FacilityOnboardingRequest",
     "DeviceOnboardingRequest",
     "OnboardingResult",

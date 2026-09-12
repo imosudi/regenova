@@ -18,10 +18,40 @@ class UserRecord:
     email: str
     role: SecurityRole
     tenant_id: str
-    status: str = "ACTIVE"
+    status: str = "ACTIVE"  # "ACTIVE", "SUSPENDED", "REVOKED"
     token: Optional[str] = None
     created_at: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    last_active: Optional[str] = None
     permissions: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class TenantOnboardingRequest:
+    """Request payload to onboard a new organization / corporate tenant."""
+    tenant_id: str
+    name: str
+    code: str
+    billing_tier: str = "ENTERPRISE"  # "ENTERPRISE", "UTILITY", "PILOT"
+    admin_name: str = "Chief Engineer"
+    admin_email: str = "admin@example.energy"
+    default_portfolio_name: str = "Default Portfolio"
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class TenantRecord:
+    """Registered multi-tenant organization entity."""
+    tenant_id: str
+    name: str
+    code: str
+    billing_tier: str
+    created_at: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    status: str = "ACTIVE"
+    sites_count: int = 0
+    assets_count: int = 0
+    users_count: int = 0
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -57,7 +87,8 @@ class OnboardingResult:
     """Standardized response from onboarding operations."""
     status: str  # "SUCCESS" or "ERROR"
     entity_id: str
-    entity_type: str  # "USER", "FACILITY", "DEVICE"
+    entity_type: str  # "USER", "FACILITY", "DEVICE", "TENANT"
     message: str
     details: Dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+

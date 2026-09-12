@@ -8,19 +8,28 @@ const API_BASE = (window.REGENOVA_API_URL !== undefined)
   ? window.REGENOVA_API_URL
   : (window.location.hostname === 'regenova.cloud' ? 'https://api.regenova.cloud' : '');
 
-function apiFetch(endpoint, options) {
+let currentTenantId = "ORG-HELIOS-GLOBAL";
+let allTenants = [];
+let allUsersList = [];
+let currentAssetId = "ASSET-INV-01";
+let pollTimer = null;
+
+function apiFetch(endpoint, options = {}) {
   const url = (typeof endpoint === 'string' && endpoint.startsWith('http'))
     ? endpoint
     : `${API_BASE}${endpoint}`;
-  return fetch(url, options);
+  const headers = Object.assign({}, options.headers || {});
+  if (!headers["X-Tenant-ID"]) {
+    headers["X-Tenant-ID"] = currentTenantId;
+  }
+  return fetch(url, Object.assign({}, options, { headers }));
 }
-
-let currentAssetId = "ASSET-INV-01";
-let pollTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   initSidebarInteractions();
   initOnboardingForms();
+  initTenantEnrolmentForm();
+  fetchTenants();
   loadAllData();
   // Poll every 3 seconds for live telemetry updates
   pollTimer = setInterval(loadAllData, 3000);
@@ -594,50 +603,314 @@ async function approveAdaptation(actionId) {
 }
 
 // ----------------------------------------------------------------------------
-// 9. Users & Onboarding Directory Logic
+// 9. Multi-Tenant Context & User Management Logic
 // ----------------------------------------------------------------------------
+
+async function fetchTenants() {
+  try {
+    const res = await apiFetch("/api/tenants");
+    if (!res.ok) return;
+    const data = await res.json();
+    allTenants = data.tenants || [];
+    populateTenantDropdowns();
+  } catch (err) {
+    console.error("Error fetching tenants:", err);
+  }
+}
+
+function populateTenantDropdowns() {
+  if (!allTenants || allTenants.length === 0) return;
+
+  // 1. Sidebar context select
+  const selectSidebar = document.getElementById("tenantContextSelect");
+  if (selectSidebar) {
+    const prevVal = selectSidebar.value || currentTenantId;
+    selectSidebar.innerHTML = allTenants.map(t => 
+      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.name}</option>`
+    ).join("");
+  }
+
+  // 2. User onboarding form tenant select
+  const selectUserTenant = document.getElementById("user-tenant");
+  if (selectUserTenant) {
+    const prevVal = selectUserTenant.value || currentTenantId;
+    selectUserTenant.innerHTML = allTenants.map(t => 
+      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.tenant_id} (${t.name})</option>`
+    ).join("");
+  }
+
+  // 3. User directory filter select
+  const selectFilterTenant = document.getElementById("filter-user-tenant");
+  if (selectFilterTenant) {
+    const prevVal = selectFilterTenant.value || "ALL";
+    selectFilterTenant.innerHTML = `<option value="ALL">All Tenants</option>` + allTenants.map(t => 
+      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.name}</option>`
+    ).join("");
+  }
+}
+
+function switchTenant(tenantId) {
+  if (!tenantId) return;
+  currentTenantId = tenantId;
+
+  // Sync sidebar dropdown
+  const selectSidebar = document.getElementById("tenantContextSelect");
+  if (selectSidebar && selectSidebar.value !== tenantId) {
+    selectSidebar.value = tenantId;
+  }
+
+  // Sync user onboarding form
+  const selectUserTenant = document.getElementById("user-tenant");
+  if (selectUserTenant) {
+    selectUserTenant.value = tenantId;
+  }
+
+  // Sync topbar tenant badge
+  const topbarBadge = document.getElementById("topbar-tenant-text");
+  if (topbarBadge) {
+    topbarBadge.innerText = tenantId;
+  }
+
+  // Update user profile card in sidebar according to active tenant
+  updateSidebarUserProfile(tenantId);
+
+  // Reload all scoped tenant data
+  loadAllData();
+}
+
+function updateSidebarUserProfile(tenantId) {
+  const nameEl = document.getElementById("sidebar-user-name");
+  const roleEl = document.getElementById("sidebar-user-role");
+  const orgEl = document.getElementById("sidebar-user-org");
+
+  if (tenantId === "ORG-AURORA-NORDIC") {
+    if (nameEl) nameEl.innerText = "Astrid Lindholm";
+    if (roleEl) roleEl.innerText = "Site Lead & Ops";
+    if (orgEl) orgEl.innerText = "ORG-AURORA-NORDIC";
+  } else if (tenantId === "ORG-SOLARIA-ESP") {
+    if (nameEl) nameEl.innerText = "Carlos Morales";
+    if (roleEl) roleEl.innerText = "Operations Mgr";
+    if (orgEl) orgEl.innerText = "ORG-SOLARIA-ESP";
+  } else if (tenantId === "ORG-HELIOS-GLOBAL") {
+    if (nameEl) nameEl.innerText = "Dr. Elena Rostova";
+    if (roleEl) roleEl.innerText = "Chief Engineer";
+    if (orgEl) orgEl.innerText = "ORG-HELIOS";
+  } else {
+    const matchedTenant = allTenants.find(t => t.tenant_id === tenantId);
+    if (nameEl) nameEl.innerText = (matchedTenant && matchedTenant.name) ? matchedTenant.name.split(" ")[0] + " Admin" : "Tenant Admin";
+    if (roleEl) roleEl.innerText = "Administrator";
+    if (orgEl) orgEl.innerText = tenantId;
+  }
+}
 
 async function fetchUsers() {
   try {
-    const res = await apiFetch("/api/users");
+    const res = await apiFetch("/api/users?all=true");
     if (!res.ok) return;
     const data = await res.json();
-    const users = data.users || [];
-
-    const statCount = document.getElementById("stat-onboard-users");
-    if (statCount) statCount.innerText = users.length;
-    const pillCount = document.getElementById("count-pill-users");
-    if (pillCount) pillCount.innerText = users.length;
-
-    const tbody = document.getElementById("directory-users-tbody");
-    if (tbody) {
-      tbody.innerHTML = users.map(u => {
-        let roleBadge = "bg-primary";
-        if (u.role === "CHIEF_ENGINEER") roleBadge = "bg-purple text-white";
-        else if (u.role === "SECURITY_ADMIN") roleBadge = "bg-danger";
-        else if (u.role === "VIEWER") roleBadge = "bg-secondary";
-
-        const permsHtml = (u.permissions || []).slice(0, 3).map(p => 
-          `<span class="badge bg-light text-dark border me-1">${p}</span>`
-        ).join("") + ((u.permissions && u.permissions.length > 3) ? `<span class="badge bg-light text-muted border">+${u.permissions.length - 3}</span>` : '');
-
-        return `
-          <tr>
-            <td class="font-monospace fw-bold text-dark">${u.user_id}</td>
-            <td class="fw-semibold">${u.name}</td>
-            <td class="text-muted small">${u.email}</td>
-            <td><span class="badge ${roleBadge}">${u.role}</span></td>
-            <td class="small font-monospace">${u.tenant_id}</td>
-            <td><code class="user-select-all small">${u.token || "TOK-ACTIVE"}</code></td>
-            <td>${permsHtml}</td>
-            <td><span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-circle me-1"></i>${u.status}</span></td>
-          </tr>
-        `;
-      }).join("");
-    }
+    allUsersList = data.users || [];
+    filterAndRenderUsers();
   } catch (err) {
     console.error("Error fetching users:", err);
   }
+}
+
+function filterAndRenderUsers() {
+  const filterTenantEl = document.getElementById("filter-user-tenant");
+  const filterSearchEl = document.getElementById("filter-user-search");
+
+  const filterTenant = filterTenantEl ? filterTenantEl.value : "ALL";
+  const filterSearch = (filterSearchEl ? filterSearchEl.value : "").toLowerCase().trim();
+
+  let filtered = allUsersList.filter(u => {
+    if (filterTenant !== "ALL" && u.tenant_id !== filterTenant) return false;
+    if (filterSearch) {
+      const matchName = (u.name || "").toLowerCase().includes(filterSearch);
+      const matchEmail = (u.email || "").toLowerCase().includes(filterSearch);
+      const matchId = (u.user_id || "").toLowerCase().includes(filterSearch);
+      if (!matchName && !matchEmail && !matchId) return false;
+    }
+    return true;
+  });
+
+  // KPI count of users for active tenant
+  const tenantUsersCount = allUsersList.filter(u => u.tenant_id === currentTenantId).length;
+  const statCount = document.getElementById("stat-onboard-users");
+  if (statCount) statCount.innerText = tenantUsersCount;
+  const pillCount = document.getElementById("count-pill-users");
+  if (pillCount) pillCount.innerText = filtered.length;
+
+  const tbody = document.getElementById("directory-users-tbody");
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-person-x fs-3 d-block mb-1"></i>No users match the selected filter.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(u => {
+    const isSuspended = (u.status === "SUSPENDED");
+    const statusBadge = isSuspended
+      ? `<span class="badge badge-status-suspended"><i class="bi bi-dash-circle me-1"></i>SUSPENDED</span>`
+      : `<span class="badge badge-status-active"><i class="bi bi-check-circle me-1"></i>ACTIVE</span>`;
+
+    const permsHtml = (u.permissions || []).slice(0, 2).map(p => 
+      `<span class="badge bg-light text-dark border me-1" style="font-size: 0.68rem;">${p}</span>`
+    ).join("") + ((u.permissions && u.permissions.length > 2) ? `<span class="badge bg-light text-muted border" style="font-size: 0.68rem;">+${u.permissions.length - 2}</span>` : '');
+
+    const toggleStatusAction = isSuspended
+      ? `<button class="btn btn-xs btn-outline-success py-0 px-1 me-1" onclick="toggleUserStatus('${u.user_id}', 'ACTIVE')" title="Reactivate user access" style="font-size: 0.72rem;"><i class="bi bi-play-circle me-1"></i>Activate</button>`
+      : `<button class="btn btn-xs btn-outline-warning py-0 px-1 me-1" onclick="toggleUserStatus('${u.user_id}', 'SUSPENDED')" title="Suspend user access" style="font-size: 0.72rem;"><i class="bi bi-pause-circle me-1"></i>Suspend</button>`;
+
+    return `
+      <tr>
+        <td class="font-monospace fw-bold text-dark">${u.user_id}</td>
+        <td>
+          <div class="fw-semibold text-dark">${u.name}</div>
+          <div class="text-muted small">${u.email}</div>
+        </td>
+        <td><span class="badge badge-tenant-pill">${u.tenant_id}</span></td>
+        <td>
+          <select class="form-select form-select-sm py-0 px-2 fw-semibold" style="font-size: 0.75rem; width: auto;" onchange="updateUserRole('${u.user_id}', this.value)">
+            <option value="OPERATOR" ${u.role === 'OPERATOR' ? 'selected' : ''}>Operator</option>
+            <option value="CHIEF_ENGINEER" ${u.role === 'CHIEF_ENGINEER' ? 'selected' : ''}>Chief Engineer</option>
+            <option value="SECURITY_ADMIN" ${u.role === 'SECURITY_ADMIN' ? 'selected' : ''}>Security Admin</option>
+            <option value="VIEWER" ${u.role === 'VIEWER' ? 'selected' : ''}>Viewer</option>
+          </select>
+        </td>
+        <td>${statusBadge}</td>
+        <td>
+          <code class="user-select-all small">${(u.token || "TOK-ACTIVE").substring(0, 14)}...</code>
+        </td>
+        <td>${permsHtml}</td>
+        <td class="text-end">
+          <div class="d-inline-flex align-items-center">
+            ${toggleStatusAction}
+            <button class="btn btn-xs btn-outline-primary py-0 px-1" onclick="regenerateUserToken('${u.user_id}')" title="Regenerate HMAC security token" style="font-size: 0.72rem;">
+              <i class="bi bi-arrow-repeat me-1"></i>New Token
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function updateUserRole(userId, newRole) {
+  try {
+    const res = await apiFetch("/api/users/update-role", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, role: newRole }),
+    });
+    const data = await res.json();
+    if (data.status === "SUCCESS") {
+      fetchUsers();
+      fetchAuditChain();
+    } else {
+      alert(`Role update failed: ${data.message || 'Unknown error'}`);
+      fetchUsers();
+    }
+  } catch (err) {
+    alert(`Network error updating role: ${err.message}`);
+  }
+}
+
+async function toggleUserStatus(userId, newStatus) {
+  try {
+    const res = await apiFetch("/api/users/toggle-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, status: newStatus }),
+    });
+    const data = await res.json();
+    if (data.status === "SUCCESS") {
+      fetchUsers();
+      fetchAuditChain();
+    } else {
+      alert(`Status toggle failed: ${data.message || 'Unknown error'}`);
+    }
+  } catch (err) {
+    alert(`Network error toggling status: ${err.message}`);
+  }
+}
+
+async function regenerateUserToken(userId) {
+  if (!confirm(`Are you sure you want to regenerate the HMAC security token for ${userId}? Existing edge tokens will be revoked.`)) {
+    return;
+  }
+  try {
+    const res = await apiFetch("/api/users/regenerate-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    const data = await res.json();
+    if (data.status === "SUCCESS") {
+      const issuedToken = data.token || data.new_token;
+      alert(`New HMAC Token issued for ${userId}:\n\n${issuedToken}`);
+      fetchUsers();
+      fetchAuditChain();
+    } else {
+      alert(`Token regeneration failed: ${data.message || 'Unknown error'}`);
+    }
+  } catch (err) {
+    alert(`Network error regenerating token: ${err.message}`);
+  }
+}
+
+function initTenantEnrolmentForm() {
+  const form = document.getElementById("form-enroll-tenant");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const alertBox = document.getElementById("tenant-enroll-alert");
+    const btnSubmit = document.getElementById("btn-submit-enroll-tenant");
+
+    alertBox.className = "alert alert-danger small d-none mb-3";
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Enrolling...`;
+
+    try {
+      const payload = {
+        tenant_id: document.getElementById("tenant-org-id").value.trim().toUpperCase(),
+        name: document.getElementById("tenant-org-name").value.trim(),
+        code: document.getElementById("tenant-org-code").value.trim().toUpperCase(),
+        billing_tier: document.getElementById("tenant-billing-tier").value,
+        admin_name: document.getElementById("tenant-admin-name").value.trim(),
+        admin_email: document.getElementById("tenant-admin-email").value.trim(),
+      };
+
+      const res = await apiFetch("/api/onboarding/tenant", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (data.status === "SUCCESS") {
+        form.reset();
+        const modalEl = document.getElementById("modalEnrollTenant");
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) modalInstance.hide();
+
+        await fetchTenants();
+        switchTenant(payload.tenant_id);
+        fetchUsers();
+        fetchAuditChain();
+      } else {
+        alertBox.className = "alert alert-danger small d-block mb-3";
+        alertBox.innerText = `Enrolment failed: ${data.message || 'Unknown error'}`;
+      }
+    } catch (err) {
+      alertBox.className = "alert alert-danger small d-block mb-3";
+      alertBox.innerText = `Network error: ${err.message}`;
+    } finally {
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organization`;
+    }
+  });
 }
 
 function initOnboardingForms() {
@@ -667,7 +940,8 @@ function initOnboardingForms() {
           alertBox.className = "alert alert-success mt-3 small py-2 d-block";
           alertBox.innerHTML = `<strong>Success:</strong> User <code>${data.user.user_id}</code> (${data.user.name}) provisioned with role <code>${data.user.role}</code>.<br>Issued Token: <code class="user-select-all">${data.user.token}</code>`;
           formUser.reset();
-          document.getElementById("user-tenant").value = "ORG-HELIOS-GLOBAL";
+          const userTenantEl = document.getElementById("user-tenant");
+          if (userTenantEl) userTenantEl.value = currentTenantId;
           fetchUsers();
           fetchAuditChain();
         } else {
