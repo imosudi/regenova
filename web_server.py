@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-REAMP Production Web Application Server.
-Serves the modern, interactive SCADA & Fleet Intelligence Web Application at http://localhost:8000.
+REGENOVA Production Web Application & WSGI Server.
+Serves the modern, interactive SCADA & Fleet Intelligence Web Application.
+Supports both standalone execution (http.server) and Apache mod_wsgi.
 Connects directly to REAMPApplicationMVP, REAMPAppAPI, and AdaptiveIntelligenceEngine.
 """
 
@@ -9,6 +10,7 @@ import sys
 import os
 import json
 import datetime
+import mimetypes
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
@@ -224,94 +226,12 @@ class REAMPWebServerState:
             "state_of_charge_percent": 74.0, "temperature_cell_max_c": 26.0,
         })
 
-
-GLOBAL_STATE = REAMPWebServerState()
-
-
-class REAMPRequestHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), "web"), **kwargs)
-
-    def _send_json(self, data, status=200):
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.end_headers()
-        self.wfile.write(json.dumps(data, default=str).encode("utf-8"))
-
-    def do_OPTIONS(self):
-        self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-        self.end_headers()
-
-    def do_HEAD(self):
-        self.do_GET()
-
-    def do_GET(self):
-        parsed = urlparse(self.path)
-        path = parsed.path
-
-        if path == "/api/overview":
-            self.handle_overview()
-        elif path == "/api/sites":
-            self.handle_sites()
-        elif path == "/api/assets":
-            self.handle_assets()
-        elif path.startswith("/api/asset/"):
-            asset_id = path.split("/")[-1]
-            self.handle_asset_detail(asset_id)
-        elif path == "/api/alerts":
-            self.handle_alerts()
-        elif path == "/api/work-orders":
-            self.handle_work_orders()
-        elif path == "/api/adaptations":
-            self.handle_adaptations()
-        elif path == "/api/audit-chain":
-            self.handle_audit_chain()
-        elif path == "/api/users":
-            self.handle_users()
-        else:
-            # Fallback to serving static UI files
-            super().do_GET()
-
-    def do_POST(self):
-        parsed = urlparse(self.path)
-        path = parsed.path
-        length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
-        payload = json.loads(body) if body else {}
-
-        if path == "/api/telemetry/inject":
-            self.handle_telemetry_inject(payload)
-        elif path == "/api/alerts/acknowledge":
-            self.handle_alert_ack(payload)
-        elif path == "/api/alerts/resolve":
-            self.handle_alert_resolve(payload)
-        elif path == "/api/work-orders/approve":
-            self.handle_wo_approve(payload)
-        elif path == "/api/adaptations/propose":
-            self.handle_adaptation_propose(payload)
-        elif path == "/api/adaptations/approve":
-            self.handle_adaptation_approve(payload)
-        elif path == "/api/onboarding/user":
-            self.handle_onboard_user(payload)
-        elif path == "/api/onboarding/facility":
-            self.handle_onboard_facility(payload)
-        elif path == "/api/onboarding/device":
-            self.handle_onboard_device(payload)
-        else:
-            self._send_json({"error": f"Endpoint '{path}' not found"}, status=404)
-
     # -------------------------------------------------------------------------
-    # API Handlers
+    # Core Data & Action Handlers
     # -------------------------------------------------------------------------
 
-    def handle_overview(self):
-        app = GLOBAL_STATE.app
+    def get_overview_data(self) -> dict:
+        app = self.app
         total_gen_kw = sum(app.latest_performance_ratio.get(a, 0.0) * (app.assets[a].rated_power_kw if a in app.assets else 2000.0) for a in app.assets)
         total_cap_mw = sum(s.rated_capacity_mw for s in app.sites.values())
         healths = list(app.latest_health.values())
@@ -321,7 +241,7 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
         active_alerts = len([a for a in app.alerts.values() if a.status == AlertStatus.ACTIVE])
         pending_wo = len([w for w in app.cmms_engine.work_orders.values() if w.status == WorkOrderStatus.PENDING_HITL_APPROVAL])
 
-        data = {
+        return {
             "tenant_id": app.tenant_id,
             "total_generation_mw": round(total_gen_kw / 1000.0, 2),
             "total_capacity_mw": round(total_cap_mw, 1),
@@ -335,10 +255,9 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             "audit_chain_length": len(app.audit_logger._chain),
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         }
-        self._send_json(data)
 
-    def handle_sites(self):
-        app = GLOBAL_STATE.app
+    def get_sites_data(self) -> list:
+        app = self.app
         sites = []
         for s in app.sites.values():
             assets = [a for a in app.assets.values() if a.site_id == s.site_id]
@@ -360,10 +279,10 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 "active_generation_mw": round(gen_kw / 1000.0, 2),
                 "asset_count": len(assets),
             })
-        self._send_json(sites)
+        return sites
 
-    def handle_assets(self):
-        app = GLOBAL_STATE.app
+    def get_assets_data(self) -> list:
+        app = self.app
         result = []
         for a in app.assets.values():
             site = app.sites.get(a.site_id)
@@ -388,13 +307,12 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 "performance_ratio": round(app.latest_performance_ratio.get(a.asset_id, 0.95), 3),
                 "status": a.status.value if hasattr(a.status, "value") else str(a.status),
             })
-        self._send_json(result)
+        return result
 
-    def handle_asset_detail(self, asset_id):
-        app = GLOBAL_STATE.app
+    def get_asset_detail_data(self, asset_id: str) -> tuple:
+        app = self.app
         if asset_id not in app.assets:
-            self._send_json({"error": f"Asset {asset_id} not found"}, status=404)
-            return
+            return 404, {"error": f"Asset {asset_id} not found"}
 
         a = app.assets[asset_id]
         site = app.sites.get(a.site_id)
@@ -418,7 +336,6 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 "is_thermal_deviating": twin.residuals.is_thermal_deviating,
             }
 
-        # Specific technology details
         tech = site.technology.value if site and hasattr(site.technology, "value") else "SOLAR_PV"
 
         detail = {
@@ -477,11 +394,11 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 for wo in app.cmms_engine.work_orders.values() if wo.asset_id == asset_id
             ]
         }
-        self._send_json(detail)
+        return 200, detail
 
-    def handle_alerts(self):
-        app = GLOBAL_STATE.app
-        alerts = [
+    def get_alerts_data(self) -> list:
+        app = self.app
+        return [
             {
                 "alert_id": a.alert_id,
                 "site_id": a.site_id,
@@ -494,11 +411,10 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             }
             for a in app.alerts.values()
         ]
-        self._send_json(alerts)
 
-    def handle_work_orders(self):
-        app = GLOBAL_STATE.app
-        wos = [
+    def get_work_orders_data(self) -> list:
+        app = self.app
+        return [
             {
                 "work_order_id": wo.work_order_id,
                 "asset_id": wo.asset_id,
@@ -513,11 +429,10 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             }
             for wo in app.cmms_engine.work_orders.values()
         ]
-        self._send_json(wos)
 
-    def handle_adaptations(self):
-        app = GLOBAL_STATE.app
-        history = [
+    def get_adaptations_data(self) -> list:
+        app = self.app
+        return [
             {
                 "action_id": a.action_id,
                 "asset_id": a.asset_id,
@@ -533,10 +448,9 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             }
             for a in app.adaptive_engine.adaptation_history.values()
         ]
-        self._send_json(history)
 
-    def handle_audit_chain(self):
-        app = GLOBAL_STATE.app
+    def get_audit_chain_data(self) -> dict:
+        app = self.app
         chain = app.audit_logger._chain
         intact, err_idx = app.audit_logger.verify_chain_integrity()
         recent = [
@@ -552,18 +466,20 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             }
             for e in reversed(chain[-20:])
         ]
-        self._send_json({
+        return {
             "is_valid": intact,
             "corrupted_index": err_idx,
             "total_entries": len(chain),
             "recent_entries": recent,
-        })
+        }
 
-    def handle_telemetry_inject(self, payload):
-        app = GLOBAL_STATE.app
+    def get_users_data(self) -> dict:
+        return {"users": self.onboarding.list_users()}
+
+    def inject_telemetry(self, payload: dict) -> dict:
+        app = self.app
         asset_id = payload.get("asset_id", "ASSET-INV-01")
         scenario = payload.get("scenario", "nominal")
-
         now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         if scenario == "blower_fault":
@@ -594,36 +510,27 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             }
 
         res = app.process_telemetry_packet(asset_id, telemetry)
-        self._send_json({
+        return {
             "status": "INGESTED",
             "asset_id": asset_id,
             "scenario": scenario,
             "result": res,
-        })
+        }
 
-    def handle_alert_ack(self, payload):
-        app = GLOBAL_STATE.app
+    def acknowledge_alert(self, payload: dict) -> dict:
         alert_id = payload.get("alert_id")
-        token = GLOBAL_STATE.admin_token
-        res = GLOBAL_STATE.api.acknowledge_alert(alert_id=alert_id, auth_token=token)
-        self._send_json(res)
+        return self.api.acknowledge_alert(alert_id=alert_id, auth_token=self.admin_token)
 
-    def handle_alert_resolve(self, payload):
-        app = GLOBAL_STATE.app
+    def resolve_alert(self, payload: dict) -> dict:
         alert_id = payload.get("alert_id")
-        token = GLOBAL_STATE.admin_token
-        res = GLOBAL_STATE.api.resolve_alert(alert_id=alert_id, auth_token=token)
-        self._send_json(res)
+        return self.api.resolve_alert(alert_id=alert_id, auth_token=self.admin_token)
 
-    def handle_wo_approve(self, payload):
-        app = GLOBAL_STATE.app
+    def approve_work_order(self, payload: dict) -> dict:
         wo_id = payload.get("work_order_id")
-        token = GLOBAL_STATE.admin_token
-        res = GLOBAL_STATE.api.approve_work_order(work_order_id=wo_id, auth_token=token)
-        self._send_json(res)
+        return self.api.approve_work_order(work_order_id=wo_id, auth_token=self.admin_token)
 
-    def handle_adaptation_propose(self, payload):
-        app = GLOBAL_STATE.app
+    def propose_adaptation(self, payload: dict) -> dict:
+        app = self.app
         asset_id = payload.get("asset_id", "ASSET-INV-01")
         shift = float(payload.get("shift_pct", -15.0))
         cur = app.adaptive_engine.get_baseline_multiplier(asset_id)
@@ -637,16 +544,16 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             reason=f"Interactive simulation of drift ({shift:+.1f}%)",
             audit_logger=app.audit_logger,
         )
-        self._send_json({
+        return {
             "action_id": action.action_id,
             "requires_hitl": action.requires_hitl,
             "status": action.status.value,
             "previous_value": action.previous_value,
             "adapted_value": action.adapted_value,
-        })
+        }
 
-    def handle_adaptation_approve(self, payload):
-        app = GLOBAL_STATE.app
+    def approve_adaptation(self, payload: dict) -> dict:
+        app = self.app
         action_id = payload.get("action_id")
         action = app.adaptive_engine.approve_adaptation(
             action_id=action_id,
@@ -654,34 +561,30 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
             approver_role=SecurityRole.CHIEF_ENGINEER,
             audit_logger=app.audit_logger,
         )
-        self._send_json({
+        return {
             "action_id": action.action_id,
             "status": action.status.value,
             "approved_by": action.approved_by,
-        })
+        }
 
-    def handle_users(self):
-        users = GLOBAL_STATE.onboarding.list_users()
-        self._send_json({"users": users})
-
-    def handle_onboard_user(self, payload):
+    def onboard_user_api(self, payload: dict) -> tuple:
         try:
             name = payload.get("name", "").strip()
             email = payload.get("email", "").strip()
             role_str = payload.get("role", "OPERATOR").upper()
             role = SecurityRole[role_str]
-            tenant_id = payload.get("tenant_id") or GLOBAL_STATE.app.tenant_id
+            tenant_id = payload.get("tenant_id") or self.app.tenant_id
 
-            user = GLOBAL_STATE.onboarding.onboard_user(
+            user = self.onboarding.onboard_user(
                 name=name,
                 email=email,
                 role=role,
                 tenant_id=tenant_id,
                 actor_id="admin-web",
-                audit_logger=GLOBAL_STATE.app.audit_logger,
-                auth_manager=GLOBAL_STATE.app.auth_manager,
+                audit_logger=self.app.audit_logger,
+                auth_manager=self.app.auth_manager,
             )
-            self._send_json({
+            return 200, {
                 "status": "SUCCESS",
                 "message": f"User '{user.name}' successfully onboarded.",
                 "user": {
@@ -694,11 +597,11 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                     "token": user.token,
                     "permissions": user.permissions,
                 }
-            })
+            }
         except Exception as e:
-            self._send_json({"status": "ERROR", "message": str(e)}, status=400)
+            return 400, {"status": "ERROR", "message": str(e)}
 
-    def handle_onboard_facility(self, payload):
+    def onboard_facility_api(self, payload: dict) -> tuple:
         try:
             tech_str = payload.get("technology", "SOLAR_PV").upper()
             tech = TechnologyType[tech_str]
@@ -712,23 +615,23 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 rated_capacity_mw=float(payload.get("rated_capacity_mw", 10.0)),
                 metadata=payload.get("metadata", {}),
             )
-            res = GLOBAL_STATE.onboarding.onboard_facility(
-                GLOBAL_STATE.app,
+            res = self.onboarding.onboard_facility(
+                self.app,
                 req,
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
-            self._send_json({
+            return status_code, {
                 "status": res.status,
                 "entity_id": res.entity_id,
                 "entity_type": res.entity_type,
                 "message": res.message,
                 "details": res.details,
-            }, status=status_code)
+            }
         except Exception as e:
-            self._send_json({"status": "ERROR", "message": str(e)}, status=400)
+            return 400, {"status": "ERROR", "message": str(e)}
 
-    def handle_onboard_device(self, payload):
+    def onboard_device_api(self, payload: dict) -> tuple:
         try:
             req = DeviceOnboardingRequest(
                 device_id=payload.get("device_id", "").strip(),
@@ -741,28 +644,216 @@ class REAMPRequestHandler(SimpleHTTPRequestHandler):
                 provision_digital_twin=bool(payload.get("provision_digital_twin", True)),
                 metadata=payload.get("metadata", {}),
             )
-            res = GLOBAL_STATE.onboarding.onboard_device(
-                GLOBAL_STATE.app,
+            res = self.onboarding.onboard_device(
+                self.app,
                 req,
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
-            self._send_json({
+            return status_code, {
                 "status": res.status,
                 "entity_id": res.entity_id,
                 "entity_type": res.entity_type,
                 "message": res.message,
                 "details": res.details,
-            }, status=status_code)
+            }
         except Exception as e:
-            self._send_json({"status": "ERROR", "message": str(e)}, status=400)
+            return 400, {"status": "ERROR", "message": str(e)}
+
+
+GLOBAL_STATE = REAMPWebServerState()
+
+
+def dispatch_api_request(method: str, path: str, payload: dict = None) -> tuple:
+    """
+    Unified router for REGENOVA API requests.
+    Returns (status_code: int, data: dict/list).
+    Used by both standalone HTTP server and Apache mod_wsgi.
+    """
+    if method == "GET":
+        if path == "/api/overview":
+            return 200, GLOBAL_STATE.get_overview_data()
+        elif path == "/api/sites":
+            return 200, GLOBAL_STATE.get_sites_data()
+        elif path == "/api/assets":
+            return 200, GLOBAL_STATE.get_assets_data()
+        elif path.startswith("/api/asset/"):
+            asset_id = path.split("/")[-1]
+            return GLOBAL_STATE.get_asset_detail_data(asset_id)
+        elif path == "/api/alerts":
+            return 200, GLOBAL_STATE.get_alerts_data()
+        elif path == "/api/work-orders":
+            return 200, GLOBAL_STATE.get_work_orders_data()
+        elif path == "/api/adaptations":
+            return 200, GLOBAL_STATE.get_adaptations_data()
+        elif path == "/api/audit-chain":
+            return 200, GLOBAL_STATE.get_audit_chain_data()
+        elif path == "/api/users":
+            return 200, GLOBAL_STATE.get_users_data()
+    elif method == "POST":
+        p = payload or {}
+        if path == "/api/telemetry/inject":
+            return 200, GLOBAL_STATE.inject_telemetry(p)
+        elif path == "/api/alerts/acknowledge":
+            return 200, GLOBAL_STATE.acknowledge_alert(p)
+        elif path == "/api/alerts/resolve":
+            return 200, GLOBAL_STATE.resolve_alert(p)
+        elif path == "/api/work-orders/approve":
+            return 200, GLOBAL_STATE.approve_work_order(p)
+        elif path == "/api/adaptations/propose":
+            return 200, GLOBAL_STATE.propose_adaptation(p)
+        elif path == "/api/adaptations/approve":
+            return 200, GLOBAL_STATE.approve_adaptation(p)
+        elif path == "/api/onboarding/user":
+            return GLOBAL_STATE.onboard_user_api(p)
+        elif path == "/api/onboarding/facility":
+            return GLOBAL_STATE.onboard_facility_api(p)
+        elif path == "/api/onboarding/device":
+            return GLOBAL_STATE.onboard_device_api(p)
+
+    return 404, {"error": f"Endpoint '{path}' not found"}
+
+
+class REAMPRequestHandler(SimpleHTTPRequestHandler):
+    """HTTP Request Handler for standalone development server."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=os.path.join(os.path.dirname(__file__), "web"), **kwargs)
+
+    def _send_json(self, data, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+        self.wfile.write(json.dumps(data, default=str).encode("utf-8"))
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.end_headers()
+
+    def do_HEAD(self):
+        self.do_GET()
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+        if path.startswith("/api/"):
+            status_code, data = dispatch_api_request("GET", path)
+            self._send_json(data, status_code)
+        else:
+            # Fallback to serving static UI files
+            super().do_GET()
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+        try:
+            payload = json.loads(body) if body else {}
+        except Exception as e:
+            self._send_json({"error": f"Invalid JSON body: {e}"}, status=400)
+            return
+
+        status_code, data = dispatch_api_request("POST", path, payload)
+        self._send_json(data, status_code)
+
+
+def application(environ, start_response):
+    """
+    Standard WSGI application interface for Apache mod_wsgi.
+    Handles API endpoints with JSON serialization and serves static UI assets.
+    """
+    method = environ.get("REQUEST_METHOD", "GET").upper()
+    raw_path = environ.get("PATH_INFO", "/")
+
+    # 1. CORS Preflight
+    if method == "OPTIONS":
+        headers = [
+            ("Content-Type", "text/plain"),
+            ("Access-Control-Allow-Origin", "*"),
+            ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
+        ]
+        start_response("204 No Content", headers)
+        return [b""]
+
+    # 2. API Endpoints
+    if raw_path.startswith("/api/"):
+        payload = {}
+        if method == "POST":
+            try:
+                content_length = int(environ.get("CONTENT_LENGTH", 0) or 0)
+                if content_length > 0:
+                    body = environ["wsgi.input"].read(content_length).decode("utf-8")
+                    payload = json.loads(body) if body else {}
+            except Exception as e:
+                resp_bytes = json.dumps({"error": f"Invalid JSON payload: {e}"}).encode("utf-8")
+                start_response("400 Bad Request", [
+                    ("Content-Type", "application/json"),
+                    ("Content-Length", str(len(resp_bytes))),
+                ])
+                return [resp_bytes]
+
+        status_code, data = dispatch_api_request(method, raw_path, payload)
+        resp_bytes = json.dumps(data, default=str).encode("utf-8")
+        status_text = "200 OK" if status_code == 200 else ("404 Not Found" if status_code == 404 else f"{status_code} Error")
+        headers = [
+            ("Content-Type", "application/json"),
+            ("Content-Length", str(len(resp_bytes))),
+            ("Access-Control-Allow-Origin", "*"),
+            ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
+            ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
+        ]
+        start_response(status_text, headers)
+        return [resp_bytes]
+
+    # 3. Static UI Assets
+    web_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "web")
+    subpath = raw_path.lstrip("/")
+    if not subpath or subpath == "":
+        subpath = "index.html"
+
+    file_path = os.path.abspath(os.path.join(web_dir, subpath))
+    # Path traversal protection
+    if not file_path.startswith(web_dir) or not os.path.isfile(file_path):
+        resp = b"404 Not Found"
+        start_response("404 Not Found", [
+            ("Content-Type", "text/plain"),
+            ("Content-Length", str(len(resp))),
+        ])
+        return [resp]
+
+    mime, _ = mimetypes.guess_type(file_path)
+    if not mime:
+        if file_path.endswith(".css"):
+            mime = "text/css"
+        elif file_path.endswith(".js"):
+            mime = "application/javascript"
+        else:
+            mime = "application/octet-stream"
+
+    with open(file_path, "rb") as f:
+        file_content = f.read()
+
+    headers = [
+        ("Content-Type", mime),
+        ("Content-Length", str(len(file_content))),
+    ]
+    start_response("200 OK", headers)
+    return [file_content]
 
 
 def run_server(port=8000):
     server_address = ("", port)
     httpd = HTTPServer(server_address, REAMPRequestHandler)
     print(f"================================================================")
-    print(f" REAMP Production Web Application Server Running")
+    print(f" REGENOVA Web Application & WSGI Server Running")
     print(f" URL: http://localhost:{port}")
     print(f"================================================================")
     httpd.serve_forever()
