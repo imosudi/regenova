@@ -20,10 +20,10 @@
       "detected": true,
       "latency_samples": 0,
       "alerts_dispatched": [
-        "ALT-6CA4D288",
-        "ALT-67248B75"
+        "ALT-9BCB2AB0",
+        "ALT-7DA41C4D"
       ],
-      "work_order_created": "WO-31F1B677",
+      "work_order_created": "WO-56CFF834",
       "work_order_status": "PENDING_HITL_APPROVAL",
       "hitl_gate_enforced": true,
       "financial_risk_usd": 2876.71
@@ -33,9 +33,9 @@
       "detected": true,
       "latency_samples": 0,
       "alerts_dispatched": [
-        "ALT-0F4A202C"
+        "ALT-16D5EA94"
       ],
-      "work_order_created": "WO-C4C72924",
+      "work_order_created": "WO-A5DAAF3C",
       "work_order_status": "PENDING_HITL_APPROVAL",
       "hitl_gate_enforced": true,
       "financial_risk_usd": 2920.6
@@ -45,7 +45,7 @@
       "detected": true,
       "latency_samples": 0,
       "alerts_dispatched": [],
-      "work_order_created": "WO-A2FAAC1A",
+      "work_order_created": "WO-A4B1E8E2",
       "work_order_status": "PENDING_HITL_APPROVAL",
       "hitl_gate_enforced": true,
       "financial_risk_usd": 2870.0

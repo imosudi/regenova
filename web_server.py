@@ -10,6 +10,7 @@ import sys
 import os
 import json
 import datetime
+import hashlib
 import mimetypes
 from typing import Dict, List, Optional, Any, Tuple
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -1122,6 +1123,88 @@ class REAMPWebServerState:
         """Returns PostgreSQL diagnostic status."""
         return self.db.get_status()
 
+    def admin_login_api(self, payload: dict) -> tuple:
+        """
+        Authenticates a super-administrator for the Backoffice console.
+        Enforces default administrator credentials:
+        User: imosudi@gmail.com, Password: password
+        """
+        try:
+            email = (payload.get("email") or payload.get("username") or "").strip().lower()
+            password = payload.get("password") or ""
+
+            admin_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
+            admin_password = os.environ.get("REAMP_ADMIN_PASSWORD", "password")
+
+            if email == admin_email and password == admin_password:
+                token_hash = hashlib.sha256(f"{email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
+                session_token = f"ADM-SEC-{token_hash[:16].upper()}"
+
+                app = self.get_tenant_app(self.default_tenant_id)
+                if app and app.audit_logger:
+                    try:
+                        app.audit_logger.record(
+                            action="ADMIN_LOGIN_SUCCESS",
+                            actor_id=email,
+                            details={"role": "SECURITY_ADMIN", "scope": "PLATFORM_ROOT", "auth_method": "PASSWORD"},
+                        )
+                    except Exception:
+                        pass
+
+                return 200, {
+                    "status": "SUCCESS",
+                    "token": session_token,
+                    "user": {
+                        "email": email,
+                        "name": "Platform Super Administrator",
+                        "role": "SECURITY_ADMIN",
+                        "scope": "PLATFORM_ROOT",
+                        "tenant_id": "ORG-PLATFORM-ROOT",
+                    },
+                    "message": "Super Administrator authenticated successfully."
+                }
+            else:
+                app = self.get_tenant_app(self.default_tenant_id)
+                if app and app.audit_logger:
+                    try:
+                        app.audit_logger.record(
+                            action="ADMIN_LOGIN_FAILED",
+                            actor_id=email or "anonymous",
+                            details={"reason": "INVALID_CREDENTIALS", "attempted_email": email},
+                        )
+                    except Exception:
+                        pass
+
+                return 401, {
+                    "status": "ERROR",
+                    "message": "Invalid administrator credentials. Access denied."
+                }
+        except Exception as e:
+            return 500, {"status": "ERROR", "message": str(e)}
+
+    def admin_verify_api(self, token: str) -> tuple:
+        """Verifies active administrator session token."""
+        try:
+            expected_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
+            token_hash = hashlib.sha256(f"{expected_email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
+            expected_token = f"ADM-SEC-{token_hash[:16].upper()}"
+
+            if token and token.strip() == expected_token:
+                return 200, {
+                    "status": "SUCCESS",
+                    "valid": True,
+                    "user": {
+                        "email": expected_email,
+                        "name": "Platform Super Administrator",
+                        "role": "SECURITY_ADMIN",
+                        "scope": "PLATFORM_ROOT",
+                        "tenant_id": "ORG-PLATFORM-ROOT",
+                    }
+                }
+            return 401, {"status": "ERROR", "valid": False, "message": "Invalid or expired administrator session."}
+        except Exception as e:
+            return 500, {"status": "ERROR", "message": str(e)}
+
 
 GLOBAL_STATE = REAMPWebServerState()
 
@@ -1168,8 +1251,16 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
             return 200, GLOBAL_STATE.get_users_data(tenant_id)
         elif path == "/api/database/status":
             return 200, GLOBAL_STATE.get_database_status_data()
+        elif path in ("/api/admin/session", "/api/admin/verify"):
+            raw_tok = query_params.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Admin-Token", "")
+            return GLOBAL_STATE.admin_verify_api(raw_tok)
     elif method == "POST":
-        if path == "/api/onboarding/tenant":
+        if path == "/api/admin/login":
+            return GLOBAL_STATE.admin_login_api(p)
+        elif path == "/api/admin/verify":
+            raw_tok = p.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Admin-Token", "")
+            return GLOBAL_STATE.admin_verify_api(raw_tok)
+        elif path == "/api/onboarding/tenant":
             return GLOBAL_STATE.onboard_tenant_api(p)
         elif path == "/api/users/update-role":
             return GLOBAL_STATE.update_user_role_api(p, tenant_id)

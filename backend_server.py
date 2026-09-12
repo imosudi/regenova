@@ -58,7 +58,7 @@ class BackofficeRequestHandler(SimpleHTTPRequestHandler):
         body = self.rfile.read(content_len) if content_len > 0 else None
 
         req_headers = {}
-        for h in ["Content-Type", "Authorization", "X-Tenant-ID", "x-tenant-id"]:
+        for h in ["Content-Type", "Authorization", "X-Tenant-ID", "x-tenant-id", "X-Admin-Token", "x-admin-token"]:
             if h in self.headers:
                 req_headers[h] = self.headers[h]
 
@@ -124,7 +124,7 @@ def application(environ, start_response):
                 req_headers["Content-Type"] = v
             elif k.startswith("HTTP_"):
                 header_name = k[5:].replace("_", "-").title()
-                if header_name in ("Authorization", "X-Tenant-Id", "Content-Type"):
+                if header_name in ("Authorization", "X-Tenant-Id", "Content-Type", "X-Admin-Token"):
                     req_headers[header_name] = v
 
         try:

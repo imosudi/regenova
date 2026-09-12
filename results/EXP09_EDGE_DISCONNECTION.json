@@ -7,9 +7,9 @@
   "data_loss_rate_pct": 0.0,
   "fifo_order_preserved": true,
   "performance_metrics": {
-    "buffering_time_s": 0.0152,
-    "sync_time_s": 1.9138,
-    "backfill_throughput_obs_sec": 261.26
+    "buffering_time_s": 0.0162,
+    "sync_time_s": 2.3139,
+    "backfill_throughput_obs_sec": 216.08
   },
   "audit_integrity": {
     "is_valid": true,

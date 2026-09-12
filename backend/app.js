@@ -9,11 +9,52 @@ const API_BASE = (window.REGENOVA_API_URL !== undefined)
   ? window.REGENOVA_API_URL
   : (window.location.hostname === 'backoffice.regenova.cloud' ? 'https://api.regenova.cloud' : '');
 
+const ADMIN_AUTH_KEY = "regenova_admin_session";
+
+function getStoredAdminAuth() {
+  const raw = sessionStorage.getItem(ADMIN_AUTH_KEY) || localStorage.getItem(ADMIN_AUTH_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredAdminAuth(authData, remember) {
+  const serialized = JSON.stringify(authData);
+  sessionStorage.setItem(ADMIN_AUTH_KEY, serialized);
+  if (remember) {
+    localStorage.setItem(ADMIN_AUTH_KEY, serialized);
+  } else {
+    localStorage.removeItem(ADMIN_AUTH_KEY);
+  }
+}
+
+function clearStoredAdminAuth() {
+  sessionStorage.removeItem(ADMIN_AUTH_KEY);
+  localStorage.removeItem(ADMIN_AUTH_KEY);
+}
+
 function apiFetch(endpoint, options = {}) {
   const url = (typeof endpoint === 'string' && endpoint.startsWith('http'))
     ? endpoint
     : `${API_BASE}${endpoint}`;
-  return fetch(url, options);
+
+  const headers = Object.assign({}, options.headers || {});
+  const auth = getStoredAdminAuth();
+  if (auth && auth.token) {
+    headers["Authorization"] = `Bearer ${auth.token}`;
+    headers["X-Admin-Token"] = auth.token;
+  }
+
+  return fetch(url, { ...options, headers }).then((res) => {
+    if (res.status === 401 && endpoint !== "/api/admin/login") {
+      clearStoredAdminAuth();
+      lockConsole();
+    }
+    return res;
+  });
 }
 
 let allTenants = [];
@@ -29,14 +70,137 @@ const CANONICAL_21_TABLES = [
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
+  initAdminAuthGateway();
   initSidebarInteractions();
   initModalsAndForms();
-  loadAllBackofficeData();
-  // Poll every 4 seconds for live cross-tenant metrics
-  pollTimer = setInterval(loadAllBackofficeData, 4000);
   updateUtcClock();
   setInterval(updateUtcClock, 1000);
+
+  const auth = getStoredAdminAuth();
+  if (auth && auth.token) {
+    unlockConsole(auth);
+  } else {
+    lockConsole();
+  }
 });
+
+function initAdminAuthGateway() {
+  const form = document.getElementById("formAdminLogin");
+  const alertBox = document.getElementById("loginAlert");
+  const toggleBtn = document.getElementById("togglePasswordBtn");
+  const passInput = document.getElementById("loginPassword");
+  const passIcon = document.getElementById("togglePasswordIcon");
+
+  if (toggleBtn && passInput && passIcon) {
+    toggleBtn.addEventListener("click", () => {
+      const isPass = passInput.type === "password";
+      passInput.type = isPass ? "text" : "password";
+      passIcon.className = isPass ? "bi bi-eye-slash text-muted" : "bi bi-eye text-muted";
+    });
+  }
+
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById("loginEmail");
+      const submitBtn = document.getElementById("btnLoginSubmit");
+      const rememberInput = document.getElementById("rememberMe");
+
+      const email = emailInput ? emailInput.value.trim() : "";
+      const password = passInput ? passInput.value : "";
+      const remember = rememberInput ? rememberInput.checked : true;
+
+      if (!email || !password) {
+        if (alertBox) {
+          alertBox.className = "alert alert-warning py-2 px-3 small";
+          alertBox.innerText = "Please enter both administrator email and password.";
+          alertBox.classList.remove("d-none");
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Authenticating...`;
+      }
+      if (alertBox) alertBox.classList.add("d-none");
+
+      try {
+        const res = await apiFetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (res.ok && data.status === "SUCCESS") {
+          setStoredAdminAuth(data, remember);
+          unlockConsole(data);
+        } else {
+          if (alertBox) {
+            alertBox.className = "alert alert-danger py-2 px-3 small";
+            alertBox.innerText = data.message || "Invalid administrator credentials. Access denied.";
+            alertBox.classList.remove("d-none");
+          }
+        }
+      } catch (err) {
+        console.error("Login request failed:", err);
+        if (alertBox) {
+          alertBox.className = "alert alert-danger py-2 px-3 small";
+          alertBox.innerText = "Authentication service error. Please try again.";
+          alertBox.classList.remove("d-none");
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = `<i class="bi bi-box-arrow-in-right me-2"></i><span>Authenticate & Access Console</span>`;
+        }
+      }
+    });
+  }
+}
+
+function unlockConsole(authData) {
+  const loginScreen = document.getElementById("backofficeLoginScreen");
+  const appLayout = document.getElementById("backofficeAppLayout");
+
+  if (loginScreen) loginScreen.classList.add("d-none");
+  if (appLayout) appLayout.classList.remove("d-none");
+
+  const email = (authData && authData.user && authData.user.email) ? authData.user.email : "imosudi@gmail.com";
+  const topbarEmail = document.getElementById("topbar-admin-email");
+  const sidebarEmail = document.getElementById("sidebar-admin-email");
+
+  if (topbarEmail) topbarEmail.innerText = email;
+  if (sidebarEmail) sidebarEmail.innerText = email;
+
+  // Load initial dataset
+  loadAllBackofficeData();
+  // Ensure polling timer is active
+  if (!pollTimer) {
+    pollTimer = setInterval(loadAllBackofficeData, 4000);
+  }
+}
+
+function lockConsole() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  const loginScreen = document.getElementById("backofficeLoginScreen");
+  const appLayout = document.getElementById("backofficeAppLayout");
+
+  if (appLayout) appLayout.classList.add("d-none");
+  if (loginScreen) loginScreen.classList.remove("d-none");
+
+  const alertBox = document.getElementById("loginAlert");
+  if (alertBox) alertBox.classList.add("d-none");
+}
+
+function handleAdminLogout() {
+  clearStoredAdminAuth();
+  lockConsole();
+}
 
 async function loadAllBackofficeData() {
   try {
