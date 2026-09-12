@@ -670,7 +670,7 @@ def dispatch_api_request(method: str, path: str, payload: dict = None) -> tuple:
     Returns (status_code: int, data: dict/list).
     Used by both standalone HTTP server and Apache mod_wsgi.
     """
-    if method == "GET":
+    if method in ("GET", "HEAD"):
         if path == "/api/overview":
             return 200, GLOBAL_STATE.get_overview_data()
         elif path == "/api/sites":
@@ -811,6 +811,8 @@ def application(environ, start_response):
             ("Access-Control-Allow-Headers", "Content-Type, Authorization"),
         ]
         start_response(status_text, headers)
+        if method == "HEAD":
+            return [b""]
         return [resp_bytes]
 
     # 3. Static UI Assets
