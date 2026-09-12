@@ -12,6 +12,7 @@ import json
 import datetime
 import hashlib
 import mimetypes
+from dataclasses import asdict
 from typing import Dict, List, Optional, Any, Tuple
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
@@ -29,6 +30,7 @@ from reamp.mvp import (
     AlertStatus,
 )
 from reamp.security.models import SecurityRole
+from reamp.security.soc2_audit import SOC2ComplianceAuditor
 from reamp.cmms.models import WorkOrderStatus
 from reamp.adaptive.models import AdaptationType
 from reamp.onboarding import (
@@ -550,13 +552,7 @@ class REAMPWebServerState:
     def get_asset_detail_data(self, asset_id: str, tenant_id: Optional[str] = None) -> tuple:
         app = self.get_tenant_app(tenant_id)
         if asset_id not in app.assets:
-            for other_app in self.tenants.values():
-                if asset_id in other_app.assets:
-                    app = other_app
-                    break
-
-        if asset_id not in app.assets:
-            return 404, {"error": f"Asset {asset_id} not found"}
+            return 404, {"error": f"Asset '{asset_id}' not found in tenant partition '{app.tenant_id}'."}
 
         a = app.assets[asset_id]
         site = app.sites.get(a.site_id)
@@ -729,6 +725,11 @@ class REAMPWebServerState:
         t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
         app = self.get_tenant_app(t_id)
         asset_id = payload.get("asset_id") or list(app.assets.keys())[0]
+        if asset_id not in app.assets:
+            return {
+                "status": "ERROR",
+                "message": f"Asset '{asset_id}' does not belong to tenant partition '{app.tenant_id}'."
+            }
         scenario = payload.get("scenario", "nominal")
         now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
@@ -784,23 +785,35 @@ class REAMPWebServerState:
             "result": res,
         }
 
-    def acknowledge_alert(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+    def acknowledge_alert(self, payload: dict, tenant_id: Optional[str] = None, actor_id: Optional[str] = None) -> tuple:
         alert_id = payload.get("alert_id")
         app = self.get_tenant_app(tenant_id)
-        api = REAMPAppAPI(app)
-        return api.acknowledge_alert(alert_id=alert_id, auth_token=self.admin_token)
+        if not alert_id or alert_id not in app.alerts:
+            return 404, {"status": "ERROR", "message": f"Alert '{alert_id}' not found in tenant partition '{app.tenant_id}'."}
+        effective_actor = actor_id or "admin-operator"
+        alert = app.acknowledge_alert(alert_id=alert_id, acknowledged_by=effective_actor)
+        return 200, {"status": "SUCCESS", "alert_id": alert_id, "acknowledged_by": effective_actor, "alert": asdict(alert)}
 
-    def resolve_alert(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+    def resolve_alert(self, payload: dict, tenant_id: Optional[str] = None, actor_id: Optional[str] = None) -> tuple:
         alert_id = payload.get("alert_id")
         app = self.get_tenant_app(tenant_id)
-        api = REAMPAppAPI(app)
-        return api.resolve_alert(alert_id=alert_id, auth_token=self.admin_token)
+        if not alert_id or alert_id not in app.alerts:
+            return 404, {"status": "ERROR", "message": f"Alert '{alert_id}' not found in tenant partition '{app.tenant_id}'."}
+        effective_actor = actor_id or "chief-engineer"
+        alert = app.resolve_alert(alert_id=alert_id, resolved_by=effective_actor)
+        return 200, {"status": "SUCCESS", "alert_id": alert_id, "resolved_by": effective_actor, "alert": asdict(alert)}
 
-    def approve_work_order(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+    def approve_work_order(self, payload: dict, tenant_id: Optional[str] = None, actor_id: Optional[str] = None) -> tuple:
         wo_id = payload.get("work_order_id")
         app = self.get_tenant_app(tenant_id)
-        api = REAMPAppAPI(app)
-        return api.approve_work_order(work_order_id=wo_id, auth_token=self.admin_token)
+        if not wo_id or wo_id not in app.cmms_engine.work_orders:
+            return 404, {"status": "ERROR", "message": f"Work order '{wo_id}' not found in tenant partition '{app.tenant_id}'."}
+        effective_actor = actor_id or "chief-engineer"
+        wo = app.approve_work_order(
+            work_order_id=wo_id,
+            approved_by=effective_actor,
+        )
+        return 200, {"status": "SUCCESS", "work_order_id": wo_id, "approved_by": effective_actor, "work_order": asdict(wo)}
 
     def propose_adaptation(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
         app = self.get_tenant_app(tenant_id)
@@ -825,18 +838,21 @@ class REAMPWebServerState:
             "adapted_value": action.adapted_value,
         }
 
-    def approve_adaptation(self, payload: dict, tenant_id: Optional[str] = None) -> dict:
+    def approve_adaptation(self, payload: dict, tenant_id: Optional[str] = None, actor_id: Optional[str] = None) -> tuple:
         app = self.get_tenant_app(tenant_id)
         action_id = payload.get("action_id")
+        if not action_id or action_id not in app.adaptive_engine.adaptation_history:
+            return 404, {"status": "ERROR", "message": f"Adaptation '{action_id}' not found in tenant partition '{app.tenant_id}'."}
+        effective_actor = actor_id or "chief-engineer"
         action = app.adaptive_engine.approve_adaptation(
             action_id=action_id,
-            approver_id="chief-eng-web",
+            approver_id=effective_actor,
             approver_role=SecurityRole.CHIEF_ENGINEER,
             audit_logger=app.audit_logger,
         )
-        return {
+        return 200, {
+            "status": "SUCCESS",
             "action_id": action.action_id,
-            "status": action.status.value,
             "approved_by": action.approved_by,
         }
 
@@ -1459,14 +1475,34 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
     if operator_user:
         op_tenant_id = operator_user.tenant_id
         if path == "/api/onboarding/tenant":
+            msg = "Tenant onboarding is restricted to Platform Super Administrators in the Backoffice."
+            app = GLOBAL_STATE.get_tenant_app(op_tenant_id)
+            app.audit_logger.append_entry(
+                actor_id=operator_user.email,
+                tenant_id=op_tenant_id,
+                action="PRIVILEGE_ESCALATION_ATTEMPT",
+                resource_id="TENANT_ONBOARDING",
+                outcome="DENIED",
+                details={"endpoint": path, "reason": msg},
+            )
             return 403, {
                 "status": "ERROR",
-                "message": "Tenant onboarding is restricted to Platform Super Administrators in the Backoffice."
+                "message": msg
             }
         if requested_tenant_id and requested_tenant_id != op_tenant_id:
+            msg = f"Tenant boundary violation: Operator '{operator_user.email}' is partitioned to '{op_tenant_id}' and is not permitted to access tenant partition '{requested_tenant_id}'."
+            app = GLOBAL_STATE.get_tenant_app(op_tenant_id)
+            app.audit_logger.append_entry(
+                actor_id=operator_user.email,
+                tenant_id=op_tenant_id,
+                action="SECURITY_BOUNDARY_VIOLATION",
+                resource_id=requested_tenant_id,
+                outcome="DENIED",
+                details={"endpoint": path, "method": method, "reason": msg},
+            )
             return 403, {
                 "status": "ERROR",
-                "message": f"Tenant boundary violation: Operator '{operator_user.email}' is partitioned to '{op_tenant_id}' and is not permitted to access tenant partition '{requested_tenant_id}'."
+                "message": msg
             }
         tenant_id = op_tenant_id
     else:
@@ -1499,6 +1535,10 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
             return 200, GLOBAL_STATE.get_users_data(target_tenant)
         elif path == "/api/database/status":
             return 200, GLOBAL_STATE.get_database_status_data()
+        elif path == "/api/soc2/audit":
+            auditor = SOC2ComplianceAuditor(GLOBAL_STATE)
+            report = auditor.audit_platform()
+            return 200, report.to_dict()
         elif path in ("/api/admin/session", "/api/admin/verify"):
             raw_tok = query_params.get("token") or auth_header.replace("Bearer ", "") or admin_token_header
             return GLOBAL_STATE.admin_verify_api(raw_tok)
@@ -1523,36 +1563,95 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
                     "message": "Tenant onboarding is restricted to Platform Super Administrators in the Backoffice."
                 }
             return GLOBAL_STATE.onboard_tenant_api(p)
-        elif path == "/api/users/update-role":
+        elif path in ("/api/users/update-role", "/api/users/toggle-status", "/api/users/regenerate-token"):
             if operator_user:
                 target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
                 if target_u and target_u.tenant_id != operator_user.tenant_id:
-                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
-            return GLOBAL_STATE.update_user_role_api(p, tenant_id)
-        elif path == "/api/users/toggle-status":
-            if operator_user:
-                target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
-                if target_u and target_u.tenant_id != operator_user.tenant_id:
-                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
-            return GLOBAL_STATE.toggle_user_status_api(p, tenant_id)
-        elif path == "/api/users/regenerate-token":
-            if operator_user:
-                target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
-                if target_u and target_u.tenant_id != operator_user.tenant_id:
-                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
-            return GLOBAL_STATE.regenerate_user_token_api(p, tenant_id)
+                    msg = "Cross-tenant user modification prohibited."
+                    app = GLOBAL_STATE.get_tenant_app(op_tenant_id)
+                    app.audit_logger.append_entry(
+                        actor_id=operator_user.email,
+                        tenant_id=op_tenant_id,
+                        action="SECURITY_BOUNDARY_VIOLATION",
+                        resource_id=p.get("user_id", "UNKNOWN"),
+                        outcome="DENIED",
+                        details={"endpoint": path, "target_tenant": target_u.tenant_id},
+                    )
+                    return 403, {"status": "ERROR", "message": msg}
+            if path == "/api/users/update-role":
+                return GLOBAL_STATE.update_user_role_api(p, tenant_id)
+            elif path == "/api/users/toggle-status":
+                return GLOBAL_STATE.toggle_user_status_api(p, tenant_id)
+            elif path == "/api/users/regenerate-token":
+                return GLOBAL_STATE.regenerate_user_token_api(p, tenant_id)
         elif path == "/api/telemetry/inject":
-            return 200, GLOBAL_STATE.inject_telemetry(p, tenant_id)
+            res = GLOBAL_STATE.inject_telemetry(p, tenant_id)
+            code = 200 if res.get("status") == "INGESTED" else 400
+            return code, res
         elif path == "/api/alerts/acknowledge":
-            return 200, GLOBAL_STATE.acknowledge_alert(p, tenant_id)
+            if operator_user and operator_user.role == "VIEWER":
+                msg = "Access Denied: Viewers cannot acknowledge alerts."
+                app = GLOBAL_STATE.get_tenant_app(tenant_id)
+                app.audit_logger.append_entry(
+                    actor_id=operator_user.email,
+                    tenant_id=tenant_id,
+                    action="UNAUTHORIZED_ACTION_ATTEMPT",
+                    resource_id=p.get("alert_id", "UNKNOWN"),
+                    outcome="DENIED",
+                    details={"endpoint": path, "role": operator_user.role},
+                )
+                return 403, {"status": "ERROR", "message": msg}
+            actor = operator_user.email if operator_user else "admin"
+            return GLOBAL_STATE.acknowledge_alert(p, tenant_id, actor_id=actor)
         elif path == "/api/alerts/resolve":
-            return 200, GLOBAL_STATE.resolve_alert(p, tenant_id)
+            if operator_user and operator_user.role in ("VIEWER", "OPERATOR"):
+                msg = "Access Denied: Resolving alerts requires Chief Engineer authority."
+                app = GLOBAL_STATE.get_tenant_app(tenant_id)
+                app.audit_logger.append_entry(
+                    actor_id=operator_user.email,
+                    tenant_id=tenant_id,
+                    action="UNAUTHORIZED_ACTION_ATTEMPT",
+                    resource_id=p.get("alert_id", "UNKNOWN"),
+                    outcome="DENIED",
+                    details={"endpoint": path, "role": operator_user.role},
+                )
+                return 403, {"status": "ERROR", "message": msg}
+            actor = operator_user.email if operator_user else "chief-engineer"
+            return GLOBAL_STATE.resolve_alert(p, tenant_id, actor_id=actor)
         elif path == "/api/work-orders/approve":
-            return 200, GLOBAL_STATE.approve_work_order(p, tenant_id)
+            if operator_user and operator_user.role in ("VIEWER", "OPERATOR"):
+                msg = "Access Denied: Approving work orders requires Chief Engineer authority."
+                app = GLOBAL_STATE.get_tenant_app(tenant_id)
+                app.audit_logger.append_entry(
+                    actor_id=operator_user.email,
+                    tenant_id=tenant_id,
+                    action="UNAUTHORIZED_ACTION_ATTEMPT",
+                    resource_id=p.get("work_order_id", "UNKNOWN"),
+                    outcome="DENIED",
+                    details={"endpoint": path, "role": operator_user.role},
+                )
+                return 403, {"status": "ERROR", "message": msg}
+            actor = operator_user.email if operator_user else "chief-engineer"
+            return GLOBAL_STATE.approve_work_order(p, tenant_id, actor_id=actor)
         elif path == "/api/adaptations/propose":
+            if operator_user and operator_user.role == "VIEWER":
+                return 403, {"status": "ERROR", "message": "Access Denied: Viewers cannot propose adaptations."}
             return 200, GLOBAL_STATE.propose_adaptation(p, tenant_id)
         elif path == "/api/adaptations/approve":
-            return 200, GLOBAL_STATE.approve_adaptation(p, tenant_id)
+            if operator_user and operator_user.role in ("VIEWER", "OPERATOR"):
+                msg = "Access Denied: Approving adaptations requires Chief Engineer authority."
+                app = GLOBAL_STATE.get_tenant_app(tenant_id)
+                app.audit_logger.append_entry(
+                    actor_id=operator_user.email,
+                    tenant_id=tenant_id,
+                    action="UNAUTHORIZED_ACTION_ATTEMPT",
+                    resource_id=p.get("action_id", "UNKNOWN"),
+                    outcome="DENIED",
+                    details={"endpoint": path, "role": operator_user.role},
+                )
+                return 403, {"status": "ERROR", "message": msg}
+            actor = operator_user.email if operator_user else "chief-engineer"
+            return GLOBAL_STATE.approve_adaptation(p, tenant_id, actor_id=actor)
         elif path == "/api/onboarding/user":
             if operator_user:
                 p["tenant_id"] = operator_user.tenant_id

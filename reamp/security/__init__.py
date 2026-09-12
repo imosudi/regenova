@@ -28,6 +28,12 @@ from reamp.security.review import (
     SecurityReviewReport,
 )
 
+from reamp.security.soc2_audit import (
+    SOC2ComplianceAuditor,
+    SOC2ControlResult,
+    SOC2AuditReport,
+)
+
 __all__ = [
     "SecurityRole",
     "Permission",
@@ -43,4 +49,7 @@ __all__ = [
     "InterfaceSecurityReviewer",
     "InterfaceReviewResult",
     "SecurityReviewReport",
+    "SOC2ComplianceAuditor",
+    "SOC2ControlResult",
+    "SOC2AuditReport",
 ]
