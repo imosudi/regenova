@@ -40,6 +40,7 @@ KNOWN_ENDPOINTS = [
     "/api/onboarding/facility",
     "/api/onboarding/device",
     "/api/telemetry/inject",
+    "/api/database/status",
 ]
 
 

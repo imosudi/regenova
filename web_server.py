@@ -34,6 +34,7 @@ from reamp.onboarding import (
     FacilityOnboardingRequest,
     DeviceOnboardingRequest,
 )
+from reamp.storage import PostgresDatabaseManager
 
 
 class REAMPWebServerState:
@@ -47,6 +48,9 @@ class REAMPWebServerState:
         self.api = REAMPAppAPI(self.app)
         self.admin_token = self.api.authenticate("chief-eng-web", SecurityRole.CHIEF_ENGINEER)
 
+        # Database persistence layer (PostgreSQL)
+        self.db = PostgresDatabaseManager()
+
         # Onboarding lifecycle manager
         self.onboarding = OnboardingManager()
         self._seed_default_users()
@@ -56,6 +60,53 @@ class REAMPWebServerState:
 
         # Seed initial nominal telemetry for all assets
         self._seed_fleet_telemetry()
+
+        # Synchronize topology & seed entities to PostgreSQL
+        self._sync_to_database()
+
+    def _sync_to_database(self):
+        """Synchronizes in-memory topology and seeded users to PostgreSQL if available."""
+        try:
+            if not self.db.test_connection():
+                return
+            self.db.sync_organisation(self.app.tenant_id, name="Helios Global Renewables", code=self.app.tenant_id)
+            for s in self.app.sites.values():
+                tech_val = s.technology.value if hasattr(s.technology, 'value') else str(s.technology)
+                self.db.sync_site(
+                    site_id=s.site_id,
+                    tenant_id=self.app.tenant_id,
+                    portfolio_id=s.portfolio_id,
+                    name=s.name,
+                    code=s.site_id,
+                    latitude=s.latitude,
+                    longitude=s.longitude,
+                    rated_capacity_mw=s.rated_capacity_mw,
+                    technology=tech_val,
+                )
+            for a in self.app.assets.values():
+                self.db.sync_asset(
+                    asset_id=a.asset_id,
+                    tenant_id=self.app.tenant_id,
+                    site_id=a.site_id,
+                    name=a.name,
+                    code=a.asset_id,
+                    asset_type=a.asset_type,
+                    model=a.model,
+                    rated_power_kw=a.rated_power_kw,
+                )
+            for u in self.onboarding.list_users():
+                role_val = u.role.value if hasattr(u.role, 'value') else str(u.role)
+                self.db.sync_user(
+                    user_id=u.user_id,
+                    tenant_id=u.tenant_id,
+                    email=u.email,
+                    full_name=u.name,
+                    role=role_val,
+                    is_active=True,
+                    metadata={"token": u.token, "permissions": u.permissions},
+                )
+        except Exception:
+            pass
 
     def _seed_default_users(self):
         self.onboarding.onboard_user(
@@ -510,6 +561,24 @@ class REAMPWebServerState:
             }
 
         res = app.process_telemetry_packet(asset_id, telemetry)
+
+        # Persist telemetry observation to PostgreSQL if available
+        if self.db.test_connection():
+            try:
+                for metric in ("ac_power_kw", "heatsink_temp"):
+                    if metric in telemetry:
+                        self.db.record_telemetry_observation(
+                            timestamp_str=now_iso,
+                            tenant_id=self.app.tenant_id,
+                            asset_id=asset_id,
+                            metric=metric,
+                            sensor_id=f"SNS-{asset_id}-{metric}",
+                            value=float(telemetry[metric]),
+                            unit="kW" if "power" in metric else "C",
+                        )
+            except Exception:
+                pass
+
         return {
             "status": "INGESTED",
             "asset_id": asset_id,
@@ -584,6 +653,21 @@ class REAMPWebServerState:
                 audit_logger=self.app.audit_logger,
                 auth_manager=self.app.auth_manager,
             )
+            # Persist to PostgreSQL if available
+            if self.db.test_connection():
+                try:
+                    self.db.sync_user(
+                        user_id=user.user_id,
+                        tenant_id=user.tenant_id,
+                        email=user.email,
+                        full_name=user.name,
+                        role=user.role.value,
+                        is_active=True,
+                        metadata={"token": user.token, "permissions": user.permissions},
+                    )
+                except Exception:
+                    pass
+
             return 200, {
                 "status": "SUCCESS",
                 "message": f"User '{user.name}' successfully onboarded.",
@@ -621,6 +705,24 @@ class REAMPWebServerState:
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
+
+            # Persist to PostgreSQL if available
+            if res.status == "SUCCESS" and self.db.test_connection():
+                try:
+                    self.db.sync_site(
+                        site_id=req.facility_id,
+                        tenant_id=self.app.tenant_id,
+                        portfolio_id=req.portfolio_id,
+                        name=req.name,
+                        code=req.facility_id,
+                        latitude=req.latitude,
+                        longitude=req.longitude,
+                        rated_capacity_mw=req.rated_capacity_mw,
+                        technology=req.technology.value,
+                    )
+                except Exception:
+                    pass
+
             return status_code, {
                 "status": res.status,
                 "entity_id": res.entity_id,
@@ -650,6 +752,23 @@ class REAMPWebServerState:
                 actor_id="admin-web",
             )
             status_code = 200 if res.status == "SUCCESS" else 400
+
+            # Persist to PostgreSQL if available
+            if res.status == "SUCCESS" and self.db.test_connection():
+                try:
+                    self.db.sync_asset(
+                        asset_id=req.device_id,
+                        tenant_id=self.app.tenant_id,
+                        site_id=req.facility_id,
+                        name=req.name,
+                        code=req.device_id,
+                        asset_type=req.asset_type,
+                        model=req.model,
+                        rated_power_kw=req.rated_power_kw,
+                    )
+                except Exception:
+                    pass
+
             return status_code, {
                 "status": res.status,
                 "entity_id": res.entity_id,
@@ -659,6 +778,10 @@ class REAMPWebServerState:
             }
         except Exception as e:
             return 400, {"status": "ERROR", "message": str(e)}
+
+    def get_database_status_data(self) -> dict:
+        """Returns PostgreSQL diagnostic status."""
+        return self.db.get_status()
 
 
 GLOBAL_STATE = REAMPWebServerState()
@@ -690,6 +813,8 @@ def dispatch_api_request(method: str, path: str, payload: dict = None) -> tuple:
             return 200, GLOBAL_STATE.get_audit_chain_data()
         elif path == "/api/users":
             return 200, GLOBAL_STATE.get_users_data()
+        elif path == "/api/database/status":
+            return 200, GLOBAL_STATE.get_database_status_data()
     elif method == "POST":
         p = payload or {}
         if path == "/api/telemetry/inject":
