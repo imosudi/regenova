@@ -85,7 +85,7 @@ class REAMPWebServerState:
         # Provision Secondary Pre-seeded Tenants (Aurora Nordic & Solaria Iberia)
         self._provision_secondary_tenants()
 
-        # Synchronize topology & seed entities to PostgreSQL
+        # Synchronise topology & seed entities to PostgreSQL
         self._sync_to_database()
 
     def get_tenant_app(self, tenant_id: Optional[str] = None) -> REAMPApplicationMVP:
@@ -114,13 +114,13 @@ class REAMPWebServerState:
         }
 
     def _sync_to_database(self):
-        """Synchronizes in-memory topology and seeded users to PostgreSQL if available."""
+        """Synchronises in-memory topology and seeded users to PostgreSQL if available."""
         try:
             if not self.db.test_connection():
                 return
             for t_id, app in self.tenants.items():
                 t_rec = self.onboarding.get_tenant(t_id)
-                t_name = t_rec.name if t_rec else f"Organization {t_id}"
+                t_name = t_rec.name if t_rec else f"Organisation {t_id}"
                 t_code = t_rec.code if t_rec else t_id.replace("ORG-", "")
                 t_tier = t_rec.billing_tier if t_rec else "ENTERPRISE"
                 self.db.sync_organisation(t_id, name=t_name, code=t_code, billing_tier=t_tier)
@@ -984,7 +984,7 @@ class REAMPWebServerState:
             return 400, {"status": "ERROR", "message": str(e)}
 
     def onboard_tenant_api(self, payload: dict) -> tuple:
-        """Onboards a new corporate organization tenant with administrative contact."""
+        """Onboards a new corporate organisation tenant with administrative contact."""
         try:
             tenant_id = payload.get("tenant_id", "").strip().upper()
             if not tenant_id:
@@ -992,7 +992,7 @@ class REAMPWebServerState:
             if not tenant_id.startswith("ORG-"):
                 tenant_id = f"ORG-{tenant_id}"
 
-            name = payload.get("name", "").strip() or f"Organization {tenant_id}"
+            name = payload.get("name", "").strip() or f"Organisation {tenant_id}"
             code = payload.get("code", "").strip().upper() or tenant_id.replace("ORG-", "")
             tier = payload.get("billing_tier", "ENTERPRISE").upper()
             admin_name = payload.get("admin_name", "Chief Engineer").strip()

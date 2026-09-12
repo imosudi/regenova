@@ -100,7 +100,7 @@ function initPreEnrolmentForm() {
         alertBox.innerHTML = `
           <div class="d-flex align-items-center gap-2 mb-2">
             <i class="bi bi-check-circle-fill text-success fs-5"></i>
-            <strong class="fs-6">Organization Enrolment Approved!</strong>
+            <strong class="fs-6">Organisation Enrolment Approved!</strong>
           </div>
           <p class="mb-2">Enterprise partition <code>${data.tenant_id}</code> (${data.name}) has been provisioned with strict Row Level Security (RLS) isolation.</p>
           <div class="bg-light p-2 rounded border font-monospace small mb-3">

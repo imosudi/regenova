@@ -738,7 +738,7 @@ async function approveHitlOrder(orderId) {
 }
 
 // ----------------------------------------------------------------------------
-// 6. Modals & Forms Initialization
+// 6. Modals & Forms Initialisation
 // ----------------------------------------------------------------------------
 
 function initModalsAndForms() {
@@ -789,7 +789,7 @@ function initModalsAndForms() {
         alertBox.innerText = `Network error: ${err.message}`;
       } finally {
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organization`;
+        btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organisation`;
       }
     });
   }

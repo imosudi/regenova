@@ -178,6 +178,11 @@ class TestBackofficeManagement(unittest.TestCase):
         self.assertIn('id="backofficeAppLayout"', html)
         self.assertIn('id="btnAdminLogout"', html)
         self.assertNotIn("—", html)
+        # Verify British English consistency
+        self.assertIn("Enrol Organisation", html)
+        self.assertIn("Organisation Name", html)
+        self.assertNotIn("Enrol Organization", html)
+        self.assertNotIn("Organization Name", html)
 
 
 if __name__ == "__main__":

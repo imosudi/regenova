@@ -103,7 +103,7 @@ function apiFetch(endpoint, options = {}) {
   }
   return fetch(url, Object.assign({}, options, { headers })).then(res => {
     if (res.status === 401 && !endpoint.includes("/api/operator/login") && !endpoint.includes("/api/operator/verify")) {
-      console.warn("Operator session expired or unauthorized:", endpoint);
+      console.warn("Operator session expired or unauthorised:", endpoint);
       handleOperatorLogout();
     }
     return res;
@@ -1115,7 +1115,7 @@ function initTenantEnrolmentForm() {
       alertBox.innerText = `Network error: ${err.message}`;
     } finally {
       btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organization`;
+      btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organisation`;
     }
   });
 }

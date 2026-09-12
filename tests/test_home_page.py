@@ -99,6 +99,44 @@ class TestHomePageRouting(unittest.TestCase):
             self.assertGreater(len(body), 50)
             self.assertNotIn("—", body)
 
+    def test_british_english_consistency(self):
+        """Verify strict British English consistency across Home Page and Operations Portal."""
+        status_received = []
+        headers_received = []
+
+        def start_response(status, headers):
+            status_received.append(status)
+            headers_received.extend(headers)
+
+        environ = {
+            "REQUEST_METHOD": "GET",
+            "PATH_INFO": "/",
+            "wsgi.input": io.BytesIO(b""),
+        }
+        body_parts = application(environ, start_response)
+        home_body = b"".join(body_parts).decode("utf-8")
+
+        # Positive assertions for British English
+        self.assertIn("Pre-Enrol Organisation", home_body)
+        self.assertIn("Organisation Pre-Enrolment Application", home_body)
+        self.assertIn("Standardised Photovoltaic Modelling", home_body)
+        self.assertIn("Power Curve Normalisation", home_body)
+        self.assertIn("Desert Hybrid Centre", home_body)
+        self.assertIn("Arrhenius Ageing", home_body)
+        self.assertIn("frequency stabilisation", home_body)
+        self.assertIn("synchronise to the canonical enterprise schema", home_body)
+        self.assertIn("tenant organisations are automatically resolved", home_body)
+        self.assertIn("lifecycle optimisation", home_body)
+
+        # Negative assertions against American English variants
+        self.assertNotIn("Pre-Enrol Organization", home_body)
+        self.assertNotIn("Standardized Photovoltaic Modeling", home_body)
+        self.assertNotIn("Power Curve Normalization", home_body)
+        self.assertNotIn("Desert Hybrid Center", home_body)
+        self.assertNotIn("Arrhenius Aging", home_body)
+        self.assertNotIn("frequency stabilization", home_body)
+        self.assertNotIn("Chief Engineer authorization", home_body)
+
 
 if __name__ == "__main__":
     unittest.main()
