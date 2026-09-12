@@ -116,8 +116,13 @@ function apiFetch(endpoint, options = {}) {
     headers["X-Tenant-ID"] = currentTenantId;
   }
   const auth = getStoredOperatorAuth();
-  if (auth && auth.token && !headers["Authorization"]) {
-    headers["Authorization"] = `Bearer ${auth.token}`;
+  if (auth && auth.token) {
+    if (!headers["Authorization"]) {
+      headers["Authorization"] = `Bearer ${auth.token}`;
+    }
+    if (!headers["X-Operator-Token"]) {
+      headers["X-Operator-Token"] = auth.token;
+    }
   }
   return fetch(url, Object.assign({}, options, { headers })).then(res => {
     if (res.status === 401 && !endpoint.includes("/api/operator/login") && !endpoint.includes("/api/operator/verify")) {

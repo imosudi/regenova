@@ -1657,10 +1657,14 @@ def application(environ, start_response):
                 return [resp_bytes]
 
         headers_dict = {
-            "X-Tenant-ID": environ.get("HTTP_X_TENANT_ID"),
-            "Authorization": environ.get("HTTP_AUTHORIZATION"),
-            "Content-Type": environ.get("CONTENT_TYPE"),
+            key[5:].replace("_", "-").title(): value
+            for key, value in environ.items()
+            if key.startswith("HTTP_")
         }
+        if "CONTENT_TYPE" in environ:
+            headers_dict["Content-Type"] = environ["CONTENT_TYPE"]
+        if "CONTENT_LENGTH" in environ:
+            headers_dict["Content-Length"] = environ["CONTENT_LENGTH"]
         from urllib.parse import parse_qs
         query_params = {k: v[0] for k, v in parse_qs(environ.get("QUERY_STRING", "")).items()}
 
