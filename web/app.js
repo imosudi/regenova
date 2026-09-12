@@ -14,6 +14,81 @@ let allUsersList = [];
 let currentAssetId = "ASSET-INV-01";
 let pollTimer = null;
 
+const OPERATOR_SESSION_KEY = "regenova_operator_session";
+
+function getStoredOperatorAuth() {
+  try {
+    const raw = sessionStorage.getItem(OPERATOR_SESSION_KEY) || localStorage.getItem(OPERATOR_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStoredOperatorAuth(authData, remember = true) {
+  try {
+    const serialized = JSON.stringify(authData);
+    sessionStorage.setItem(OPERATOR_SESSION_KEY, serialized);
+    if (remember) {
+      localStorage.setItem(OPERATOR_SESSION_KEY, serialized);
+    } else {
+      localStorage.removeItem(OPERATOR_SESSION_KEY);
+    }
+  } catch (e) {
+    console.error("Failed to store operator session:", e);
+  }
+}
+
+function clearStoredOperatorAuth() {
+  sessionStorage.removeItem(OPERATOR_SESSION_KEY);
+  localStorage.removeItem(OPERATOR_SESSION_KEY);
+}
+
+function lockPortal() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  const loginScreen = document.getElementById("portalLoginScreen");
+  const appLayout = document.getElementById("portalAppLayout");
+  if (loginScreen) loginScreen.classList.remove("d-none");
+  if (appLayout) appLayout.classList.add("d-none");
+}
+
+function unlockPortal(authData) {
+  const loginScreen = document.getElementById("portalLoginScreen");
+  const appLayout = document.getElementById("portalAppLayout");
+  if (loginScreen) loginScreen.classList.add("d-none");
+  if (appLayout) appLayout.classList.remove("d-none");
+
+  if (authData && authData.user) {
+    const u = authData.user;
+    if (u.tenant_id) {
+      currentTenantId = u.tenant_id;
+      const tenantSelect = document.getElementById("tenantContextSelect");
+      if (tenantSelect) tenantSelect.value = currentTenantId;
+      const topbarTenant = document.getElementById("topbar-tenant-text");
+      if (topbarTenant) topbarTenant.innerText = currentTenantId;
+    }
+    const nameEl = document.getElementById("sidebar-user-name");
+    if (nameEl) nameEl.innerText = u.name || "Operator";
+    const roleEl = document.getElementById("sidebar-user-role");
+    if (roleEl) roleEl.innerText = (u.role || "OPERATOR").replace(/_/g, " ");
+    const orgEl = document.getElementById("sidebar-user-org");
+    if (orgEl) orgEl.innerText = (u.tenant_id || "ORG-HELIOS").replace("ORG-", "");
+    const topbarName = document.getElementById("topbar-operator-name");
+    if (topbarName) topbarName.innerText = `${u.name || "Operator"} (${(u.role || "OPERATOR").replace(/_/g, " ")})`;
+  }
+
+  fetchTenants();
+  switchTenant(currentTenantId);
+  loadAllData();
+  if (!pollTimer) {
+    pollTimer = setInterval(loadAllData, 3000);
+  }
+}
+
 function apiFetch(endpoint, options = {}) {
   const url = (typeof endpoint === 'string' && endpoint.startsWith('http'))
     ? endpoint
@@ -22,25 +97,146 @@ function apiFetch(endpoint, options = {}) {
   if (!headers["X-Tenant-ID"]) {
     headers["X-Tenant-ID"] = currentTenantId;
   }
-  return fetch(url, Object.assign({}, options, { headers }));
+  const auth = getStoredOperatorAuth();
+  if (auth && auth.token && !headers["Authorization"]) {
+    headers["Authorization"] = `Bearer ${auth.token}`;
+  }
+  return fetch(url, Object.assign({}, options, { headers })).then(res => {
+    if (res.status === 401 && !endpoint.includes("/api/operator/login") && !endpoint.includes("/api/operator/verify")) {
+      console.warn("Operator session expired or unauthorized:", endpoint);
+      handleOperatorLogout();
+    }
+    return res;
+  });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+window.handleOperatorLoginSubmit = async function(event) {
+  if (event) event.preventDefault();
+  const alertBox = document.getElementById("portalLoginAlert");
+  const submitBtn = document.getElementById("btnOperatorLoginSubmit");
+  const tenantSelect = document.getElementById("portalTenantSelect");
+  const emailInput = document.getElementById("portalLoginEmail");
+  const pwdInput = document.getElementById("portalLoginPassword");
+  const rememberChk = document.getElementById("portalRememberMe");
+
+  const email = emailInput ? emailInput.value.trim() : "";
+  const password = pwdInput ? pwdInput.value : "";
+  const tenant_id = tenantSelect ? tenantSelect.value : currentTenantId;
+  const remember = rememberChk ? rememberChk.checked : true;
+
+  if (alertBox) {
+    alertBox.classList.add("d-none");
+    alertBox.innerText = "";
+  }
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Authenticating...';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/operator/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, tenant_id })
+    });
+    const data = await res.json();
+    if (res.ok && data.status === "SUCCESS") {
+      setStoredOperatorAuth(data, remember);
+      unlockPortal(data);
+    } else {
+      if (alertBox) {
+        alertBox.className = "alert alert-danger py-2 px-3 small";
+        alertBox.innerText = data.message || "Invalid operator credentials. Access denied.";
+        alertBox.classList.remove("d-none");
+      }
+    }
+  } catch (err) {
+    if (alertBox) {
+      alertBox.className = "alert alert-danger py-2 px-3 small";
+      alertBox.innerText = `Authentication connection failed: ${err.message}`;
+      alertBox.classList.remove("d-none");
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i><span>Authenticate & Access Portal</span>';
+    }
+  }
+};
+
+window.handleOperatorLogout = function() {
+  clearStoredOperatorAuth();
+  lockPortal();
+  const alertBox = document.getElementById("portalLoginAlert");
+  if (alertBox) {
+    alertBox.className = "alert alert-info py-2 px-3 small";
+    alertBox.innerText = "You have been signed out of the Operations Portal.";
+    alertBox.classList.remove("d-none");
+  }
+};
+
+window.fillDemoOperator = function(tenantId, email, pwd) {
+  const tenantSelect = document.getElementById("portalTenantSelect");
+  const emailInput = document.getElementById("portalLoginEmail");
+  const pwdInput = document.getElementById("portalLoginPassword");
+  if (tenantSelect) tenantSelect.value = tenantId;
+  if (emailInput) emailInput.value = email;
+  if (pwdInput) pwdInput.value = pwd;
+};
+
+window.toggleOperatorPasswordVisibility = function() {
+  const p = document.getElementById("portalLoginPassword");
+  const icon = document.getElementById("portalTogglePasswordIcon");
+  const chk = document.getElementById("portalCheckShowPassword");
+  if (!p) return;
+  const isPass = (p.type === "password");
+  p.type = isPass ? "text" : "password";
+  if (icon) {
+    icon.className = isPass ? "bi bi-eye-slash-fill text-primary" : "bi bi-eye text-muted";
+  }
+  if (chk) {
+    chk.checked = isPass;
+  }
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const tenantParam = urlParams.get("tenant_id");
   if (tenantParam) {
     currentTenantId = tenantParam;
+    const portalTenantSelect = document.getElementById("portalTenantSelect");
+    if (portalTenantSelect) portalTenantSelect.value = tenantParam;
   }
   initSidebarInteractions();
   initOnboardingForms();
   initTenantEnrolmentForm();
-  fetchTenants();
-  switchTenant(currentTenantId);
-  loadAllData();
-  // Poll every 3 seconds for live telemetry updates
-  pollTimer = setInterval(loadAllData, 3000);
   updateUtcClock();
   setInterval(updateUtcClock, 1000);
+
+  // Validate existing operator authentication
+  const auth = getStoredOperatorAuth();
+  if (auth && auth.token) {
+    try {
+      const verifyRes = await fetch(`${API_BASE}/api/operator/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${auth.token}`
+        },
+        body: JSON.stringify({ token: auth.token, tenant_id: currentTenantId })
+      });
+      if (verifyRes.ok) {
+        const verifyData = await verifyRes.json();
+        unlockPortal(verifyData);
+        return;
+      }
+    } catch (e) {
+      console.warn("Operator session verification check:", e);
+    }
+  }
+
+  // Not authenticated or token invalid: enforce lock and show login gateway
+  lockPortal();
 });
 
 async function loadAllData() {
@@ -689,18 +885,28 @@ function updateSidebarUserProfile(tenantId) {
   const roleEl = document.getElementById("sidebar-user-role");
   const orgEl = document.getElementById("sidebar-user-org");
 
+  const auth = getStoredOperatorAuth();
+  if (auth && auth.user && auth.user.tenant_id === tenantId) {
+    if (nameEl) nameEl.innerText = auth.user.name || "Operator";
+    if (roleEl) roleEl.innerText = (auth.user.role || "OPERATOR").replace(/_/g, " ");
+    if (orgEl) orgEl.innerText = tenantId.replace("ORG-", "");
+    const topbarName = document.getElementById("topbar-operator-name");
+    if (topbarName) topbarName.innerText = `${auth.user.name || "Operator"} (${(auth.user.role || "OPERATOR").replace(/_/g, " ")})`;
+    return;
+  }
+
   if (tenantId === "ORG-AURORA-NORDIC") {
-    if (nameEl) nameEl.innerText = "Astrid Lindholm";
-    if (roleEl) roleEl.innerText = "Site Lead & Ops";
-    if (orgEl) orgEl.innerText = "ORG-AURORA-NORDIC";
+    if (nameEl) nameEl.innerText = "Astrid Lindgren";
+    if (roleEl) roleEl.innerText = "Chief Engineer";
+    if (orgEl) orgEl.innerText = "AURORA";
   } else if (tenantId === "ORG-SOLARIA-ESP") {
-    if (nameEl) nameEl.innerText = "Carlos Morales";
-    if (roleEl) roleEl.innerText = "Operations Mgr";
-    if (orgEl) orgEl.innerText = "ORG-SOLARIA-ESP";
+    if (nameEl) nameEl.innerText = "Javier Morales";
+    if (roleEl) roleEl.innerText = "Chief Engineer";
+    if (orgEl) orgEl.innerText = "SOLARIA";
   } else if (tenantId === "ORG-HELIOS-GLOBAL") {
     if (nameEl) nameEl.innerText = "Dr. Elena Rostova";
     if (roleEl) roleEl.innerText = "Chief Engineer";
-    if (orgEl) orgEl.innerText = "ORG-HELIOS";
+    if (orgEl) orgEl.innerText = "HELIOS";
   } else {
     const matchedTenant = allTenants.find(t => t.tenant_id === tenantId);
     if (nameEl) nameEl.innerText = (matchedTenant && matchedTenant.name) ? matchedTenant.name.split(" ")[0] + " Admin" : "Tenant Admin";

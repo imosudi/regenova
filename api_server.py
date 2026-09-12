@@ -48,6 +48,9 @@ KNOWN_ENDPOINTS = [
     "/api/database/status",
     "/api/admin/login",
     "/api/admin/verify",
+    "/api/operator/login",
+    "/api/operator/verify",
+    "/api/operator/session",
 ]
 
 

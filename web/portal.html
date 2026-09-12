@@ -13,7 +13,116 @@
 </head>
 <body class="bg-light text-dark">
 
-  <div class="reamp-app-layout">
+  <!-- OPERATOR AUTHENTICATION GATEWAY -->
+  <div id="portalLoginScreen" class="portal-auth-container min-vh-100 d-flex align-items-center justify-content-center p-3 bg-light">
+    <div class="card border-0 shadow-lg" style="max-width: 480px; width: 100%; border-radius: 1rem;">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3 shadow-sm" style="width: 52px; height: 52px; font-size: 1.5rem; background: var(--bs-primary, #0d6efd); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-lightning-charge-fill"></i>
+          </div>
+          <h4 class="fw-bold text-dark m-0">REGENOVA</h4>
+          <div class="text-primary fw-semibold small mb-1">Operations Portal Access</div>
+          <p class="text-muted small m-0">Operator Authentication & Telemetry Partition Gateway</p>
+        </div>
+
+        <div id="portalLoginAlert" class="alert alert-danger d-none py-2 px-3 small" role="alert"></div>
+
+        <form id="formOperatorLogin" onsubmit="handleOperatorLoginSubmit(event)">
+          <div class="mb-3">
+            <label for="portalTenantSelect" class="form-label small fw-semibold text-dark">Tenant Organization Partition</label>
+            <select class="form-select form-select-sm" id="portalTenantSelect" required>
+              <option value="ORG-HELIOS-GLOBAL" selected>Helios Global Renewables (ORG-HELIOS-GLOBAL)</option>
+              <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy (ORG-AURORA-NORDIC)</option>
+              <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia (ORG-SOLARIA-ESP)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="portalLoginEmail" class="form-label small fw-semibold text-dark">Operator Work Email</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0" id="portalLoginEmail" required value="elena.rostova@helios.energy" placeholder="operator@tenant.energy">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label for="portalLoginPassword" class="form-label small fw-semibold text-dark m-0">Access Password</label>
+              <div class="form-check form-switch m-0" style="font-size: 0.78rem;">
+                <input class="form-check-input" type="checkbox" id="portalCheckShowPassword" onchange="toggleOperatorPasswordVisibility()" role="switch">
+                <label class="form-check-label text-muted" for="portalCheckShowPassword" style="cursor: pointer;">Show password</label>
+              </div>
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light text-muted border-end-0"><i class="bi bi-key"></i></span>
+              <input type="password" class="form-control border-start-0 border-end-0" id="portalLoginPassword" required value="Helios2026!" placeholder="••••••••">
+              <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" id="portalTogglePasswordBtn" onclick="toggleOperatorPasswordVisibility()" title="Show or hide password" aria-label="Toggle password visibility">
+                <i class="bi bi-eye text-muted" id="portalTogglePasswordIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="portalRememberMe" checked>
+              <label class="form-check-label small text-muted" for="portalRememberMe">Remember session</label>
+            </div>
+            <span class="badge bg-light text-muted border small font-monospace">SCADA_RBAC</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnOperatorLoginSubmit">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span>Authenticate & Access Portal</span>
+          </button>
+        </form>
+
+        <!-- Quick Operator Selector for Evaluation -->
+        <div class="border-top pt-3 mt-3">
+          <div class="text-muted small fw-semibold mb-2" style="font-size: 0.72rem;">Quick Fill Operator Credentials:</div>
+          <div class="d-flex flex-column gap-1">
+            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-HELIOS-GLOBAL', 'elena.rostova@helios.energy', 'Helios2026!')">
+              <span class="small"><strong>Helios Global:</strong> Dr. Elena Rostova</span>
+              <span class="badge bg-primary-subtle text-primary" style="font-size: 0.65rem;">Chief Engineer</span>
+            </button>
+            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-AURORA-NORDIC', 'astrid.lindgren@aurora.energy', 'Aurora2026!')">
+              <span class="small"><strong>Aurora Nordic:</strong> Astrid Lindgren</span>
+              <span class="badge bg-info-subtle text-info" style="font-size: 0.65rem;">Chief Engineer</span>
+            </button>
+            <button type="button" class="btn btn-light btn-sm text-start border d-flex justify-content-between align-items-center py-1 px-2" onclick="fillDemoOperator('ORG-SOLARIA-ESP', 'javier.morales@solaria.energy', 'Solaria2026!')">
+              <span class="small"><strong>Solaria Iberia:</strong> Javier Morales</span>
+              <span class="badge bg-warning-subtle text-dark" style="font-size: 0.65rem;">Chief Engineer</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-center mt-3">
+          <a href="/" class="text-muted text-decoration-none small">
+            <i class="bi bi-arrow-left me-1"></i> Return to Public Home Page
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleOperatorPasswordVisibility() {
+      var p = document.getElementById("portalLoginPassword");
+      var icon = document.getElementById("portalTogglePasswordIcon");
+      var chk = document.getElementById("portalCheckShowPassword");
+      if (!p) return;
+      var isPass = (p.type === "password");
+      p.type = isPass ? "text" : "password";
+      if (icon) {
+        icon.className = isPass ? "bi bi-eye-slash-fill text-primary" : "bi bi-eye text-muted";
+      }
+      if (chk) {
+        chk.checked = isPass;
+      }
+    }
+  </script>
+
+  <div class="reamp-app-layout d-none" id="portalAppLayout">
     <!-- Backdrop for mobile drawer -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -196,6 +305,16 @@
           <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace d-none d-sm-inline-flex align-items-center gap-1" id="topbar-tenant-badge">
             <i class="bi bi-buildings"></i> <span id="topbar-tenant-text">ORG-HELIOS-GLOBAL</span>
           </span>
+
+          <!-- Operator Identity Badge -->
+          <span class="badge bg-light text-dark border d-none d-md-inline-flex align-items-center gap-1" id="topbar-operator-badge">
+            <i class="bi bi-person-badge text-primary"></i> <span id="topbar-operator-name">Dr. Elena Rostova</span>
+          </span>
+
+          <!-- Sign Out Button -->
+          <button class="btn btn-sm btn-outline-danger fw-semibold" id="btnOperatorLogout" onclick="handleOperatorLogout()" title="Sign out of Operations Portal">
+            <i class="bi bi-box-arrow-right me-1"></i> Sign Out
+          </button>
         </div>
       </header>
 
@@ -1132,6 +1251,6 @@
 <!-- Bootstrap 5.3.3 Bundle JS -->
 <script src="vendor/bootstrap.bundle.min.js"></script>
 <!-- Client Application Logic -->
-<script src="app.js"></script>
+<script src="app.js?v=1.0.4"></script>
 </body>
 </html>
