@@ -13,107 +13,178 @@
 </head>
 <body class="bg-light text-dark">
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-reamp sticky-top">
-    <div class="container-fluid px-4">
-      <a class="navbar-brand d-flex align-items-center fw-bold text-primary m-0" href="#">
+  <div class="reamp-app-layout">
+    <!-- Backdrop for mobile drawer -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- LEFT VERTICAL PANE (SIDEBAR) -->
+    <aside class="reamp-sidebar" id="reampSidebar">
+      <!-- Top Branding -->
+      <div class="reamp-sidebar-header d-flex align-items-center">
         <div class="brand-icon">
           <i class="bi bi-lightning-charge-fill"></i>
         </div>
         <div>
-          <span class="fs-5 fw-bold text-dark">REGENOVA</span>
-          <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2">v1.0 Capstone</span>
-          <div class="small text-muted fw-normal" style="font-size: 0.72rem;">Renewable Energy Asset Intelligence & Management Framework</div>
-        </div>
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
-        <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill d-flex align-items-center">
-            <span class="pulse-live"></span>
-            <span class="fw-semibold">TELEMETRY STREAMING (1 Hz)</span>
-          </span>
-          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 rounded-pill font-monospace" id="audit-badge">
-            <i class="bi bi-shield-check text-success me-1"></i> SHA-256 LEDGER: INTACT
-          </span>
-          <div class="d-flex align-items-center text-secondary small border-start ps-3">
-            <i class="bi bi-person-badge me-2 text-primary"></i>
-            <div>
-              <div class="fw-bold text-dark" style="font-size: 0.75rem;">Carlos Mendez (Chief Engineer)</div>
-              <div class="text-muted" style="font-size: 0.68rem;">TENANT: ORG-HELIOS-GLOBAL</div>
-            </div>
+          <div class="d-flex align-items-center">
+            <span class="fs-5 fw-bold text-dark me-2">REGENOVA</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">v1.0 Capstone</span>
           </div>
+          <div class="small text-muted" style="font-size: 0.7rem; line-height: 1.1;">Asset Intelligence & Management</div>
         </div>
       </div>
-    </div>
-  </nav>
 
-  <!-- Sub-Navigation Navigation Tabs (Bootstrap 5.3 nav-tabs in Light Theme) -->
-  <div class="bg-white border-bottom shadow-sm">
-    <div class="container-fluid px-4">
-      <ul class="nav nav-tabs border-bottom-0 pt-2" id="reampTab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active fw-semibold" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab" aria-selected="true">
-            <i class="bi bi-speedometer2 me-1 text-primary"></i> Fleet Overview
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="twin-tab" data-bs-toggle="tab" data-bs-target="#tab-twin" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-cpu me-1 text-info"></i> Digital Twin & Telemetry
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="health-tab" data-bs-toggle="tab" data-bs-target="#tab-health" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-heart-pulse me-1 text-success"></i> 7-Dimension Health (AHI)
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold position-relative" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#tab-alerts" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-exclamation-triangle me-1 text-danger"></i> Anomaly & Alerts
-            <span class="badge bg-danger rounded-pill ms-1" id="badge-alert-count">0</span>
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="xai-tab" data-bs-toggle="tab" data-bs-target="#tab-xai" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-diagram-3 me-1 text-warning"></i> Explainable AI (SHAP)
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="cmms-tab" data-bs-toggle="tab" data-bs-target="#tab-cmms" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-wrench-adjustable me-1 text-primary"></i> CMMS & HITL Queue
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="adaptive-tab" data-bs-toggle="tab" data-bs-target="#tab-adaptive" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-sliders me-1 text-dark"></i> Adaptive Intelligence
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="audit-tab" data-bs-toggle="tab" data-bs-target="#tab-audit" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-journal-text me-1 text-secondary"></i> Cryptographic Audit
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link fw-semibold" id="onboard-tab" data-bs-toggle="tab" data-bs-target="#tab-onboard" type="button" role="tab" aria-selected="false">
-            <i class="bi bi-person-plus me-1 text-primary"></i> Onboarding & Provisioning
-          </button>
-        </li>
-      </ul>
-    </div>
-  </div>
+      <!-- User & Tenant Card -->
+      <div class="reamp-sidebar-user d-flex align-items-center">
+        <div class="bg-primary text-white rounded-circle p-2 me-2 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-size: 0.9rem;">
+          <i class="bi bi-person-badge"></i>
+        </div>
+        <div class="overflow-hidden flex-grow-1">
+          <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem;">Dr. Elena Rostova</div>
+          <div class="text-muted text-truncate" style="font-size: 0.68rem;">Chief Engineer • <span class="font-monospace">ORG-HELIOS</span></div>
+        </div>
+      </div>
 
-  <!-- Main Content Container -->
-  <main class="container-fluid px-4 py-4">
+      <!-- Vertical Nav Links (Tabs) -->
+      <div class="reamp-sidebar-nav">
+        <div class="text-uppercase text-muted fw-bold px-2 mb-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">Core Operations</div>
+        <ul class="nav nav-pills flex-column" id="reampTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab" aria-selected="true">
+              <i class="bi bi-speedometer2 text-primary"></i>
+              <span>Fleet Overview</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="twin-tab" data-bs-toggle="tab" data-bs-target="#tab-twin" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-cpu text-info"></i>
+              <span>Digital Twin & Telemetry</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="health-tab" data-bs-toggle="tab" data-bs-target="#tab-health" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-heart-pulse text-success"></i>
+              <span>7-Dimension Health (AHI)</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link position-relative" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#tab-alerts" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-exclamation-triangle text-danger"></i>
+              <span>Anomaly & Alerts</span>
+              <span class="badge bg-danger rounded-pill ms-auto" id="badge-alert-count">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="xai-tab" data-bs-toggle="tab" data-bs-target="#tab-xai" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-diagram-3 text-warning"></i>
+              <span>Explainable AI (SHAP)</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cmms-tab" data-bs-toggle="tab" data-bs-target="#tab-cmms" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-wrench-adjustable text-primary"></i>
+              <span>CMMS & HITL Queue</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="adaptive-tab" data-bs-toggle="tab" data-bs-target="#tab-adaptive" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-sliders text-dark"></i>
+              <span>Adaptive Intelligence</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#tab-audit" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-journal-text text-secondary"></i>
+              <span>Cryptographic Audit</span>
+            </button>
+          </li>
 
-    <!-- TAB CONTENTS -->
-    <div class="tab-content" id="reampTabContent">
+          <div class="text-uppercase text-muted fw-bold px-2 mt-3 mb-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">Governance & Platform</div>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="onboard-tab" data-bs-toggle="tab" data-bs-target="#tab-onboard" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-person-plus text-primary"></i>
+              <span>Onboarding & Directory</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="database-tab" data-bs-toggle="tab" data-bs-target="#tab-database" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-database" style="color: var(--reamp-purple);"></i>
+              <span>Database & PostgreSQL</span>
+              <span class="badge bg-success-subtle text-success border border-success-subtle ms-auto small" id="badge-db-status">ONLINE</span>
+            </button>
+          </li>
+        </ul>
+      </div>
 
-      <!-- 1. FLEET OVERVIEW TAB -->
-      <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="overview-tab">
+      <!-- Sidebar Bottom System Info -->
+      <div class="reamp-sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <span class="pulse-live" id="sidebar-db-dot"></span>
+            <span class="fw-semibold text-dark" id="sidebar-db-status-text" style="font-size: 0.73rem;">PostgreSQL 18.6</span>
+          </div>
+          <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">db.regenova.cloud</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.7rem;">
+          <span><i class="bi bi-shield-check text-success me-1"></i>SHA-256 Ledger</span>
+          <span class="font-monospace text-dark" id="sidebar-utc-clock">--:--:-- UTC</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT PANE -->
+    <div class="reamp-main-pane">
+      <!-- Topbar Header -->
+      <header class="reamp-topbar px-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div>
+            <h5 class="m-0 fw-bold text-dark d-flex align-items-center" id="topbar-section-title">
+              <i class="bi bi-speedometer2 text-primary me-2"></i> Fleet Overview
+            </h5>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+          <!-- Live Telemetry Badge -->
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill d-none d-md-inline-flex align-items-center">
+            <span class="pulse-live"></span>
+            <span class="fw-semibold">1 Hz STREAMING</span>
+          </span>
+
+          <!-- Quick Scenario Trigger Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary dropdown-toggle fw-semibold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-lightning-charge me-1 text-warning"></i> Simulate Scenario
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
+              <li><h6 class="dropdown-header">Real-Time Ingestion Scenarios</h6></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('nominal')"><i class="bi bi-check-circle text-success me-2"></i>Nominal Generation</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('high_temp_shadow')"><i class="bi bi-thermometer-high text-danger me-2"></i>Heatwave & Thermal Shadow</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('inverter_trip')"><i class="bi bi-exclamation-octagon text-danger me-2"></i>Emergency Inverter Trip</a></li>
+              <li><a class="dropdown-item" href="javascript:void(0)" onclick="injectScenario('bess_discharge')"><i class="bi bi-battery-charging text-primary me-2"></i>BESS Peak Shaving Discharge</a></li>
+            </ul>
+          </div>
+
+          <!-- Refresh Button -->
+          <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="loadAllData()" title="Poll live telemetry">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+          </button>
+
+          <!-- Tenant Badge -->
+          <span class="badge bg-light text-secondary border font-monospace d-none d-sm-inline-block">
+            ORG-HELIOS-GLOBAL
+          </span>
+        </div>
+      </header>
+
+      <!-- Main Content Body -->
+      <main class="reamp-content-body">
+        <div class="tab-content" id="reampTabContent">
+
+          <!-- 1. FLEET OVERVIEW TAB -->
+          <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="overview-tab">
         
         <!-- Top KPI Metric Cards -->
         <div class="row g-3 mb-4">
@@ -795,28 +866,161 @@
           </div>
         </div>
 
+        <!-- 10. DATABASE & POSTGRESQL TAB -->
+        <div class="tab-pane fade" id="tab-database" role="tabpanel" aria-labelledby="database-tab">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="fw-bold text-dark m-0"><i class="bi bi-database text-primary me-2"></i>PostgreSQL Relational & TimescaleDB Domain Storage</h5>
+              <div class="small text-muted mt-1">Multi-tenant persistence, entity registries, time-series observations, and cryptographic hash ledger</div>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+              <i class="bi bi-check-circle-fill me-1"></i> PostgreSQL 18.6 Live Connected
+            </span>
+          </div>
+
+          <!-- KPI Metrics Row -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Database Engine</div>
+                <div class="stat-kpi-val text-primary" style="font-size: 1.4rem;">PostgreSQL</div>
+                <div class="small text-muted mt-2">Version: <span id="db-val-version" class="fw-semibold text-dark">18.6</span></div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Host & Port</div>
+                <div class="stat-kpi-val text-dark font-monospace" style="font-size: 1.2rem;" id="db-val-host">db.regenova.cloud:5432</div>
+                <div class="small text-muted mt-2">Loopback / Oracle Cloud</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Database Name</div>
+                <div class="stat-kpi-val text-success font-monospace" style="font-size: 1.35rem;" id="db-val-name">regenova_db</div>
+                <div class="small text-muted mt-2">Owner: <span id="db-val-user" class="fw-semibold text-dark">regenova_db</span></div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Canonical Tables</div>
+                <div class="stat-kpi-val text-info" id="db-val-tables">21 Tables</div>
+                <div class="small text-muted mt-2">Public Schema Loaded</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Multi-Tenancy</div>
+                <div class="stat-kpi-val text-success" style="font-size: 1.3rem;">RLS Active</div>
+                <div class="small text-muted mt-2">reamp.current_tenant_id</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+              <div class="card card-reamp h-100 p-3">
+                <div class="stat-kpi-label mb-1">Python Driver</div>
+                <div class="stat-kpi-val text-primary" style="font-size: 1.35rem;" id="db-val-driver">psycopg2</div>
+                <div class="small text-muted mt-2">Thread-safe Connector</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Database Schema Tables Directory -->
+          <div class="row g-4">
+            <div class="col-12 col-lg-8">
+              <div class="card card-reamp p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold text-dark m-0"><i class="bi bi-table me-2 text-primary"></i>Canonical Database Tables (21 Entities)</h6>
+                  <span class="badge bg-light text-secondary border">001_initial_reamp_schema.sql</span>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover table-reamp">
+                    <thead>
+                      <tr>
+                        <th>Table Name</th>
+                        <th>Category</th>
+                        <th>Multi-Tenancy (RLS)</th>
+                        <th>Primary Key</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td><code>organisations</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Corporate tenant root & billing metadata</td></tr>
+                      <tr><td><code>portfolios</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Regional generation portfolios & targets</td></tr>
+                      <tr><td><code>sites</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Geospatial generation facilities & coords</td></tr>
+                      <tr><td><code>energy_systems</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Multi-tech topologies (Solar, Wind, BESS)</td></tr>
+                      <tr><td><code>assets</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Physical equipment, nacelles, inverters</td></tr>
+                      <tr><td><code>components</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Subsystems, IGBTs, gearboxes, cells</td></tr>
+                      <tr><td><code>sensors</code></td><td><span class="badge bg-primary">Hierarchy</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Telemetry channels (Modbus, OPC-UA, MQTT)</td></tr>
+                      <tr><td><code>telemetry_observations</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>(timestamp, tenant, asset, metric)</code></td><td>Partitioned hypertable observations</td></tr>
+                      <tr><td><code>weather_observations</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Met station irradiance, wind, ambient</td></tr>
+                      <tr><td><code>generation_forecasts</code></td><td><span class="badge bg-info text-dark">Time-Series</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Day-ahead & hour-ahead yield forecasts</td></tr>
+                      <tr><td><code>alarms</code></td><td><span class="badge bg-warning text-dark">Intelligence</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Critical alarms & acknowledge states</td></tr>
+                      <tr><td><code>anomalies</code></td><td><span class="badge bg-warning text-dark">Intelligence</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>CUSUM, EWMA, IsoForest detections & SHAP</td></tr>
+                      <tr><td><code>work_orders</code></td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>CMMS work orders & HITL approval status</td></tr>
+                      <tr><td><code>maintenance_logs</code></td><td><span class="badge bg-warning text-dark">Maintenance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Field technician corrective/preventive logs</td></tr>
+                      <tr><td><code>performance_metrics</code></td><td><span class="badge bg-success">Yield</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>IEC 61724-1 PR, degradation rates</td></tr>
+                      <tr><td><code>health_scores</code></td><td><span class="badge bg-success">Yield</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>7-dimension deterministic health scores</td></tr>
+                      <tr><td><code>financial_records</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>PPA revenue losses, curtailment costs</td></tr>
+                      <tr><td><code>users</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Enterprise RBAC users, HMAC tokens</td></tr>
+                      <tr><td><code>audit_logs</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>Relational audit events & state changes</td></tr>
+                      <tr><td><code>events</code></td><td><span class="badge bg-secondary">Governance</span></td><td><span class="badge bg-success-subtle text-success border">ENABLED</span></td><td><code>id (UUID)</code></td><td>SCADA grid events & operational transitions</td></tr>
+                      <tr><td><code>audit_chain_blocks</code></td><td><span class="badge bg-dark">Blockchain</span></td><td><span class="badge bg-info-subtle text-info border">GLOBAL</span></td><td><code>entry_id (VARCHAR)</code></td><td>SHA-256 tamper-evident hash ledger blocks</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+              <div class="card card-reamp p-4 mb-4">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-shield-lock me-2 text-success"></i>Row Level Security (RLS)</h6>
+                <p class="small text-muted">Corporate multi-tenant isolation is hardware and database-enforced directly within the PostgreSQL engine:</p>
+                <div class="bg-light p-3 rounded-3 font-monospace small border mb-3">
+                  <div>SET LOCAL reamp.current_tenant_id = 'uuid';</div>
+                  <div class="text-success mt-1">// Enforced across all 20 domain tables</div>
+                </div>
+                <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Zero cross-tenant data leakage (NFR-SEC-002)</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>Non-bypassable at application layer</li>
+                  <li><i class="bi bi-check-circle-fill text-success me-2"></i>TimescaleDB hypertable partition isolation</li>
+                </ul>
+              </div>
+
+              <div class="card card-reamp p-4">
+                <h6 class="fw-bold text-dark mb-2"><i class="bi bi-activity me-2 text-primary"></i>Resilience & Recovery</h6>
+                <ul class="list-unstyled small mb-0 d-flex flex-column gap-2 text-secondary">
+                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Graceful fallback to SQLite / In-Memory (NFR-RES-001)</li>
+                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>Store-and-forward edge buffering on WAN disconnect</li>
+                  <li><i class="bi bi-check-circle-fill text-primary me-2"></i>RTO &le; 30s streaming replication ready</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-    </div>
+    </main>
 
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container-fluid px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <div>
-        <strong class="text-dark">REGENOVA</strong> - Renewable Energy Asset Intelligence & Management Framework
-        <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
+    <!-- Footer -->
+    <footer class="reamp-footer">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+          <strong class="text-dark">REGENOVA</strong> - Renewable Energy Asset Intelligence & Management Framework
+          <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
+        </div>
+        <div class="font-monospace small">
+          API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold">ORG-HELIOS-GLOBAL</span>
+        </div>
       </div>
-      <div class="font-monospace small">
-        API: <span class="text-primary">http://localhost:8000</span> | Tenant: <span class="text-dark fw-bold">ORG-HELIOS-GLOBAL</span>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
-  <!-- Bootstrap 5.3.3 Bundle JS -->
-  <script src="vendor/bootstrap.bundle.min.js"></script>
-  <!-- Client Application Logic -->
-  <script src="app.js"></script>
+  </div>
+</div>
+
+<!-- Bootstrap 5.3.3 Bundle JS -->
+<script src="vendor/bootstrap.bundle.min.js"></script>
+<!-- Client Application Logic -->
+<script src="app.js"></script>
 </body>
 </html>

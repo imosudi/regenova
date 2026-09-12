@@ -3,6 +3,7 @@
    Requirement: FR-UI-001 / AC-FR-UI-001
    "All UI screens build strictly with Bootstrap 5.3.x in LIGHT theme
     without dark SCADA override."
+   Left Vertical Pane Layout & Enterprise Dashboard Design System
    ========================================================================== */
 
 @import url("vendor/bootstrap.min.css");
@@ -10,48 +11,176 @@
 
 :root {
   --reamp-primary: #0d6efd;
+  --reamp-primary-dark: #0b5ed7;
   --reamp-success: #198754;
   --reamp-warning: #ffc107;
   --reamp-danger: #dc3545;
   --reamp-info: #0dcaf0;
+  --reamp-purple: #6f42c1;
   --reamp-body-bg: #f8fafc;
   --reamp-card-bg: #ffffff;
   --reamp-border: #e2e8f0;
+  --reamp-border-subtle: #f1f5f9;
   --reamp-text-main: #0f172a;
   --reamp-text-muted: #64748b;
+  --reamp-sidebar-width: 275px;
 }
 
 body {
   background-color: var(--reamp-body-bg);
   color: var(--reamp-text-main);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
-/* Light Theme Navbar */
-.navbar-reamp {
+/* ==========================================================================
+   Main App Layout: Left Sidebar + Main Content Pane
+   ========================================================================== */
+
+.reamp-app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Left Vertical Pane (Sidebar)
+   -------------------------------------------------------------------------- */
+.reamp-sidebar {
+  width: var(--reamp-sidebar-width);
+  min-width: var(--reamp-sidebar-width);
+  max-width: var(--reamp-sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
   background-color: #ffffff;
+  border-right: 1px solid var(--reamp-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  transition: transform 0.25s ease-in-out;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.02);
+}
+
+.reamp-sidebar-header {
+  padding: 1.25rem 1.15rem 1rem 1.15rem;
   border-bottom: 1px solid var(--reamp-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
-  color: white;
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: 1.2rem;
+  border-radius: 10px;
+  font-size: 1.25rem;
   margin-right: 0.75rem;
-  box-shadow: 0 2px 6px rgba(13, 110, 253, 0.25);
+  box-shadow: 0 3px 8px rgba(13, 110, 253, 0.28);
+  flex-shrink: 0;
 }
 
-/* Cards & Statistics */
+.reamp-sidebar-user {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--reamp-border);
+  background-color: #fafbfc;
+}
+
+.reamp-sidebar-nav {
+  padding: 0.85rem 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.reamp-sidebar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.25rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s ease-in-out;
+  text-align: left;
+  text-decoration: none;
+}
+
+.reamp-sidebar-nav .nav-link i {
+  font-size: 1.05rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.reamp-sidebar-nav .nav-link:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.reamp-sidebar-nav .nav-link.active {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.22);
+  border-color: #0d6efd;
+}
+
+.reamp-sidebar-nav .nav-link.active i {
+  color: #ffffff !important;
+}
+
+.reamp-sidebar-nav .nav-link.active .badge {
+  background-color: #ffffff !important;
+  color: #0d6efd !important;
+  border-color: #ffffff !important;
+}
+
+.reamp-sidebar-footer {
+  padding: 0.85rem 1.15rem;
+  border-top: 1px solid var(--reamp-border);
+  background-color: #f8fafc;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* --------------------------------------------------------------------------
+   Right Main Content Pane
+   -------------------------------------------------------------------------- */
+.reamp-main-pane {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.reamp-topbar {
+  height: 62px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--reamp-border);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.reamp-content-body {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Cards & Data Panels
+   -------------------------------------------------------------------------- */
 .card-reamp {
   background-color: var(--reamp-card-bg);
   border: 1px solid var(--reamp-border);
@@ -110,7 +239,7 @@ body {
   font-family: monospace;
 }
 
-/* Pulse indicator */
+/* Live Telemetry Pulse Animation */
 .pulse-live {
   width: 8px;
   height: 8px;
@@ -120,6 +249,7 @@ body {
   margin-right: 6px;
   box-shadow: 0 0 6px rgba(25, 135, 84, 0.6);
   animation: pulse-kf 2s infinite ease-in-out;
+  flex-shrink: 0;
 }
 
 @keyframes pulse-kf {
@@ -127,7 +257,7 @@ body {
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
-/* Asset Selector Items */
+/* Asset Selector Buttons */
 .asset-item-btn {
   border: 1px solid var(--reamp-border);
   border-radius: 8px;
@@ -166,18 +296,45 @@ body {
   border-bottom: 1px solid #f1f5f9;
 }
 
-/* Monospace text */
 .mono-font {
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.82rem;
 }
 
 /* Footer */
-footer {
+footer.reamp-footer {
   background-color: #ffffff;
   border-top: 1px solid var(--reamp-border);
-  padding: 1.25rem 0;
+  padding: 1.15rem 1.5rem;
   margin-top: auto;
   font-size: 0.825rem;
   color: var(--reamp-text-muted);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 991.98px) {
+  .reamp-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  .reamp-sidebar.show {
+    transform: translateX(0);
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1035;
+    display: none;
+  }
+  .sidebar-backdrop.show {
+    display: block;
+  }
 }

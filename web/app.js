@@ -19,10 +19,13 @@ let currentAssetId = "ASSET-INV-01";
 let pollTimer = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+  initSidebarInteractions();
   initOnboardingForms();
   loadAllData();
   // Poll every 3 seconds for live telemetry updates
   pollTimer = setInterval(loadAllData, 3000);
+  updateUtcClock();
+  setInterval(updateUtcClock, 1000);
 });
 
 async function loadAllData() {
@@ -37,6 +40,7 @@ async function loadAllData() {
       fetchAdaptations(),
       fetchAuditChain(),
       fetchUsers(),
+      fetchDatabaseStatus(),
     ]);
   } catch (err) {
     console.error("REAMP polling error:", err);
@@ -771,3 +775,135 @@ function switchTab(tabId) {
     tab.show();
   }
 }
+
+// 10. Database Status
+async function fetchDatabaseStatus() {
+  try {
+    const res = await apiFetch("/api/database/status");
+    if (!res.ok) return;
+    const d = await res.json();
+
+    const badgeDb = document.getElementById("badge-db-status");
+    const sidebarDbDot = document.getElementById("sidebar-db-dot");
+    const sidebarDbText = document.getElementById("sidebar-db-status-text");
+
+    // Parse version from engine_version if present
+    let verStr = "18.6";
+    if (d.engine_version) {
+      const match = d.engine_version.match(/PostgreSQL\s+([\d.]+)/);
+      verStr = match ? match[1] : (d.engine_version.split(" ")[1] || "18.6");
+    }
+
+    if (d.status === "CONNECTED") {
+      if (badgeDb) {
+        badgeDb.className = "badge bg-success-subtle text-success border border-success-subtle ms-auto small";
+        badgeDb.innerText = "ONLINE";
+      }
+      if (sidebarDbDot) sidebarDbDot.className = "pulse-live";
+      if (sidebarDbText) sidebarDbText.innerText = `PostgreSQL ${verStr}`;
+    } else {
+      if (badgeDb) {
+        badgeDb.className = "badge bg-danger-subtle text-danger border border-danger-subtle ms-auto small";
+        badgeDb.innerText = "OFFLINE";
+      }
+      if (sidebarDbDot) sidebarDbDot.className = "pulse-live bg-danger";
+      if (sidebarDbText) sidebarDbText.innerText = "DB Offline";
+    }
+
+    // Update Database Tab KPIs if present
+    const elVersion = document.getElementById("db-val-version");
+    if (elVersion) elVersion.innerText = verStr;
+
+    const elHost = document.getElementById("db-val-host");
+    if (elHost && d.host) elHost.innerText = `${d.host}:${d.port || 5432}`;
+
+    const elName = document.getElementById("db-val-name");
+    if (elName && d.dbname) elName.innerText = d.dbname;
+
+    const elUser = document.getElementById("db-val-user");
+    if (elUser && d.user) elUser.innerText = d.user;
+
+    const elTables = document.getElementById("db-val-tables");
+    if (elTables && d.tables_count !== undefined) elTables.innerText = `${d.tables_count} Tables`;
+
+    const elDriver = document.getElementById("db-val-driver");
+    if (elDriver && d.driver) elDriver.innerText = d.driver;
+  } catch (err) {
+    console.debug("Database status fetch warning:", err);
+  }
+}
+
+// 11. UTC Live Clock
+function updateUtcClock() {
+  const clockEl = document.getElementById("sidebar-utc-clock");
+  if (!clockEl) return;
+  const now = new Date();
+  const utcHours = String(now.getUTCHours()).padStart(2, "0");
+  const utcMinutes = String(now.getUTCMinutes()).padStart(2, "0");
+  const utcSeconds = String(now.getUTCSeconds()).padStart(2, "0");
+  clockEl.innerText = `${utcHours}:${utcMinutes}:${utcSeconds} UTC`;
+}
+
+// 12. Sidebar & Topbar Dynamic Navigation
+function initSidebarInteractions() {
+  // Mobile Drawer Toggle
+  const sidebar = document.getElementById("reampSidebar");
+  const backdrop = document.getElementById("sidebarBackdrop");
+  const toggleBtn = document.getElementById("sidebarToggleBtn");
+
+  function toggleSidebar(open) {
+    if (!sidebar || !backdrop) return;
+    const shouldOpen = open !== undefined ? open : !sidebar.classList.contains("show");
+    if (shouldOpen) {
+      sidebar.classList.add("show");
+      backdrop.classList.add("show");
+    } else {
+      sidebar.classList.remove("show");
+      backdrop.classList.remove("show");
+    }
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => toggleSidebar());
+  }
+  if (backdrop) {
+    backdrop.addEventListener("click", () => toggleSidebar(false));
+  }
+
+  // Close drawer on mobile upon clicking a nav tab link
+  const navLinks = document.querySelectorAll("#reampTab .nav-link");
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth < 992) {
+        toggleSidebar(false);
+      }
+    });
+  });
+
+  // Dynamic Topbar Header Title on Tab Switch
+  const titleMap = {
+    "overview-tab": '<i class="bi bi-speedometer2 text-primary me-2"></i> Fleet Overview',
+    "twin-tab": '<i class="bi bi-cpu text-info me-2"></i> Digital Twin & Telemetry',
+    "health-tab": '<i class="bi bi-heart-pulse text-success me-2"></i> 7-Dimension Health (AHI)',
+    "alerts-tab": '<i class="bi bi-exclamation-triangle text-danger me-2"></i> Anomaly & Alerts',
+    "xai-tab": '<i class="bi bi-diagram-3 text-warning me-2"></i> Explainable AI (SHAP)',
+    "cmms-tab": '<i class="bi bi-wrench-adjustable text-primary me-2"></i> CMMS & HITL Queue',
+    "adaptive-tab": '<i class="bi bi-sliders text-dark me-2"></i> Adaptive Intelligence',
+    "audit-tab": '<i class="bi bi-journal-text text-secondary me-2"></i> Cryptographic Audit Ledger',
+    "onboard-tab": '<i class="bi bi-person-plus text-primary me-2"></i> Onboarding & Directory',
+    "database-tab": '<i class="bi bi-database text-primary me-2"></i> PostgreSQL Database Storage',
+  };
+
+  const topbarTitle = document.getElementById("topbar-section-title");
+  if (topbarTitle) {
+    document.querySelectorAll('#reampTab button[data-bs-toggle="tab"]').forEach((btn) => {
+      btn.addEventListener("shown.bs.tab", (event) => {
+        const targetId = event.target.id;
+        if (titleMap[targetId]) {
+          topbarTitle.innerHTML = titleMap[targetId];
+        }
+      });
+    });
+  }
+}
+
