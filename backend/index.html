@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REGENOVA Backoffice - Platform Operations & Administration</title>
+  <meta name="description" content="REGENOVA Backoffice - Super-admin operational console for multi-tenant renewable energy asset management, user administration, infrastructure telemetry, and cryptographic governance. Strict AC-FR-UI-001 (Bootstrap 5.3 Light Theme).">
+  <!-- Bootstrap 5.3.3 CSS -->
+  <link rel="stylesheet" href="vendor/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body class="bg-light text-dark">
+
+  <div class="reamp-app-layout">
+    <!-- Backdrop for mobile drawer -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- LEFT VERTICAL PANE (SIDEBAR) -->
+    <aside class="reamp-sidebar" id="reampSidebar">
+      <!-- Top Branding -->
+      <div class="reamp-sidebar-header d-flex align-items-center">
+        <div class="brand-icon-admin">
+          <i class="bi bi-shield-shaded"></i>
+        </div>
+        <div>
+          <div class="d-flex align-items-center">
+            <span class="fs-5 fw-bold text-dark me-2">REGENOVA</span>
+            <span class="badge bg-indigo-subtle text-primary border border-primary-subtle" style="font-size: 0.65rem;">Backoffice</span>
+          </div>
+          <div class="small text-muted" style="font-size: 0.7rem; line-height: 1.1;">Platform Operations & Admin</div>
+        </div>
+      </div>
+
+      <!-- Super-Admin Identity Card -->
+      <div class="reamp-sidebar-admin-user d-flex align-items-center">
+        <div class="admin-avatar me-2">
+          <i class="bi bi-person-fill-lock"></i>
+        </div>
+        <div class="overflow-hidden flex-grow-1">
+          <div class="fw-bold text-dark text-truncate" style="font-size: 0.8rem;">Platform Root Admin</div>
+          <div class="d-flex align-items-center gap-1 mt-1">
+            <span class="badge-platform-root">SECURITY_ADMIN</span>
+            <span class="text-muted" style="font-size: 0.68rem;">Global Scope</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vertical Navigation Tabs -->
+      <div class="reamp-sidebar-nav">
+        <div class="text-uppercase text-muted fw-bold px-2 mb-2" style="font-size: 0.68rem; letter-spacing: 0.08em;">Platform Oversight</div>
+        <ul class="nav nav-pills flex-column" id="backofficeTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab" aria-selected="true">
+              <i class="bi bi-speedometer2 text-primary"></i>
+              <span>Global Overview</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tab-tenants" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-buildings text-indigo"></i>
+              <span>Tenant Partitions</span>
+              <span class="badge bg-primary-subtle text-primary ms-auto small" id="badge-tenants-count">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#tab-users" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-people text-success"></i>
+              <span>Global User Directory</span>
+              <span class="badge bg-success-subtle text-success ms-auto small" id="badge-users-count">0</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="infra-tab" data-bs-toggle="tab" data-bs-target="#tab-infra" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-database-gear text-purple" style="color: var(--reamp-purple);"></i>
+              <span>Infrastructure & DB</span>
+              <span class="badge bg-success-subtle text-success ms-auto small" id="badge-db-indicator">CONNECTED</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#tab-audit" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-shield-check text-secondary"></i>
+              <span>Audit Ledger (SHA-256)</span>
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="hitl-tab" data-bs-toggle="tab" data-bs-target="#tab-hitl" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-wrench-adjustable text-warning"></i>
+              <span>HITL Queue & Alerts</span>
+              <span class="badge bg-danger rounded-pill ms-auto small" id="badge-hitl-count">0</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="reamp-sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <span class="pulse-live"></span>
+            <span class="fw-semibold text-dark" style="font-size: 0.73rem;">PostgreSQL 18.6</span>
+          </div>
+          <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">db.regenova.cloud</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.7rem;">
+          <span><i class="bi bi-shield-lock-fill text-success me-1"></i>Cryptographic Root</span>
+          <span class="font-monospace text-dark" id="sidebar-utc-clock">--:--:-- UTC</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT PANE -->
+    <div class="reamp-main-pane">
+      <!-- Topbar Header -->
+      <header class="reamp-topbar px-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" id="sidebarToggleBtn" aria-label="Toggle Sidebar">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <div>
+            <h5 class="m-0 fw-bold text-dark d-flex align-items-center" id="topbar-section-title">
+              <i class="bi bi-speedometer2 text-primary me-2"></i> Global Platform Overview
+            </h5>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <!-- Live API Indicator -->
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill d-none d-md-inline-flex align-items-center gap-1" id="topbar-api-badge">
+            <span class="pulse-live"></span>
+            <span class="fw-semibold font-monospace" style="font-size: 0.72rem;">API CONNECTED</span>
+          </span>
+
+          <!-- Quick Action: Enrol Tenant Modal Trigger -->
+          <button class="btn btn-sm btn-outline-primary fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalEnrollTenant">
+            <i class="bi bi-building-add me-1"></i> Enrol Tenant
+          </button>
+
+          <!-- Quick Action: Provision User Modal Trigger -->
+          <button class="btn btn-sm btn-outline-success fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalCreateUser">
+            <i class="bi bi-person-plus-fill me-1"></i> Add User
+          </button>
+
+          <!-- Refresh Button -->
+          <button class="btn btn-sm btn-outline-secondary fw-semibold" onclick="loadAllBackofficeData()" title="Refresh telemetry">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+
+          <!-- Portal Switcher Link -->
+          <a class="btn btn-sm btn-light border fw-semibold d-none d-sm-inline-flex align-items-center gap-1" href="https://regenova.cloud/" target="_blank" title="Go to Tenant Operations Portal">
+            <i class="bi bi-box-arrow-up-right"></i> Operations
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Content Body -->
+      <main class="reamp-content-body">
+        <div class="tab-content" id="backofficeTabContent">
+
+          <!-- 1. GLOBAL PLATFORM OVERVIEW TAB -->
+          <div class="tab-pane fade show active" id="tab-overview" role="tabpanel" aria-labelledby="overview-tab">
+            <!-- Global Metric KPI Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Global Contracted Capacity</div>
+                  <div class="stat-kpi-val text-primary" id="kpi-total-capacity">-- <small class="fs-6 text-muted">MW</small></div>
+                  <div class="small text-muted mt-2">Active Generation: <span id="kpi-total-generation" class="fw-bold text-success">-- MW</span></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Global Fleet Health (AHI)</div>
+                  <div class="stat-kpi-val text-success" id="kpi-fleet-health">-- <small class="fs-6 text-muted">/ 100</small></div>
+                  <div class="small text-muted mt-2">Status: <span class="badge bg-success-subtle text-success">OPTIMAL</span></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Active Tenant Partitions</div>
+                  <div class="stat-kpi-val text-dark" id="kpi-tenants-count">--</div>
+                  <div class="small text-muted mt-2">Zero Cross-Tenant Leakage Enforced</div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Total Connected Assets</div>
+                  <div class="stat-kpi-val text-info" id="kpi-assets-count">-- <small class="fs-6 text-muted">units</small></div>
+                  <div class="small text-muted mt-2">Across <span id="kpi-sites-count" class="fw-semibold text-dark">--</span> generation facilities</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Second Row: Health, Alerts & Financials -->
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-4">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Platform Revenue Flow</div>
+                  <div class="stat-kpi-val text-success" id="kpi-revenue-flow">$0.00 <small class="fs-6 text-muted">/ hr</small></div>
+                  <div class="small text-muted mt-2">Estimated loss: <span id="kpi-revenue-loss" class="text-danger fw-semibold">$0.00 / hr</span></div>
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Active Anomalies & Alerts</div>
+                  <div class="stat-kpi-val text-danger" id="kpi-active-alerts">0</div>
+                  <div class="small text-muted mt-2">Real-time Level 1 to 4 detection pipeline</div>
+                </div>
+              </div>
+              <div class="col-12 col-md-4">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Cumulative CO2 Avoided</div>
+                  <div class="stat-kpi-val text-purple" id="kpi-co2-tons" style="color: var(--reamp-purple);">-- <small class="fs-6 text-muted">Tons</small></div>
+                  <div class="small text-muted mt-2">Green Energy Dispatch Factor: 0.70 kg/kWh</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cross-Tenant Operational Grid -->
+            <div class="card card-reamp p-4 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h6 class="fw-bold text-dark m-0"><i class="bi bi-grid-fill me-2 text-primary"></i>Cross-Tenant Operational Status</h6>
+                  <div class="small text-muted">Live portfolio overview across all provisioned enterprise tenants</div>
+                </div>
+                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalEnrollTenant">
+                  <i class="bi bi-plus-circle me-1"></i> Enrol New Tenant
+                </button>
+              </div>
+              <div class="row g-3" id="cross-tenant-grid">
+                <!-- Dynamically populated tenant cards -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. TENANT PARTITIONS TAB -->
+          <div class="tab-pane fade" id="tab-tenants" role="tabpanel" aria-labelledby="tenants-tab">
+            <div class="card card-reamp p-4 mb-4 border-start border-4 border-primary">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Multi-Tenancy Governance</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-shield-lock me-1"></i>Isolated Partitions</span>
+                  </div>
+                  <h4 class="fw-bold text-dark m-0">Enterprise Tenant Partitions & Resource Limits</h4>
+                  <div class="text-muted small mt-1">
+                    Manage tenant boundaries, billing tiers, quotas, and administrative credentials with strict data isolation.
+                  </div>
+                </div>
+                <button class="btn btn-primary fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalEnrollTenant">
+                  <i class="bi bi-plus-circle me-1"></i> Enrol Organization
+                </button>
+              </div>
+            </div>
+
+            <!-- Tenants Table -->
+            <div class="card card-reamp p-4">
+              <div class="table-responsive">
+                <table class="table table-hover table-reamp align-middle">
+                  <thead>
+                    <tr>
+                      <th>Tenant ID</th>
+                      <th>Organization Name</th>
+                      <th>Short Code</th>
+                      <th>Billing Tier</th>
+                      <th>Capacity (MW)</th>
+                      <th>Sites</th>
+                      <th>Assets</th>
+                      <th>Users</th>
+                      <th>Alerts</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tenants-table-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. GLOBAL USER DIRECTORY TAB -->
+          <div class="tab-pane fade" id="tab-users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="card card-reamp p-4 mb-4 border-start border-4 border-success">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Identity & Access Management (IAM)</span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1"><i class="bi bi-key-fill me-1"></i>HMAC-SHA256</span>
+                  </div>
+                  <h4 class="fw-bold text-dark m-0">Global Platform User Directory & RBAC</h4>
+                  <div class="text-muted small mt-1">
+                    Super-admin control over roles, status suspension, and credential rotation across all utility boundaries.
+                  </div>
+                </div>
+                <button class="btn btn-success fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalCreateUser">
+                  <i class="bi bi-person-plus-fill me-1"></i> Provision User
+                </button>
+              </div>
+            </div>
+
+            <!-- User Filter & Directory Table -->
+            <div class="card card-reamp p-4">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 bg-light p-2 rounded border">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="small fw-semibold text-secondary"><i class="bi bi-funnel me-1"></i>Tenant Filter:</span>
+                  <select class="form-select form-select-sm" id="backoffice-filter-tenant" style="width: auto;" onchange="renderBackofficeUsers()">
+                    <option value="ALL">All Tenants</option>
+                  </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="text" class="form-control form-control-sm" id="backoffice-filter-search" placeholder="Search user by name, email, or ID..." oninput="renderBackofficeUsers()" style="width: 260px;">
+                  <button class="btn btn-sm btn-outline-secondary" onclick="fetchGlobalUsers()" title="Refresh Users">
+                    <i class="bi bi-arrow-clockwise"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover table-reamp align-middle">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Full Name & Email</th>
+                      <th>Tenant Org</th>
+                      <th>RBAC Role</th>
+                      <th>Status</th>
+                      <th>Security Token</th>
+                      <th>Permissions</th>
+                      <th class="text-end">Administration Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="backoffice-users-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. INFRASTRUCTURE & POSTGRESQL TAB -->
+          <div class="tab-pane fade" id="tab-infra" role="tabpanel" aria-labelledby="infra-tab">
+            <div class="card card-reamp p-4 mb-4 border-start border-4 border-purple" style="border-left-color: var(--reamp-purple) !important;">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-purple text-white px-2 py-1" style="background-color: var(--reamp-purple);">PostgreSQL 18.6</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Operational</span>
+                  </div>
+                  <h4 class="fw-bold text-dark m-0">Database & API Infrastructure Diagnostics</h4>
+                  <div class="text-muted small mt-1">
+                    Real-time connection monitoring, canonical table verification, TimescaleDB hypertable partition status, and API health.
+                  </div>
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="fetchDatabaseStatus()">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Re-test Connection
+                </button>
+              </div>
+            </div>
+
+            <!-- DB Metric Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Database Engine</div>
+                  <div class="fw-bold text-dark fs-5" id="infra-db-engine">PostgreSQL 18.6</div>
+                  <div class="small text-muted mt-1">Driver: <code id="infra-db-driver">psycopg2</code></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Host & Port</div>
+                  <div class="fw-bold text-primary fs-6 font-monospace text-truncate" id="infra-db-host">db.regenova.cloud</div>
+                  <div class="small text-muted mt-1">Port: <code id="infra-db-port">5432</code></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Database Name</div>
+                  <div class="fw-bold text-dark fs-5 font-monospace" id="infra-db-name">regenova_db</div>
+                  <div class="small text-muted mt-1">User: <code id="infra-db-user">regenova_db</code></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Canonical Tables</div>
+                  <div class="stat-kpi-val text-success" id="infra-db-tables">21</div>
+                  <div class="small text-muted mt-1">Status: <span class="badge bg-success-subtle text-success">VERIFIED</span></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">Multi-Tenancy RLS</div>
+                  <div class="fw-bold text-success fs-5">ENFORCED</div>
+                  <div class="small text-muted mt-1">NFR-SEC-002 Compliant</div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6 col-xl-2">
+                <div class="card card-reamp h-100 p-3">
+                  <div class="stat-kpi-label mb-1">API Service Host</div>
+                  <div class="fw-bold text-info fs-6 text-truncate">api.regenova.cloud</div>
+                  <div class="small text-muted mt-1">mod_wsgi Daemon</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Canonical 21 Tables Breakdown -->
+            <div class="card card-reamp p-4">
+              <h6 class="fw-bold text-dark mb-3"><i class="bi bi-table me-2 text-primary"></i>Canonical Relational & TimescaleDB Tables Directory</h6>
+              <div class="row g-2 font-monospace small" id="canonical-tables-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. CRYPTOGRAPHIC AUDIT LEDGER TAB -->
+          <div class="tab-pane fade" id="tab-audit" role="tabpanel" aria-labelledby="audit-tab">
+            <div class="card card-reamp p-4 mb-4 border-start border-4 border-secondary">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-dark text-white px-2 py-1">SHA-256 Hash Chain</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="bi bi-shield-check me-1"></i>Genesis-to-Tip Validated</span>
+                  </div>
+                  <h4 class="fw-bold text-dark m-0">Cryptographic Governance & Audit Ledger</h4>
+                  <div class="text-muted small mt-1">
+                    Immutable log of security actions, tenant enrolments, role mutations, and automated adaptations.
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="fetchAuditTrail()">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Verify Hash Continuity
+                </button>
+              </div>
+            </div>
+
+            <!-- Audit Trail Table -->
+            <div class="card card-reamp p-4">
+              <div class="table-responsive">
+                <table class="table table-hover table-reamp align-middle font-monospace small">
+                  <thead>
+                    <tr>
+                      <th>Seq #</th>
+                      <th>Timestamp (UTC)</th>
+                      <th>Action</th>
+                      <th>Actor ID</th>
+                      <th>Tenant Scope</th>
+                      <th>Payload Summary</th>
+                      <th>Previous Hash</th>
+                      <th>Block Hash (SHA-256)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="backoffice-audit-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. HITL APPROVALS & EMERGENCY QUEUE TAB -->
+          <div class="tab-pane fade" id="tab-hitl" role="tabpanel" aria-labelledby="hitl-tab">
+            <div class="card card-reamp p-4 mb-4 border-start border-4 border-warning">
+              <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">Human-in-the-Loop Gate</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Safety Override</span>
+                  </div>
+                  <h4 class="fw-bold text-dark m-0">Global HITL Work Order Queue & Emergency Oversight</h4>
+                  <div class="text-muted small mt-1">
+                    Central review of high-risk operational dispatch actions requiring safety signoff across all utility assets.
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="fetchHitlWorkOrders()">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Refresh Queue
+                </button>
+              </div>
+            </div>
+
+            <!-- Work Orders Table -->
+            <div class="card card-reamp p-4">
+              <div class="table-responsive">
+                <table class="table table-hover table-reamp align-middle">
+                  <thead>
+                    <tr>
+                      <th>WO ID</th>
+                      <th>Target Asset</th>
+                      <th>Tenant Scope</th>
+                      <th>Urgency</th>
+                      <th>Proposed Action</th>
+                      <th>Financial Exposure</th>
+                      <th>Status</th>
+                      <th class="text-end">HITL Decision</th>
+                    </tr>
+                  </thead>
+                  <tbody id="backoffice-hitl-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="reamp-footer">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <strong class="text-dark">REGENOVA Backoffice</strong> - Platform Operations & Administration Console
+            <div class="text-muted small mt-1">Universal governance and administration interface for renewable energy generation assets.</div>
+          </div>
+          <div class="font-monospace small">
+            API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Scope: <span class="text-dark fw-bold">PLATFORM_ROOT</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Modal 1: Enrol Tenant Organization -->
+  <div class="modal fade" id="modalEnrollTenant" tabindex="-1" aria-labelledby="modalEnrollTenantLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light border-bottom">
+          <div class="d-flex align-items-center gap-2">
+            <div class="p-2 rounded bg-primary-subtle text-primary">
+              <i class="bi bi-building-plus fs-5"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark fs-6" id="modalEnrollTenantLabel">Enrol Tenant Organization</h5>
+              <div class="small text-muted">Provision a completely isolated enterprise tenant partition</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-backoffice-enroll-tenant">
+          <div class="modal-body p-4">
+            <div id="tenant-enroll-alert" class="alert alert-danger small d-none mb-3"></div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Tenant ID Code</label>
+              <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="backoffice-tenant-id" placeholder="ORG-IBERIAN-SOLAR" required>
+              <div class="form-text" style="font-size: 0.72rem;">Unique identifier code prefix for RLS partitioning</div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Organization Name</label>
+              <input type="text" class="form-control form-control-sm" id="backoffice-tenant-name" placeholder="Iberian Clean Power SL" required>
+            </div>
+            <div class="row g-2 mb-3">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">Short Code</label>
+                <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="backoffice-tenant-code" placeholder="IBERIAN" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-dark">Billing Tier</label>
+                <select class="form-select form-select-sm" id="backoffice-tenant-tier" required>
+                  <option value="ENTERPRISE_TIER_1" selected>Enterprise Tier 1</option>
+                  <option value="ENTERPRISE_TIER_2">Enterprise Tier 2</option>
+                  <option value="UTILITY_COMMUNITY">Utility Community</option>
+                  <option value="PILOT_TRIAL">Pilot Trial</option>
+                </select>
+              </div>
+            </div>
+            <div class="border-top pt-3 mt-3">
+              <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-person-badge-fill text-primary me-1"></i>Primary Administrator Account</h6>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-dark">Admin Name</label>
+                  <input type="text" class="form-control form-control-sm" id="backoffice-admin-name" placeholder="Javier Ramos" required>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-semibold text-dark">Admin Email</label>
+                  <input type="email" class="form-control form-control-sm" id="backoffice-admin-email" placeholder="javier@iberianpower.es" required>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer bg-light border-top py-2 px-4">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-sm btn-primary fw-semibold" id="btn-backoffice-enroll-submit">
+              <i class="bi bi-shield-check me-1"></i> Enrol Organization
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Provision User Under Tenant -->
+  <div class="modal fade" id="modalCreateUser" tabindex="-1" aria-labelledby="modalCreateUserLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light border-bottom">
+          <div class="d-flex align-items-center gap-2">
+            <div class="p-2 rounded bg-success-subtle text-success">
+              <i class="bi bi-person-plus-fill fs-5"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold text-dark fs-6" id="modalCreateUserLabel">Provision Platform User</h5>
+              <div class="small text-muted">Create operator, engineer, or admin identity with HMAC token</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="form-backoffice-create-user">
+          <div class="modal-body p-4">
+            <div id="user-create-alert" class="alert alert-danger small d-none mb-3"></div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Tenant Organization</label>
+              <select class="form-select form-select-sm" id="modal-user-tenant" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Full Name</label>
+              <input type="text" class="form-control form-control-sm" id="modal-user-name" placeholder="e.g. Dr. Sara Bergstrom" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Email Address</label>
+              <input type="email" class="form-control form-control-sm" id="modal-user-email" placeholder="e.g. sara@aurora.energy" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Assigned Role (RBAC)</label>
+              <select class="form-select form-select-sm" id="modal-user-role" required>
+                <option value="OPERATOR" selected>Operator (Monitor & Dispatch WOs)</option>
+                <option value="CHIEF_ENGINEER">Chief Engineer (Full HITL Approvals)</option>
+                <option value="SECURITY_ADMIN">Security Admin (Audit & Config)</option>
+                <option value="VIEWER">Viewer (Read-Only Telemetry)</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer bg-light border-top py-2 px-4">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-sm btn-success fw-semibold" id="btn-backoffice-user-submit">
+              <i class="bi bi-key-fill me-1"></i> Provision & Generate Token
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5.3.3 Bundle JS -->
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+  <!-- Backoffice Controller Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

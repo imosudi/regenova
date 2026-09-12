@@ -1,0 +1,345 @@
+/* ==========================================================================
+   REGENOVA Backoffice - Platform Operations & Administration
+   Requirement: FR-UI-001 / AC-FR-UI-001
+   Strict Bootstrap 5.3 Light Theme without dark SCADA override
+   Dedicated Admin Portal for Multi-Tenant Platform Management
+   ========================================================================== */
+
+@import url("vendor/bootstrap.min.css");
+@import url("vendor/bootstrap-icons.min.css");
+
+:root {
+  --reamp-indigo: #4f46e5;
+  --reamp-indigo-dark: #4338ca;
+  --reamp-indigo-light: #e0e7ff;
+  --reamp-primary: #0d6efd;
+  --reamp-success: #10b981;
+  --reamp-warning: #f59e0b;
+  --reamp-danger: #ef4444;
+  --reamp-info: #06b6d4;
+  --reamp-purple: #8b5cf6;
+  --reamp-slate-dark: #0f172a;
+  --reamp-slate-muted: #64748b;
+  --reamp-body-bg: #f8fafc;
+  --reamp-card-bg: #ffffff;
+  --reamp-border: #e2e8f0;
+  --reamp-border-subtle: #f1f5f9;
+  --reamp-sidebar-width: 280px;
+}
+
+body {
+  background-color: var(--reamp-body-bg);
+  color: var(--reamp-slate-dark);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   App Layout: Left Sidebar + Main Content Pane
+   ========================================================================== */
+.reamp-app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar */
+.reamp-sidebar {
+  width: var(--reamp-sidebar-width);
+  min-width: var(--reamp-sidebar-width);
+  max-width: var(--reamp-sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background-color: #ffffff;
+  border-right: 1px solid var(--reamp-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 1040;
+  transition: transform 0.25s ease-in-out;
+  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.03);
+}
+
+.reamp-sidebar-header {
+  padding: 1.25rem 1.15rem 1rem 1.15rem;
+  border-bottom: 1px solid var(--reamp-border);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.brand-icon-admin {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  margin-right: 0.75rem;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+  flex-shrink: 0;
+}
+
+.reamp-sidebar-admin-user {
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid var(--reamp-border);
+  background-color: #ffffff;
+}
+
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(79, 70, 229, 0.25);
+}
+
+.badge-platform-root {
+  background-color: rgba(79, 70, 229, 0.12);
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.reamp-sidebar-nav {
+  padding: 1rem 0.75rem;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.reamp-sidebar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  margin-bottom: 0.2rem;
+  border: 1px solid transparent;
+}
+
+.reamp-sidebar-nav .nav-link:hover {
+  background-color: #f1f5f9;
+  color: var(--reamp-slate-dark);
+}
+
+.reamp-sidebar-nav .nav-link.active {
+  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  color: #ffffff;
+  box-shadow: 0 3px 8px rgba(79, 70, 229, 0.3);
+  font-weight: 600;
+}
+
+.reamp-sidebar-nav .nav-link.active i {
+  color: #ffffff !important;
+}
+
+.reamp-sidebar-footer {
+  padding: 0.85rem 1.15rem;
+  border-top: 1px solid var(--reamp-border);
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ==========================================================================
+   Main Pane & Topbar
+   ========================================================================== */
+.reamp-main-pane {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--reamp-body-bg);
+}
+
+.reamp-topbar {
+  height: 60px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--reamp-border);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+}
+
+.reamp-content-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+
+/* ==========================================================================
+   Cards, Badges & Micro-Interactions
+   ========================================================================== */
+.card-reamp {
+  background: #ffffff;
+  border: 1px solid var(--reamp-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-reamp:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.stat-kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--reamp-slate-muted);
+  font-weight: 700;
+}
+
+.stat-kpi-val {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Pulse Live */
+.pulse-live {
+  width: 8px;
+  height: 8px;
+  background-color: var(--reamp-success);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Status Badges */
+.badge-status-active {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+}
+
+.badge-status-suspended {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+}
+
+.badge-tenant-pill {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.badge-role-admin {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.badge-role-engineer {
+  background-color: rgba(139, 92, 246, 0.12);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.badge-role-operator {
+  background-color: rgba(13, 110, 253, 0.12);
+  color: #0d6efd;
+  border: 1px solid rgba(13, 110, 253, 0.25);
+}
+
+.badge-role-viewer {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Tables in Light Theme */
+.table-reamp th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  border-bottom: 2px solid var(--reamp-border);
+}
+
+.table-reamp td {
+  vertical-align: middle;
+  font-size: 0.85rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Footer */
+footer.reamp-footer {
+  background-color: #ffffff;
+  border-top: 1px solid var(--reamp-border);
+  padding: 1.15rem 1.5rem;
+  margin-top: auto;
+  font-size: 0.825rem;
+  color: var(--reamp-slate-muted);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 991.98px) {
+  .reamp-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+  .reamp-sidebar.show {
+    transform: translateX(0);
+  }
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.4);
+    z-index: 1035;
+    display: none;
+  }
+  .sidebar-backdrop.show {
+    display: block;
+  }
+}
