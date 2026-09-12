@@ -451,18 +451,22 @@ class REAMPWebServerState:
     # Core Data & Action Handlers (Multi-Tenant Scoped)
     # -------------------------------------------------------------------------
 
-    def get_tenants_data(self) -> dict:
-        """Returns all registered corporate tenants with live metrics."""
-        tenants = self.onboarding.list_tenants()
-        for t in tenants:
+    def get_tenants_data(self, tenant_id: Optional[str] = None) -> dict:
+        """Returns registered corporate tenants with live metrics, optionally filtered to a single tenant partition."""
+        all_tenants = self.onboarding.list_tenants()
+        tenants = []
+        for t in all_tenants:
             t_id = t["tenant_id"]
+            if tenant_id and t_id != tenant_id:
+                continue
             if t_id in self.tenants:
                 app = self.tenants[t_id]
                 t["sites_count"] = len(app.sites)
                 t["assets_count"] = len(app.assets)
                 t["capacity_mw"] = round(sum(s.rated_capacity_mw for s in app.sites.values()), 1)
                 t["active_alerts_count"] = len([a for a in app.alerts.values() if a.status == AlertStatus.ACTIVE])
-        return {"tenants": tenants, "default_tenant_id": self.default_tenant_id}
+            tenants.append(t)
+        return {"tenants": tenants, "default_tenant_id": tenant_id or self.default_tenant_id}
 
     def get_overview_data(self, tenant_id: Optional[str] = None) -> dict:
         app = self.get_tenant_app(tenant_id)
@@ -1388,12 +1392,37 @@ class REAMPWebServerState:
             return 500, {"status": "ERROR", "message": str(e)}
 
 
+    def get_operator_from_token(self, token: Optional[str]):
+        """Resolves authenticated active operator user from session token."""
+        if not token:
+            return None
+        tok_clean = token.strip().replace("Bearer ", "")
+        for u in self.onboarding.users.values():
+            if u.status != "ACTIVE":
+                continue
+            expected_hash = hashlib.sha256(f"{u.email.lower()}:{u.tenant_id}:REGENOVA-OPERATOR-SALT-2026".encode("utf-8")).hexdigest()
+            expected_token = f"OPR-SEC-{expected_hash[:16].upper()}"
+            if tok_clean in (expected_token, getattr(u, "token", None)):
+                return u
+        return None
+
+    def is_valid_admin_token(self, token: Optional[str]) -> bool:
+        """Verifies if token is a valid Super Administrator token."""
+        if not token:
+            return False
+        tok_clean = token.strip().replace("Bearer ", "")
+        expected_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
+        token_hash = hashlib.sha256(f"{expected_email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
+        expected_token = f"ADM-SEC-{token_hash[:16].upper()}"
+        return tok_clean == expected_token
+
+
 GLOBAL_STATE = REAMPWebServerState()
 
 
 def dispatch_api_request(method: str, path: str, payload: dict = None, headers: dict = None, query_params: dict = None) -> tuple:
     """
-    Unified router for REGENOVA API requests with multi-tenant isolation.
+    Unified router for REGENOVA API requests with strict multi-tenant isolation.
     Returns (status_code: int, data: dict/list).
     Used by both standalone HTTP server and Apache mod_wsgi.
     """
@@ -1401,16 +1430,52 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
     query_params = query_params or {}
     p = payload or {}
 
-    tenant_id = (
-        headers.get("X-Tenant-ID")
-        or headers.get("x-tenant-id")
+    norm_headers = {str(k).lower(): (v or "") for k, v in headers.items() if k is not None}
+
+    auth_header = norm_headers.get("authorization") or ""
+    op_token_header = norm_headers.get("x-operator-token") or ""
+    admin_token_header = norm_headers.get("x-admin-token") or ""
+    query_token = query_params.get("token") or ""
+    payload_token = (p.get("token") if isinstance(p, dict) and p.get("token") else "") or ""
+
+    raw_token = (
+        auth_header.replace("Bearer ", "").strip()
+        or op_token_header.strip()
+        or admin_token_header.strip()
+        or query_token.strip()
+        or payload_token.strip()
+    )
+
+    requested_tenant_id = (
+        norm_headers.get("x-tenant-id")
         or query_params.get("tenant_id")
         or (p.get("tenant_id") if isinstance(p, dict) else None)
-        or GLOBAL_STATE.default_tenant_id
     )
+
+    operator_user = GLOBAL_STATE.get_operator_from_token(raw_token) if raw_token else None
+    is_admin = GLOBAL_STATE.is_valid_admin_token(raw_token) if raw_token else False
+
+    # Strict multi-tenant partition boundary enforcement
+    if operator_user:
+        op_tenant_id = operator_user.tenant_id
+        if path == "/api/onboarding/tenant":
+            return 403, {
+                "status": "ERROR",
+                "message": "Tenant onboarding is restricted to Platform Super Administrators in the Backoffice."
+            }
+        if requested_tenant_id and requested_tenant_id != op_tenant_id:
+            return 403, {
+                "status": "ERROR",
+                "message": f"Tenant boundary violation: Operator '{operator_user.email}' is partitioned to '{op_tenant_id}' and is not permitted to access tenant partition '{requested_tenant_id}'."
+            }
+        tenant_id = op_tenant_id
+    else:
+        tenant_id = requested_tenant_id or GLOBAL_STATE.default_tenant_id
 
     if method in ("GET", "HEAD"):
         if path == "/api/tenants":
+            if operator_user:
+                return 200, GLOBAL_STATE.get_tenants_data(tenant_id=operator_user.tenant_id)
             return 200, GLOBAL_STATE.get_tenants_data()
         elif path == "/api/overview":
             return 200, GLOBAL_STATE.get_overview_data(tenant_id)
@@ -1430,33 +1495,51 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
         elif path == "/api/audit-chain":
             return 200, GLOBAL_STATE.get_audit_chain_data(tenant_id)
         elif path == "/api/users":
-            return 200, GLOBAL_STATE.get_users_data(tenant_id)
+            target_tenant = operator_user.tenant_id if operator_user else (None if query_params.get("all") == "true" and is_admin else tenant_id)
+            return 200, GLOBAL_STATE.get_users_data(target_tenant)
         elif path == "/api/database/status":
             return 200, GLOBAL_STATE.get_database_status_data()
         elif path in ("/api/admin/session", "/api/admin/verify"):
-            raw_tok = query_params.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Admin-Token", "")
+            raw_tok = query_params.get("token") or auth_header.replace("Bearer ", "") or admin_token_header
             return GLOBAL_STATE.admin_verify_api(raw_tok)
         elif path in ("/api/operator/session", "/api/operator/verify"):
-            raw_tok = query_params.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Operator-Token", "")
+            raw_tok = query_params.get("token") or auth_header.replace("Bearer ", "") or op_token_header
             return GLOBAL_STATE.operator_verify_api(raw_tok, query_params.get("tenant_id"))
     elif method == "POST":
         if path == "/api/operator/login":
             return GLOBAL_STATE.operator_login_api(p)
         elif path == "/api/operator/verify":
-            raw_tok = p.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Operator-Token", "")
+            raw_tok = p.get("token") or auth_header.replace("Bearer ", "") or op_token_header
             return GLOBAL_STATE.operator_verify_api(raw_tok, p.get("tenant_id"))
         elif path == "/api/admin/login":
             return GLOBAL_STATE.admin_login_api(p)
         elif path == "/api/admin/verify":
-            raw_tok = p.get("token") or headers.get("Authorization", "").replace("Bearer ", "") or headers.get("X-Admin-Token", "")
+            raw_tok = p.get("token") or auth_header.replace("Bearer ", "") or admin_token_header
             return GLOBAL_STATE.admin_verify_api(raw_tok)
         elif path == "/api/onboarding/tenant":
+            if operator_user:
+                return 403, {
+                    "status": "ERROR",
+                    "message": "Tenant onboarding is restricted to Platform Super Administrators in the Backoffice."
+                }
             return GLOBAL_STATE.onboard_tenant_api(p)
         elif path == "/api/users/update-role":
+            if operator_user:
+                target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
+                if target_u and target_u.tenant_id != operator_user.tenant_id:
+                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
             return GLOBAL_STATE.update_user_role_api(p, tenant_id)
         elif path == "/api/users/toggle-status":
+            if operator_user:
+                target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
+                if target_u and target_u.tenant_id != operator_user.tenant_id:
+                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
             return GLOBAL_STATE.toggle_user_status_api(p, tenant_id)
         elif path == "/api/users/regenerate-token":
+            if operator_user:
+                target_u = GLOBAL_STATE.onboarding.get_user(p.get("user_id"))
+                if target_u and target_u.tenant_id != operator_user.tenant_id:
+                    return 403, {"status": "ERROR", "message": "Cross-tenant user modification prohibited."}
             return GLOBAL_STATE.regenerate_user_token_api(p, tenant_id)
         elif path == "/api/telemetry/inject":
             return 200, GLOBAL_STATE.inject_telemetry(p, tenant_id)
@@ -1471,6 +1554,8 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
         elif path == "/api/adaptations/approve":
             return 200, GLOBAL_STATE.approve_adaptation(p, tenant_id)
         elif path == "/api/onboarding/user":
+            if operator_user:
+                p["tenant_id"] = operator_user.tenant_id
             return GLOBAL_STATE.onboard_user_api(p, tenant_id)
         elif path == "/api/onboarding/facility":
             return GLOBAL_STATE.onboard_facility_api(p, tenant_id)

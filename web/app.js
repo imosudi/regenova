@@ -64,12 +64,30 @@ function unlockPortal(authData) {
 
   if (authData && authData.user) {
     const u = authData.user;
+    const t = authData.tenant || {};
     if (u.tenant_id) {
       currentTenantId = u.tenant_id;
-      const tenantSelect = document.getElementById("tenantContextSelect");
-      if (tenantSelect) tenantSelect.value = currentTenantId;
+      
+      const sidebarTenantName = document.getElementById("sidebar-tenant-name");
+      if (sidebarTenantName) sidebarTenantName.innerText = t.name || u.tenant_name || (u.tenant_id.replace("ORG-", "").replace(/-/g, " ") + " Renewables");
+
+      const sidebarTenantId = document.getElementById("sidebar-tenant-id");
+      if (sidebarTenantId) sidebarTenantId.innerText = u.tenant_id;
+
       const topbarTenant = document.getElementById("topbar-tenant-text");
-      if (topbarTenant) topbarTenant.innerText = currentTenantId;
+      if (topbarTenant) topbarTenant.innerText = u.tenant_id;
+
+      const footerTenant = document.getElementById("footer-tenant-text");
+      if (footerTenant) footerTenant.innerText = u.tenant_id;
+
+      const filterUserTenantBadge = document.getElementById("filter-user-tenant-badge");
+      if (filterUserTenantBadge) filterUserTenantBadge.innerText = u.tenant_id;
+
+      const userTenantInput = document.getElementById("user-tenant");
+      if (userTenantInput) userTenantInput.value = u.tenant_id;
+
+      const userTenantDisplay = document.getElementById("user-tenant-display");
+      if (userTenantDisplay) userTenantDisplay.value = `${u.tenant_id} (${t.name || u.tenant_name || 'Active Partition'})`;
     }
     const nameEl = document.getElementById("sidebar-user-name");
     if (nameEl) nameEl.innerText = u.name || "Operator";
@@ -197,20 +215,17 @@ window.toggleOperatorPasswordVisibility = function() {
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-  const tenantParam = urlParams.get("tenant_id");
-  if (tenantParam) {
-    currentTenantId = tenantParam;
-  }
   initSidebarInteractions();
   initOnboardingForms();
-  initTenantEnrolmentForm();
   updateUtcClock();
   setInterval(updateUtcClock, 1000);
 
   // Validate existing operator authentication
   const auth = getStoredOperatorAuth();
   if (auth && auth.token) {
+    if (auth.user && auth.user.tenant_id) {
+      currentTenantId = auth.user.tenant_id;
+    }
     try {
       const verifyRes = await fetch(`${API_BASE}/api/operator/verify`, {
         method: "POST",
@@ -818,43 +833,33 @@ async function fetchTenants() {
 function populateTenantDropdowns() {
   if (!allTenants || allTenants.length === 0) return;
 
-  // 1. Sidebar context select
-  const selectSidebar = document.getElementById("tenantContextSelect");
-  if (selectSidebar) {
-    const prevVal = selectSidebar.value || currentTenantId;
-    selectSidebar.innerHTML = allTenants.map(t => 
-      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.name}</option>`
-    ).join("");
-  }
+  const currentTenant = allTenants.find(t => t.tenant_id === currentTenantId) || allTenants[0];
+  if (currentTenant) {
+    const sidebarTenantName = document.getElementById("sidebar-tenant-name");
+    if (sidebarTenantName) sidebarTenantName.innerText = currentTenant.name;
 
-  // 2. User onboarding form tenant select
-  const selectUserTenant = document.getElementById("user-tenant");
-  if (selectUserTenant) {
-    const prevVal = selectUserTenant.value || currentTenantId;
-    selectUserTenant.innerHTML = allTenants.map(t => 
-      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.tenant_id} (${t.name})</option>`
-    ).join("");
-  }
+    const sidebarTenantId = document.getElementById("sidebar-tenant-id");
+    if (sidebarTenantId) sidebarTenantId.innerText = currentTenant.tenant_id;
 
-  // 3. User directory filter select
-  const selectFilterTenant = document.getElementById("filter-user-tenant");
-  if (selectFilterTenant) {
-    const prevVal = selectFilterTenant.value || "ALL";
-    selectFilterTenant.innerHTML = `<option value="ALL">All Tenants</option>` + allTenants.map(t => 
-      `<option value="${t.tenant_id}" ${t.tenant_id === prevVal ? 'selected' : ''}>${t.name}</option>`
-    ).join("");
+    const userTenantDisplay = document.getElementById("user-tenant-display");
+    if (userTenantDisplay) userTenantDisplay.value = `${currentTenant.tenant_id} (${currentTenant.name})`;
+
+    const userTenantInput = document.getElementById("user-tenant");
+    if (userTenantInput) userTenantInput.value = currentTenant.tenant_id;
+
+    const filterUserTenantBadge = document.getElementById("filter-user-tenant-badge");
+    if (filterUserTenantBadge) filterUserTenantBadge.innerText = currentTenant.tenant_id;
   }
 }
 
 function switchTenant(tenantId) {
+  const auth = getStoredOperatorAuth();
+  if (auth && auth.user && auth.user.tenant_id && auth.user.tenant_id !== tenantId) {
+    console.warn(`Tenant switch denied: operator is strictly bound to partition ${auth.user.tenant_id}`);
+    return;
+  }
   if (!tenantId) return;
   currentTenantId = tenantId;
-
-  // Sync sidebar dropdown
-  const selectSidebar = document.getElementById("tenantContextSelect");
-  if (selectSidebar && selectSidebar.value !== tenantId) {
-    selectSidebar.value = tenantId;
-  }
 
   // Sync user onboarding form
   const selectUserTenant = document.getElementById("user-tenant");
@@ -868,51 +873,19 @@ function switchTenant(tenantId) {
     topbarBadge.innerText = tenantId;
   }
 
-  // Update user profile card in sidebar according to active tenant
-  updateSidebarUserProfile(tenantId);
+  // Sync footer tenant badge
+  const footerTenant = document.getElementById("footer-tenant-text");
+  if (footerTenant) {
+    footerTenant.innerText = tenantId;
+  }
 
   // Reload all scoped tenant data
   loadAllData();
 }
 
-function updateSidebarUserProfile(tenantId) {
-  const nameEl = document.getElementById("sidebar-user-name");
-  const roleEl = document.getElementById("sidebar-user-role");
-  const orgEl = document.getElementById("sidebar-user-org");
-
-  const auth = getStoredOperatorAuth();
-  if (auth && auth.user && auth.user.tenant_id === tenantId) {
-    if (nameEl) nameEl.innerText = auth.user.name || "Operator";
-    if (roleEl) roleEl.innerText = (auth.user.role || "OPERATOR").replace(/_/g, " ");
-    if (orgEl) orgEl.innerText = tenantId.replace("ORG-", "");
-    const topbarName = document.getElementById("topbar-operator-name");
-    if (topbarName) topbarName.innerText = `${auth.user.name || "Operator"} (${(auth.user.role || "OPERATOR").replace(/_/g, " ")})`;
-    return;
-  }
-
-  if (tenantId === "ORG-AURORA-NORDIC") {
-    if (nameEl) nameEl.innerText = "Astrid Lindgren";
-    if (roleEl) roleEl.innerText = "Chief Engineer";
-    if (orgEl) orgEl.innerText = "AURORA";
-  } else if (tenantId === "ORG-SOLARIA-ESP") {
-    if (nameEl) nameEl.innerText = "Javier Morales";
-    if (roleEl) roleEl.innerText = "Chief Engineer";
-    if (orgEl) orgEl.innerText = "SOLARIA";
-  } else if (tenantId === "ORG-HELIOS-GLOBAL") {
-    if (nameEl) nameEl.innerText = "Dr. Elena Rostova";
-    if (roleEl) roleEl.innerText = "Chief Engineer";
-    if (orgEl) orgEl.innerText = "HELIOS";
-  } else {
-    const matchedTenant = allTenants.find(t => t.tenant_id === tenantId);
-    if (nameEl) nameEl.innerText = (matchedTenant && matchedTenant.name) ? matchedTenant.name.split(" ")[0] + " Admin" : "Tenant Admin";
-    if (roleEl) roleEl.innerText = "Administrator";
-    if (orgEl) orgEl.innerText = tenantId;
-  }
-}
-
 async function fetchUsers() {
   try {
-    const res = await apiFetch("/api/users?all=true");
+    const res = await apiFetch("/api/users");
     if (!res.ok) return;
     const data = await res.json();
     allUsersList = data.users || [];
@@ -923,14 +896,12 @@ async function fetchUsers() {
 }
 
 function filterAndRenderUsers() {
-  const filterTenantEl = document.getElementById("filter-user-tenant");
   const filterSearchEl = document.getElementById("filter-user-search");
-
-  const filterTenant = filterTenantEl ? filterTenantEl.value : "ALL";
   const filterSearch = (filterSearchEl ? filterSearchEl.value : "").toLowerCase().trim();
 
   let filtered = allUsersList.filter(u => {
-    if (filterTenant !== "ALL" && u.tenant_id !== filterTenant) return false;
+    // Strictly isolate users to the operator's active tenant partition
+    if (u.tenant_id !== currentTenantId) return false;
     if (filterSearch) {
       const matchName = (u.name || "").toLowerCase().includes(filterSearch);
       const matchEmail = (u.email || "").toLowerCase().includes(filterSearch);
@@ -941,9 +912,8 @@ function filterAndRenderUsers() {
   });
 
   // KPI count of users for active tenant
-  const tenantUsersCount = allUsersList.filter(u => u.tenant_id === currentTenantId).length;
   const statCount = document.getElementById("stat-onboard-users");
-  if (statCount) statCount.innerText = tenantUsersCount;
+  if (statCount) statCount.innerText = filtered.length;
   const pillCount = document.getElementById("count-pill-users");
   if (pillCount) pillCount.innerText = filtered.length;
 
@@ -951,7 +921,7 @@ function filterAndRenderUsers() {
   if (!tbody) return;
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-person-x fs-3 d-block mb-1"></i>No users match the selected filter.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-person-x fs-3 d-block mb-1"></i>No users found for this organisation partition.</td></tr>`;
     return;
   }
 
@@ -1066,60 +1036,6 @@ async function regenerateUserToken(userId) {
   }
 }
 
-function initTenantEnrolmentForm() {
-  const form = document.getElementById("form-enroll-tenant");
-  if (!form) return;
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const alertBox = document.getElementById("tenant-enroll-alert");
-    const btnSubmit = document.getElementById("btn-submit-enroll-tenant");
-
-    alertBox.className = "alert alert-danger small d-none mb-3";
-    btnSubmit.disabled = true;
-    btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Enrolling...`;
-
-    try {
-      const payload = {
-        tenant_id: document.getElementById("tenant-org-id").value.trim().toUpperCase(),
-        name: document.getElementById("tenant-org-name").value.trim(),
-        code: document.getElementById("tenant-org-code").value.trim().toUpperCase(),
-        billing_tier: document.getElementById("tenant-billing-tier").value,
-        admin_name: document.getElementById("tenant-admin-name").value.trim(),
-        admin_email: document.getElementById("tenant-admin-email").value.trim(),
-      };
-
-      const res = await apiFetch("/api/onboarding/tenant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-
-      if (data.status === "SUCCESS") {
-        form.reset();
-        const modalEl = document.getElementById("modalEnrollTenant");
-        const modalInstance = bootstrap.Modal.getInstance(modalEl);
-        if (modalInstance) modalInstance.hide();
-
-        await fetchTenants();
-        switchTenant(payload.tenant_id);
-        fetchUsers();
-        fetchAuditChain();
-      } else {
-        alertBox.className = "alert alert-danger small d-block mb-3";
-        alertBox.innerText = `Enrolment failed: ${data.message || 'Unknown error'}`;
-      }
-    } catch (err) {
-      alertBox.className = "alert alert-danger small d-block mb-3";
-      alertBox.innerText = `Network error: ${err.message}`;
-    } finally {
-      btnSubmit.disabled = false;
-      btnSubmit.innerHTML = `<i class="bi bi-shield-check me-1"></i> Enrol Organisation`;
-    }
-  });
-}
-
 function initOnboardingForms() {
   // 1. User Form
   const formUser = document.getElementById("form-onboard-user");
@@ -1149,6 +1065,11 @@ function initOnboardingForms() {
           formUser.reset();
           const userTenantEl = document.getElementById("user-tenant");
           if (userTenantEl) userTenantEl.value = currentTenantId;
+          const userTenantDisplay = document.getElementById("user-tenant-display");
+          if (userTenantDisplay) {
+            const currentTenant = allTenants.find(t => t.tenant_id === currentTenantId);
+            userTenantDisplay.value = currentTenant ? `${currentTenant.tenant_id} (${currentTenant.name})` : currentTenantId;
+          }
           fetchUsers();
           fetchAuditChain();
         } else {

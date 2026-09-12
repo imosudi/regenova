@@ -114,19 +114,16 @@
         </div>
       </div>
 
-      <!-- Active Tenant Context Switcher -->
+      <!-- Active Tenant Context (Locked Partition) -->
       <div class="reamp-sidebar-tenant">
         <div class="d-flex align-items-center justify-content-between mb-1">
           <span class="text-uppercase text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 0.06em;">Active Tenant</span>
-          <button class="btn btn-link p-0 text-decoration-none text-primary fw-semibold" type="button" data-bs-toggle="modal" data-bs-target="#modalEnrollTenant" title="Enrol new tenant organisation" style="font-size: 0.72rem;">
-            <i class="bi bi-plus-circle me-1"></i>Enrol
-          </button>
+          <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.6rem;"><i class="bi bi-shield-lock-fill me-1"></i>Isolated</span>
         </div>
-        <select class="form-select form-select-sm tenant-select" id="tenantContextSelect" onchange="switchTenant(this.value)">
-          <option value="ORG-HELIOS-GLOBAL" selected>Helios Global Renewables</option>
-          <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy</option>
-          <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia</option>
-        </select>
+        <div class="p-2 rounded bg-light border">
+          <div class="fw-bold text-dark text-truncate small" id="sidebar-tenant-name">Helios Global Renewables</div>
+          <div class="text-muted font-monospace" style="font-size: 0.68rem;" id="sidebar-tenant-id">ORG-HELIOS-GLOBAL</div>
+        </div>
       </div>
 
       <!-- User & Tenant Card -->
@@ -755,12 +752,9 @@
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label small fw-semibold text-dark">Tenant Organisation</label>
-                  <select class="form-select form-select-sm" id="user-tenant" required>
-                    <option value="ORG-HELIOS-GLOBAL" selected>ORG-HELIOS-GLOBAL (Helios Global Renewables)</option>
-                    <option value="ORG-AURORA-NORDIC">ORG-AURORA-NORDIC (Aurora Nordic Clean Energy)</option>
-                    <option value="ORG-SOLARIA-ESP">ORG-SOLARIA-ESP (Solaria Iberia Energia)</option>
-                  </select>
+                  <label class="form-label small fw-semibold text-dark">Tenant Partition</label>
+                  <input type="text" class="form-control form-control-sm bg-light font-monospace text-dark" id="user-tenant-display" readonly value="ORG-HELIOS-GLOBAL">
+                  <input type="hidden" id="user-tenant" value="ORG-HELIOS-GLOBAL">
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary w-100 mt-2">
                   <i class="bi bi-person-plus-fill me-1"></i> Provision User & Issue Token
@@ -915,13 +909,8 @@
               <!-- Filtering & Control Bar -->
               <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 bg-light p-2 rounded border">
                 <div class="d-flex align-items-center gap-2">
-                  <span class="small fw-semibold text-secondary"><i class="bi bi-funnel me-1"></i>Filter Tenant:</span>
-                  <select class="form-select form-select-sm" id="filter-user-tenant" style="width: auto;" onchange="filterAndRenderUsers()">
-                    <option value="ALL">All Tenants</option>
-                    <option value="ORG-HELIOS-GLOBAL">Helios Global Renewables</option>
-                    <option value="ORG-AURORA-NORDIC">Aurora Nordic Clean Energy</option>
-                    <option value="ORG-SOLARIA-ESP">Solaria Iberia Energia</option>
-                  </select>
+                  <span class="small fw-semibold text-secondary"><i class="bi bi-shield-lock me-1"></i>Tenant Partition:</span>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace" id="filter-user-tenant-badge">ORG-HELIOS-GLOBAL</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                   <input type="text" class="form-control form-control-sm" id="filter-user-search" placeholder="Search user by name or email..." oninput="filterAndRenderUsers()" style="width: 240px;">
@@ -1144,7 +1133,7 @@
           <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
         </div>
         <div class="font-monospace small">
-          API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold">ORG-HELIOS-GLOBAL</span>
+          API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold" id="footer-tenant-text">ORG-HELIOS-GLOBAL</span>
         </div>
       </div>
     </footer>
@@ -1152,73 +1141,7 @@
   </div>
 </div>
 
-<!-- Tenant Enrolment Modal -->
-<div class="modal fade" id="modalEnrollTenant" tabindex="-1" aria-labelledby="modalEnrollTenantLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-light border-bottom">
-        <div class="d-flex align-items-center gap-2">
-          <div class="p-2 rounded bg-primary-subtle text-primary">
-            <i class="bi bi-building-plus fs-5"></i>
-          </div>
-          <div>
-            <h5 class="modal-title fw-bold text-dark fs-6" id="modalEnrollTenantLabel">Enrol Tenant Organisation</h5>
-            <div class="small text-muted">Register an isolated enterprise tenant partition</div>
-          </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form id="form-enroll-tenant">
-        <div class="modal-body p-4">
-          <div id="tenant-enroll-alert" class="alert alert-danger small d-none mb-3"></div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Tenant ID Code</label>
-            <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="tenant-org-id" placeholder="ORG-PACIFIC-GREEN" required>
-            <div class="form-text" style="font-size: 0.72rem;">Unique tenant identifier code prefix</div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Organisation Name</label>
-            <input type="text" class="form-control form-control-sm" id="tenant-org-name" placeholder="Pacific Green Power Co." required>
-          </div>
-          <div class="row g-2 mb-3">
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-dark">Short Code</label>
-              <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="tenant-org-code" placeholder="PACIFIC" required>
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-semibold text-dark">Billing Tier</label>
-              <select class="form-select form-select-sm" id="tenant-billing-tier" required>
-                <option value="ENTERPRISE_TIER_1" selected>Enterprise Tier 1</option>
-                <option value="ENTERPRISE_TIER_2">Enterprise Tier 2</option>
-                <option value="COMMUNITY_UTILITY">Community Utility</option>
-                <option value="PILOT_TRIAL">Pilot Trial</option>
-              </select>
-            </div>
-          </div>
-          <div class="border-top pt-3 mt-3">
-            <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-person-badge-fill text-primary me-1"></i>Primary Administrator</h6>
-            <div class="row g-2">
-              <div class="col-6">
-                <label class="form-label small fw-semibold text-dark">Admin Name</label>
-                <input type="text" class="form-control form-control-sm" id="tenant-admin-name" placeholder="Marcus Vance" required>
-              </div>
-              <div class="col-6">
-                <label class="form-label small fw-semibold text-dark">Admin Email</label>
-                <input type="email" class="form-control form-control-sm" id="tenant-admin-email" placeholder="marcus@pacificgreen.energy" required>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer bg-light border-top py-2 px-4">
-          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-sm btn-primary fw-semibold" id="btn-submit-enroll-tenant">
-            <i class="bi bi-shield-check me-1"></i> Enrol Organisation
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+
 
 <!-- Bootstrap 5.3.3 Bundle JS -->
 <script src="vendor/bootstrap.bundle.min.js"></script>

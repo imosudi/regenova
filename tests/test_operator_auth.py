@@ -162,5 +162,108 @@ class TestOperatorAuthentication(unittest.TestCase):
             self.assertNotIn("—", data, f"Found em dash in {fpath}")
 
 
+    def test_10_operator_tenant_isolation_enforced(self):
+        """Validates that an operator cannot access another tenant's partition via X-Tenant-ID."""
+        # 1. Login as Elena (ORG-HELIOS-GLOBAL)
+        code, res = dispatch_api_request("POST", "/api/operator/login", {
+            "email": "elena.rostova@helios.energy",
+            "password": "Helios2026!"
+        })
+        self.assertEqual(code, 200)
+        token = res["token"]
+
+        # 2. Attempt to query ORG-AURORA-NORDIC with Elena's token
+        err_code, err_res = dispatch_api_request(
+            "GET",
+            "/api/overview",
+            headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": "ORG-AURORA-NORDIC"}
+        )
+        self.assertEqual(err_code, 403)
+        self.assertEqual(err_res["status"], "ERROR")
+        self.assertIn("Tenant boundary violation", err_res["message"])
+
+        # 3. Query with Elena's own tenant succeeds
+        ok_code, ok_res = dispatch_api_request(
+            "GET",
+            "/api/overview",
+            headers={"Authorization": f"Bearer {token}", "X-Tenant-ID": "ORG-HELIOS-GLOBAL"}
+        )
+        self.assertEqual(ok_code, 200)
+
+    def test_11_operator_tenants_endpoint_scoped(self):
+        """Validates that /api/tenants only returns the operator's tenant partition."""
+        code, res = dispatch_api_request("POST", "/api/operator/login", {
+            "email": "astrid.lindgren@aurora.energy",
+            "password": "Aurora2026!"
+        })
+        token = res["token"]
+
+        t_code, t_res = dispatch_api_request(
+            "GET",
+            "/api/tenants",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        self.assertEqual(t_code, 200)
+        tenants = t_res.get("tenants", [])
+        self.assertEqual(len(tenants), 1)
+        self.assertEqual(tenants[0]["tenant_id"], "ORG-AURORA-NORDIC")
+
+    def test_12_operator_users_endpoint_scoped(self):
+        """Validates that /api/users only returns users belonging to the operator's tenant."""
+        code, res = dispatch_api_request("POST", "/api/operator/login", {
+            "email": "elena.rostova@helios.energy",
+            "password": "Helios2026!"
+        })
+        token = res["token"]
+
+        u_code, u_res = dispatch_api_request(
+            "GET",
+            "/api/users",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        self.assertEqual(u_code, 200)
+        users = u_res.get("users", [])
+        self.assertTrue(len(users) > 0)
+        for u in users:
+            self.assertEqual(u["tenant_id"], "ORG-HELIOS-GLOBAL")
+
+    def test_13_operator_tenant_onboarding_forbidden(self):
+        """Validates that operators cannot enrol new tenants via /api/onboarding/tenant."""
+        code, res = dispatch_api_request("POST", "/api/operator/login", {
+            "email": "elena.rostova@helios.energy",
+            "password": "Helios2026!"
+        })
+        token = res["token"]
+
+        o_code, o_res = dispatch_api_request(
+            "POST",
+            "/api/onboarding/tenant",
+            headers={"Authorization": f"Bearer {token}"},
+            payload={
+                "tenant_id": "ORG-ROGUE-TEST",
+                "name": "Rogue Test",
+                "code": "ROGUE",
+                "admin_name": "Rogue Admin",
+                "admin_email": "admin@rogue.energy"
+            }
+        )
+        self.assertEqual(o_code, 403)
+        self.assertIn("Tenant onboarding is restricted to Platform Super Administrators", o_res.get("message", ""))
+
+    def test_14_portal_html_tenant_switcher_removed(self):
+        """Validates that tenantContextSelect and modalEnrollTenant are removed from portal.html."""
+        portal_path = os.path.join(os.path.dirname(__file__), "..", "web", "portal.html")
+        with open(portal_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertNotIn('id="tenantContextSelect"', content)
+        self.assertNotIn('id="modalEnrollTenant"', content)
+        self.assertIn('id="sidebar-tenant-name"', content)
+        self.assertIn('id="sidebar-tenant-id"', content)
+        self.assertIn('id="user-tenant-display"', content)
+        self.assertIn('id="footer-tenant-text"', content)
+
+
 if __name__ == "__main__":
     unittest.main()
+
