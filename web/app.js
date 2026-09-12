@@ -1,8 +1,19 @@
 /* ==========================================================================
    REAMP Client Application Logic (Bootstrap 5.3 Light Theme)
    Requirement: FR-UI-001 / AC-FR-UI-001
-   Connects to REST backend on http://localhost:8000
+   Connects to REST backend on https://api.regenova.cloud or local proxy
    ========================================================================== */
+
+const API_BASE = (window.REGENOVA_API_URL !== undefined)
+  ? window.REGENOVA_API_URL
+  : (window.location.hostname === 'regenova.cloud' ? 'https://api.regenova.cloud' : '');
+
+function apiFetch(endpoint, options) {
+  const url = (typeof endpoint === 'string' && endpoint.startsWith('http'))
+    ? endpoint
+    : `${API_BASE}${endpoint}`;
+  return fetch(url, options);
+}
 
 let currentAssetId = "ASSET-INV-01";
 let pollTimer = null;
@@ -34,7 +45,7 @@ async function loadAllData() {
 
 // 1. Overview KPIs
 async function fetchOverview() {
-  const res = await fetch("/api/overview");
+  const res = await apiFetch("/api/overview");
   if (!res.ok) return;
   const d = await res.json();
 
@@ -53,7 +64,7 @@ async function fetchOverview() {
 
 // 2. Sites Cards
 async function fetchSites() {
-  const res = await fetch("/api/sites");
+  const res = await apiFetch("/api/sites");
   if (!res.ok) return;
   const sites = await res.json();
 
@@ -142,7 +153,7 @@ async function fetchSites() {
 
 // 3. Assets Cards & Sidebar
 async function fetchAssets() {
-  const res = await fetch("/api/assets");
+  const res = await apiFetch("/api/assets");
   if (!res.ok) return;
   const assets = await res.json();
 
@@ -239,7 +250,7 @@ function selectAsset(assetId) {
 
 // 4. Asset Detail & Digital Twin
 async function fetchAssetDetail(assetId) {
-  const res = await fetch(`/api/asset/${assetId}`);
+  const res = await apiFetch(`/api/asset/${assetId}`);
   if (!res.ok) return;
   const d = await res.json();
 
@@ -352,7 +363,7 @@ function setGauge(barId, textId, pct, htmlVal) {
 
 // 5. Alerts Table
 async function fetchAlerts() {
-  const res = await fetch("/api/alerts");
+  const res = await apiFetch("/api/alerts");
   if (!res.ok) return;
   const alerts = await res.json();
 
@@ -391,7 +402,7 @@ async function fetchAlerts() {
 
 // 6. CMMS Work Orders & HITL Queue (AC-FR-MAIN-001 & AC-FR-XAI-002)
 async function fetchWorkOrders() {
-  const res = await fetch("/api/work-orders");
+  const res = await apiFetch("/api/work-orders");
   if (!res.ok) return;
   const wos = await res.json();
 
@@ -428,7 +439,7 @@ async function fetchWorkOrders() {
 
 // 7. Adaptive Intelligence & Safety Interlock
 async function fetchAdaptations() {
-  const res = await fetch("/api/adaptations");
+  const res = await apiFetch("/api/adaptations");
   if (!res.ok) return;
   const acts = await res.json();
 
@@ -465,7 +476,7 @@ async function fetchAdaptations() {
 
 // 8. Cryptographic Audit Trail
 async function fetchAuditChain() {
-  const res = await fetch("/api/audit-chain");
+  const res = await apiFetch("/api/audit-chain");
   if (!res.ok) return;
   const d = await res.json();
 
@@ -506,7 +517,7 @@ async function injectScenario(scenario) {
   box.innerHTML = `<div class="spinner-border spinner-border-sm me-1" role="status"></div> Injecting '${scenario}' telemetry into ${currentAssetId}...`;
 
   try {
-    const res = await fetch("/api/telemetry/inject", {
+    const res = await apiFetch("/api/telemetry/inject", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ asset_id: currentAssetId, scenario: scenario }),
@@ -522,7 +533,7 @@ async function injectScenario(scenario) {
 }
 
 async function acknowledgeAlert(alertId) {
-  await fetch("/api/alerts/acknowledge", {
+  await apiFetch("/api/alerts/acknowledge", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ alert_id: alertId }),
@@ -531,7 +542,7 @@ async function acknowledgeAlert(alertId) {
 }
 
 async function resolveAlert(alertId) {
-  await fetch("/api/alerts/resolve", {
+  await apiFetch("/api/alerts/resolve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ alert_id: alertId }),
@@ -540,7 +551,7 @@ async function resolveAlert(alertId) {
 }
 
 async function approveWorkOrder(woId) {
-  await fetch("/api/work-orders/approve", {
+  await apiFetch("/api/work-orders/approve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ work_order_id: woId }),
@@ -553,7 +564,7 @@ async function proposeAdaptation(shiftPct) {
   box.className = "alert alert-warning mt-3 mb-0 small py-2 d-block";
   box.innerText = `Proposing ${shiftPct}% baseline shift...`;
 
-  const res = await fetch("/api/adaptations/propose", {
+  const res = await apiFetch("/api/adaptations/propose", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ asset_id: currentAssetId, shift_pct: shiftPct }),
@@ -570,7 +581,7 @@ async function proposeAdaptation(shiftPct) {
 }
 
 async function approveAdaptation(actionId) {
-  await fetch("/api/adaptations/approve", {
+  await apiFetch("/api/adaptations/approve", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action_id: actionId }),
@@ -584,7 +595,7 @@ async function approveAdaptation(actionId) {
 
 async function fetchUsers() {
   try {
-    const res = await fetch("/api/users");
+    const res = await apiFetch("/api/users");
     if (!res.ok) return;
     const data = await res.json();
     const users = data.users || [];
@@ -642,7 +653,7 @@ function initOnboardingForms() {
           role: document.getElementById("user-role").value,
           tenant_id: document.getElementById("user-tenant").value.trim(),
         };
-        const res = await fetch("/api/onboarding/user", {
+        const res = await apiFetch("/api/onboarding/user", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -684,7 +695,7 @@ function initOnboardingForms() {
           latitude: parseFloat(document.getElementById("facility-lat").value),
           longitude: parseFloat(document.getElementById("facility-lng").value),
         };
-        const res = await fetch("/api/onboarding/facility", {
+        const res = await apiFetch("/api/onboarding/facility", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -727,7 +738,7 @@ function initOnboardingForms() {
           model: document.getElementById("device-model").value.trim(),
           provision_digital_twin: document.getElementById("device-twin").checked,
         };
-        const res = await fetch("/api/onboarding/device", {
+        const res = await apiFetch("/api/onboarding/device", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
