@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime secrets & environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+
+# Node-RED runtime credentials and context
+flows_cred.json
+.config.runtime.json
+.config.nodes.json
+.sessions.json
+context/
+
+# Logs & temp
+*.log
+logs/
+.tmp/
+tmp/
+
+# AI Agent & IDE artifacts
+.gemini/
+.system_generated/
+*.tmp
+*.bak

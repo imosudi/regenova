@@ -1,0 +1,26 @@
+{
+  "name": "regenova-flowfield",
+  "version": "0.1.0",
+  "description": "REGENOVA FlowField — IoT Integration, Telemetry & Event Flow Service",
+  "main": "settings.js",
+  "scripts": {
+    "start": "node-red -u . -s ./settings.js",
+    "test": "node ./scripts/health_check.js"
+  },
+  "keywords": [
+    "regenova",
+    "flowfield",
+    "reamp",
+    "iot",
+    "telemetry",
+    "node-red",
+    "timescaledb"
+  ],
+  "author": "REGENOVA Core Engineering Team",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "node-red": "^4.0.8"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,196 @@
+# ==============================================================================
+# REGENOVA — Unified Microservices Docker Compose Orchestration
+# ==============================================================================
+# Repeatable deployment across local workstations and production servers:
+#   - flowfield:           Node-RED IoT Integration Microservice (1880)
+#   - twinfield:           FastAPI Digital Twin Sub-API (9000)
+#   - regenova-api:        Core Telemetry & Asset Intelligence API (8101:8001)
+#   - regenova-backoffice: Multi-tenant Superadmin Console (8102:8002)
+#   - regenova-web:        Operations Portal & Web Application (8100:8000)
+#   - mosquitto:           Eclipse Mosquitto MQTT Broker (1883, 9001)
+#   - redis:               In-Memory State & Buffer Store (6380:6379)
+#   - timescaledb:         TimescaleDB container (profile: standalone)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. FlowField — IoT Telemetry & Event Ingestion
+  # ----------------------------------------------------------------------------
+  flowfield:
+    build:
+      context: ${FLOWFIELD_DIR:-./flowfield}
+      dockerfile: Dockerfile
+    container_name: regenova-flowfield
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1880:1880"
+    environment:
+      - NODE_ENV=production
+      - FLOWFIELD_PORT=1880
+      - FLOWFIELD_HOST=0.0.0.0
+      - FLOWFIELD_CREDENTIAL_SECRET=${FLOWFIELD_CREDENTIAL_SECRET:-regenova-flowfield-credential-secret-key-2026}
+      - FLOWFIELD_ADMIN_HASH=${FLOWFIELD_ADMIN_HASH:-$$2b$$10$$678EDfJxsYaWMk5hSUqvuOiHgE4yEFgVufQxc1tyc/ONppTSaG41O}
+      - FLOWFIELD_DB_HOST=${DB_HOST:-host.docker.internal}
+      - FLOWFIELD_DB_PORT=${DB_PORT:-5432}
+      - FLOWFIELD_DB_NAME=${TIMESERIES_DB_NAME:-regenova_timeseries_db}
+      - FLOWFIELD_DB_USER=${TIMESERIES_DB_USER:-regenova_timeseries_db}
+      - FLOWFIELD_DB_PASSWORD=${TIMESERIES_DB_PASSWORD:-OmolileOtilile}
+      - REGENOVA_API_URL=http://regenova-api:8001
+      - TWINFIELD_API_URL=http://twinfield:9000
+      - FLOWFIELD_MQTT_URL=mqtt://mosquitto:1883
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - flowfield_data:/usr/src/node-red/context
+    networks:
+      - regenova-net
+    depends_on:
+      - mosquitto
+
+  # ----------------------------------------------------------------------------
+  # 2. TwinField — Digital Twin Sub-API
+  # ----------------------------------------------------------------------------
+  twinfield:
+    build:
+      context: ${TWINFIELD_DIR:-../iot-digital-twin/backend}
+      dockerfile: Dockerfile
+    container_name: regenova-twinfield
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9000:9000"
+    environment:
+      - APP_PORT=9000
+      - CORS_ORIGINS=*
+      - REGENOVA_API_URL=http://regenova-api:8001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - regenova-net
+
+  # ----------------------------------------------------------------------------
+  # 3. REGENOVA API — Core Telemetry, Anomaly & Asset Intelligence
+  # ----------------------------------------------------------------------------
+  regenova-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: regenova-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8101:8001"
+    environment:
+      - REAMP_DB_HOST=${DB_HOST:-host.docker.internal}
+      - REAMP_DB_PORT=${DB_PORT:-5432}
+      - REAMP_DB_NAME=${REAMP_DB_NAME:-regenova_db}
+      - REAMP_DB_USER=${REAMP_DB_USER:-regenova_db}
+      - REAMP_DB_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - regenova-net
+
+  # ----------------------------------------------------------------------------
+  # 4. REGENOVA Backoffice — Multi-Tenant Administration Console
+  # ----------------------------------------------------------------------------
+  regenova-backoffice:
+    build:
+      context: .
+      dockerfile: Dockerfile.backoffice
+    container_name: regenova-backoffice
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8102:8002"
+    environment:
+      - REGENOVA_API_URL=http://regenova-api:8001
+      - REAMP_DB_HOST=${DB_HOST:-host.docker.internal}
+      - REAMP_DB_PORT=${DB_PORT:-5432}
+      - REAMP_DB_NAME=${REAMP_DB_NAME:-regenova_db}
+      - REAMP_DB_USER=${REAMP_DB_USER:-regenova_db}
+      - REAMP_DB_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - regenova-net
+    depends_on:
+      - regenova-api
+
+  # ----------------------------------------------------------------------------
+  # 5. REGENOVA Web — Operations Portal & Frontend Application
+  # ----------------------------------------------------------------------------
+  regenova-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: regenova-web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8100:8000"
+    environment:
+      - REAMP_DB_HOST=${DB_HOST:-host.docker.internal}
+      - REAMP_DB_PORT=${DB_PORT:-5432}
+      - REAMP_DB_NAME=${REAMP_DB_NAME:-regenova_db}
+      - REAMP_DB_USER=${REAMP_DB_USER:-regenova_db}
+      - REAMP_DB_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - regenova-net
+    depends_on:
+      - regenova-api
+
+  # ----------------------------------------------------------------------------
+  # 6. Mosquitto — Primary IoT MQTT Broker
+  # ----------------------------------------------------------------------------
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: regenova-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - ./docker/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto_data:/mosquitto/data
+    networks:
+      - regenova-net
+
+  # ----------------------------------------------------------------------------
+  # 7. Redis — In-Memory State & Buffer Store
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: regenova-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6380:6379"
+    networks:
+      - regenova-net
+
+  # ----------------------------------------------------------------------------
+  # 8. TimescaleDB (Optional Standalone Profile)
+  # ----------------------------------------------------------------------------
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: regenova-timescaledb
+    restart: unless-stopped
+    profiles:
+      - standalone
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      - POSTGRES_DB=${TIMESERIES_DB_NAME:-regenova_timeseries_db}
+      - POSTGRES_USER=${TIMESERIES_DB_USER:-regenova_timeseries_db}
+      - POSTGRES_PASSWORD=${TIMESERIES_DB_PASSWORD:-OmolileOtilile}
+    volumes:
+      - timescaledb_data:/var/lib/postgresql/data
+    networks:
+      - regenova-net
+
+networks:
+  regenova-net:
+    driver: bridge
+
+volumes:
+  flowfield_data:
+  mosquitto_data:
+  timescaledb_data:

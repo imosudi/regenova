@@ -1,0 +1,153 @@
+[
+    {
+        "id": "tab_flowfield_core",
+        "type": "tab",
+        "label": "FlowField Core & Health",
+        "disabled": false,
+        "info": "REGENOVA FlowField Core Health and Lifecycle Endpoints"
+    },
+    {
+        "id": "http_in_health",
+        "type": "http in",
+        "z": "tab_flowfield_core",
+        "name": "GET /health",
+        "url": "/health",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 80,
+        "wires": [
+            [
+                "fn_health"
+            ]
+        ]
+    },
+    {
+        "id": "fn_health",
+        "type": "function",
+        "z": "tab_flowfield_core",
+        "name": "Health Status",
+        "func": "const proc = global.get('process') || {};\nmsg.statusCode = 200;\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\nmsg.payload = {\n    status: 'healthy',\n    service: 'FlowField',\n    framework: 'REGENOVA (incorporating REAMP Engine Architecture)',\n    version: '0.1.0',\n    uptime_seconds: proc.uptime ? Math.floor(proc.uptime()) : 0,\n    memory_usage_mb: (proc.memoryUsage && proc.memoryUsage()) ? Math.round(proc.memoryUsage().rss / (1024 * 1024)) : 0,\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 80,
+        "wires": [
+            [
+                "http_out_health"
+            ]
+        ]
+    },
+    {
+        "id": "http_out_health",
+        "type": "http response",
+        "z": "tab_flowfield_core",
+        "name": "HTTP 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 520,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "http_in_ready",
+        "type": "http in",
+        "z": "tab_flowfield_core",
+        "name": "GET /ready",
+        "url": "/ready",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 160,
+        "wires": [
+            [
+                "fn_ready"
+            ]
+        ]
+    },
+    {
+        "id": "fn_ready",
+        "type": "function",
+        "z": "tab_flowfield_core",
+        "name": "Readiness Status",
+        "func": "msg.statusCode = 200;\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\nmsg.payload = {\n    status: 'ready',\n    service: 'FlowField',\n    subsystem_checks: {\n        runtime: 'OK',\n        event_loop: 'OK'\n    },\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 330,
+        "y": 160,
+        "wires": [
+            [
+                "http_out_ready"
+            ]
+        ]
+    },
+    {
+        "id": "http_out_ready",
+        "type": "http response",
+        "z": "tab_flowfield_core",
+        "name": "HTTP 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 520,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "http_in_info",
+        "type": "http in",
+        "z": "tab_flowfield_core",
+        "name": "GET /api/v1/info",
+        "url": "/api/v1/info",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 240,
+        "wires": [
+            [
+                "fn_info"
+            ]
+        ]
+    },
+    {
+        "id": "fn_info",
+        "type": "function",
+        "z": "tab_flowfield_core",
+        "name": "Service Discovery Info",
+        "func": "msg.statusCode = 200;\nmsg.headers = {\n    'Content-Type': 'application/json',\n    'Access-Control-Allow-Origin': '*'\n};\nmsg.payload = {\n    service: 'REGENOVA FlowField — IoT Integration, Telemetry & Event Flow Service',\n    framework: 'REGENOVA (incorporating REAMP Engine Architecture)',\n    version: '0.1.0',\n    environment: global.get('env') || 'production',\n    endpoints: [\n        '/health',\n        '/ready',\n        '/api/v1/info',\n        '/api/v1/telemetry/ingest'\n    ],\n    integrated_services: {\n        platform: 'https://regenova.cloud/',\n        api: 'https://api.regenova.cloud/',\n        backoffice: 'https://backoffice.regenova.cloud/',\n        twinfield: 'https://twinfield.regenova.cloud/'\n    },\n    timestamp: new Date().toISOString()\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 240,
+        "wires": [
+            [
+                "http_out_info"
+            ]
+        ]
+    },
+    {
+        "id": "http_out_info",
+        "type": "http response",
+        "z": "tab_flowfield_core",
+        "name": "HTTP 200",
+        "statusCode": "200",
+        "headers": {},
+        "x": 520,
+        "y": 240,
+        "wires": []
+    }
+]

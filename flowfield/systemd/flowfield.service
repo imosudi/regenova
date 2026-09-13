@@ -1,0 +1,26 @@
+[Unit]
+Description=REGENOVA FlowField — IoT Integration, Telemetry & Event Flow Microservice
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=mosud
+Group=mosud
+WorkingDirectory=/home/mosud/flowfield
+EnvironmentFile=-/home/mosud/flowfield/.env
+ExecStart=/usr/bin/node /home/mosud/flowfield/node_modules/node-red/red.js -u /home/mosud/flowfield -s /home/mosud/flowfield/settings.js
+Restart=always
+RestartSec=5
+KillMode=process
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=regenova-flowfield
+
+# Security sandbox directives
+ProtectHome=read-only
+ReadWritePaths=/home/mosud/flowfield
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
