@@ -1570,6 +1570,29 @@ function updateTwinFieldStateVectors(d) {
   if (predPowerEl) predPowerEl.innerText = `${(activePower * 0.965).toFixed(1)} kW`;
   const predDegEl = document.getElementById("vec-predicted-deg");
   if (predDegEl) predDegEl.innerText = `0.04 %/yr`;
+
+  // 5. Update Live Topology Canvas
+  const topoSiteName = document.getElementById("topo-site-name");
+  if (topoSiteName && d.site_name) topoSiteName.innerText = d.site_name;
+  const topoSiteStatus = document.getElementById("topo-site-status");
+  if (topoSiteStatus) topoSiteStatus.innerText = `Site: Healthy • ${d.name || 'Entity 01'}`;
+  const topoSiteText = document.getElementById("topology-active-site-text");
+  if (topoSiteText && d.site_name) topoSiteText.innerText = `SITE: ${d.site_name.toUpperCase()}`;
+
+  const topoPvPower = document.getElementById("topo-pv-power");
+  if (topoPvPower) {
+    topoPvPower.innerText = `${activePower.toFixed(1)} kW generating`;
+  }
+  const topoWtgPower = document.getElementById("topo-wtg-power");
+  if (topoWtgPower) {
+    const wtgVal = d.technology === "WIND" ? activePower : (rated * 0.45);
+    topoWtgPower.innerText = `${wtgVal.toFixed(1)} kW • 8.4 m/s`;
+  }
+  const topoBessSoc = document.getElementById("topo-bess-soc");
+  if (topoBessSoc) {
+    const bessSoc = d.technology === "BESS" ? Math.round(pr * 100) : 68;
+    topoBessSoc.innerText = `${bessSoc}% • ${(rated * 0.35).toFixed(1)} kW`;
+  }
 }
 
 window.openTwinLifecycleModal = function(twinId) {

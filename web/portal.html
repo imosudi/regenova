@@ -383,10 +383,10 @@
             </div>
             <div class="d-flex flex-wrap gap-2 align-items-center">
               <a href="https://twinfield.regenova.cloud/" target="_blank" class="btn btn-sm btn-primary fw-semibold d-flex align-items-center gap-1 shadow-sm">
-                <i class="bi bi-box-arrow-up-right"></i> Open TwinField Studio
+                <i class="bi bi-cpu-fill"></i> Sub-API Root
               </a>
               <a href="https://twinfield.regenova.cloud/docs" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold d-flex align-items-center gap-1">
-                <i class="bi bi-file-earmark-code"></i> API Docs (Swagger)
+                <i class="bi bi-file-earmark-code"></i> Swagger API Specs
               </a>
             </div>
           </div>
@@ -495,6 +495,104 @@
                     <div class="stat-kpi-label">Baseline Multiplier</div>
                     <div class="h4 fw-bold text-success my-1 font-monospace" id="dt-res-base">1.0000</div>
                     <div class="small text-muted">Adaptive Soiling / Roughness Multiplier</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Live Site Digital Twin Topology Map (TwinField Engine) -->
+            <div class="card card-reamp p-4 mb-4">
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small">Live Topology Canvas</span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small">
+                      <span class="pulse-live me-1"></span> Live Stream Active
+                    </span>
+                  </div>
+                  <h6 class="fw-bold text-dark m-0"><i class="bi bi-diagram-3-fill me-2 text-primary"></i>Site Digital Twin Topology &amp; Entity Relationships</h6>
+                  <div class="small text-muted mt-1">Hierarchical asset interconnection and telemetry flow powered by TwinField Sub-API</div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge bg-light text-dark border font-monospace" id="topology-active-site-text">SITE: NORTH RIDGE ENERGY</span>
+                </div>
+              </div>
+
+              <!-- Visual Topology Grid Canvas -->
+              <div class="p-3 bg-light rounded-3 border">
+                <div class="row g-3 align-items-center">
+                  <!-- Root Facility Node -->
+                  <div class="col-12 col-md-4 col-xl-3">
+                    <div class="p-3 bg-white rounded-3 border shadow-sm h-100 border-primary border-2">
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-dark px-2 py-1 font-monospace">SITE</span>
+                        <span class="badge bg-success-subtle text-success small">Operational</span>
+                      </div>
+                      <h6 class="fw-bold text-dark mb-1" id="topo-site-name">North Ridge Energy</h6>
+                      <div class="small text-muted font-monospace" id="topo-site-status">Site: Healthy &bull; 24 Entities</div>
+                      <div class="mt-2 pt-2 border-top small text-primary fw-semibold">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Root Interconnect
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Connector Arrow -->
+                  <div class="col-12 col-md-1 d-none d-md-flex justify-content-center">
+                    <i class="bi bi-arrow-right fs-4 text-muted"></i>
+                  </div>
+
+                  <!-- Sub-Entities Cluster -->
+                  <div class="col-12 col-md-7 col-xl-8">
+                    <div class="row g-2">
+                      <!-- Solar Array Entity -->
+                      <div class="col-12 col-sm-4">
+                        <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-warning text-dark fw-bold">PV</span>
+                            <span class="badge bg-success-subtle text-success small">Generating</span>
+                          </div>
+                          <div class="fw-bold text-dark small mt-1">Solar Array Array-01</div>
+                          <div class="small text-muted font-monospace mt-1" id="topo-pv-power">312.4 kW generating</div>
+                          <div class="mt-2 text-muted" style="font-size: 0.72rem;">Feed: DC Busbar 1</div>
+                        </div>
+                      </div>
+
+                      <!-- Battery Bank Entity -->
+                      <div class="col-12 col-sm-4">
+                        <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-secondary text-white fw-bold">BT</span>
+                            <span class="badge bg-info-subtle text-info small">Charging</span>
+                          </div>
+                          <div class="fw-bold text-dark small mt-1">Battery Storage Rack</div>
+                          <div class="small text-muted font-monospace mt-1" id="topo-bess-soc">68% &bull; 180.0 kW</div>
+                          <div class="mt-2 text-muted" style="font-size: 0.72rem;">Feed: Bi-directional POI</div>
+                        </div>
+                      </div>
+
+                      <!-- Wind Turbine Entity -->
+                      <div class="col-12 col-sm-4">
+                        <div class="p-3 bg-white rounded-3 border shadow-sm h-100">
+                          <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="badge bg-info text-dark fw-bold">WT</span>
+                            <span class="badge bg-success-subtle text-success small">Generating</span>
+                          </div>
+                          <div class="fw-bold text-dark small mt-1">Wind Turbine WTG-01</div>
+                          <div class="small text-muted font-monospace mt-1" id="topo-wtg-power">170.2 kW &bull; 8.4 m/s</div>
+                          <div class="mt-2 text-muted" style="font-size: 0.72rem;">Feed: AC Collector Ring</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Sub-API Provenance Footer -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-2 border-top small text-muted font-monospace">
+                  <div>
+                    <i class="bi bi-hdd-network text-primary me-1"></i>TwinField Relationship Registry: <span class="text-dark fw-semibold">EntityGraph (v0.3.0)</span>
+                  </div>
+                  <div>
+                    Sub-API Synchronisation: <span class="text-success fw-semibold">1 Hz Stream Active</span>
                   </div>
                 </div>
               </div>
