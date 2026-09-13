@@ -1,7 +1,7 @@
 /* ==========================================================================
    REGENOVA Backoffice - Application Controller Logic
    Requirement: FR-UI-001 / AC-FR-UI-001
-   Strict Bootstrap 5.3 Light Theme without dark SCADA override
+   Strict Light Theme without dark SCADA override
    Interfaces with REST API on https://api.regenova.cloud
    ========================================================================== */
 

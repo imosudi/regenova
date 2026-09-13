@@ -1,5 +1,5 @@
 /* ==========================================================================
-   REGENOVA Public Home Page Controller (Bootstrap 5.3 Light Theme)
+   REGENOVA Public Home Page Controller
    Requirement: FR-UI-001 / AC-FR-UI-001
    Interfaces with REST API on https://api.regenova.cloud
    ========================================================================== */

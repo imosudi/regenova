@@ -1,5 +1,5 @@
 /* ==========================================================================
-   REAMP Client Application Logic (Bootstrap 5.3 Light Theme)
+   REAMP Client Application Logic
    Requirement: FR-UI-001 / AC-FR-UI-001
    Connects to REST backend on https://api.regenova.cloud or local proxy
    ========================================================================== */
@@ -1398,7 +1398,7 @@ async function fetchDatabaseStatus() {
         badgeDb.innerText = "ONLINE";
       }
       if (sidebarDbDot) sidebarDbDot.className = "pulse-live";
-      if (sidebarDbText) sidebarDbText.innerText = `PostgreSQL ${verStr}`;
+      if (sidebarDbText) sidebarDbText.innerText = "Enterprise DB Live";
     } else {
       if (badgeDb) {
         badgeDb.className = "badge bg-danger-subtle text-danger border border-danger-subtle ms-auto small";
@@ -1489,7 +1489,7 @@ function initSidebarInteractions() {
     "adaptive-tab": '<i class="bi bi-sliders text-dark me-2"></i> Adaptive Intelligence',
     "audit-tab": '<i class="bi bi-journal-text text-secondary me-2"></i> Cryptographic Audit Ledger',
     "onboard-tab": '<i class="bi bi-person-plus text-primary me-2"></i> Onboarding & Directory',
-    "database-tab": '<i class="bi bi-database text-primary me-2"></i> PostgreSQL Database Storage',
+    "database-tab": '<i class="bi bi-database text-primary me-2"></i> Enterprise Database Storage',
   };
 
   const topbarTitle = document.getElementById("topbar-section-title");
