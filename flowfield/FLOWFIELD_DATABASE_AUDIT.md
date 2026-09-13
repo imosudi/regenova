@@ -37,7 +37,7 @@ WHERE extname = 'timescaledb';
 ### Relational Metadata Database (`regenova_db`)
 `regenova_db` holds asset metadata and transactional data. It currently contains:
 - `telemetry_observations`: Standard PostgreSQL table with B-tree indices on `(timestamp, tenant_id, asset_id, metric)`, check constraints on `communication_status` and `quality`, and Row-Level Security (RLS) policies.
-- Not optimized for high-throughput time-series chunk compression or continuous aggregates.
+- Not optimised for high-throughput time-series chunk compression or continuous aggregates.
 
 ### Dedicated Time-Series Database (`regenova_timeseries_db`)
 - Currently contains `0` user tables.

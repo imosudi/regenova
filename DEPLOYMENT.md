@@ -14,9 +14,9 @@ This document defines the canonical, repeatable procedure for deploying the **RE
 
 ---
 
-## 2. Standardized Container Infrastructure (`docker/`)
+## 2. Standardised Container Infrastructure (`docker/`)
 
-All container definitions and runtime assets are organized into dedicated subdirectories under `docker/`:
+All container definitions and runtime assets are organised into dedicated subdirectories under `docker/`:
 
 ```text
 docker/

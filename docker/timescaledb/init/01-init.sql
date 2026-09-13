@@ -1,5 +1,5 @@
 -- =============================================================================
--- REGENOVA TimescaleDB Initialization Script
+-- REGENOVA TimescaleDB Initialisation Script
 -- =============================================================================
 
 -- 1. Enable Core Extensions
@@ -63,7 +63,7 @@ BEGIN
         IMPORT FOREIGN SCHEMA public FROM SERVER host_postgres INTO host_regenova;
     EXCEPTION
         WHEN OTHERS THEN
-            RAISE NOTICE 'Foreign schema import deferred: %', SQLERRM;
+            RAISE NOTICE 'Foreign schema import deferred (host may be initialising): %', SQLERRM;
     END;
 EXCEPTION
     WHEN OTHERS THEN

@@ -27,9 +27,9 @@ fi
 echo "[+] Docker Engine: $(docker --version)"
 echo "[+] Docker Compose: $(docker compose version)"
 
-# 2. Check or initialize .env configuration
+# 2. Check or initialise .env configuration
 if [ ! -f "${ROOT_DIR}/.env" ]; then
-    echo "[!] .env not found. Initializing from .env.example..."
+    echo "[!] .env not found. Initialising from .env.example..."
     cp "${ROOT_DIR}/.env.example" "${ROOT_DIR}/.env"
 fi
 

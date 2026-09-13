@@ -1,7 +1,7 @@
 # ==============================================================================
-# REGENOVA — Standardized Microservices Docker Compose Orchestration
+# REGENOVA — Standardised Microservices Docker Compose Orchestration
 # ==============================================================================
-# Standardized Container Directories under docker/:
+# Standardised Container Directories under docker/:
 #   - docker/flowfield/Dockerfile     -> Node-RED IoT Telemetry & Event Microservice
 #   - docker/twinfield/Dockerfile     -> FastAPI Digital Twin Sub-API
 #   - docker/api/Dockerfile           -> Core Telemetry & Asset Intelligence API

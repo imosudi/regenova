@@ -3,7 +3,7 @@
 ## 1. Repository Status & Layout
 
 - **Local Working Directory**: `/home/mosud/flowfield/`
-- **Git Status**: Currently uninitialized.
+- **Git Status**: Currently uninitialised.
 - **Remote Server Directory**: `/home/mosud/flowfield/` prepared for deployment.
 
 ---

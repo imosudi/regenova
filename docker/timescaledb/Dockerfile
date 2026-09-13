@@ -1,7 +1,7 @@
 # REGENOVA TimescaleDB — Dockerfile
 FROM timescale/timescaledb:latest-pg16
 
-# Copy initialization SQL scripts
+# Copy initialisation SQL scripts
 COPY docker/timescaledb/init/ /docker-entrypoint-initdb.d/
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
