@@ -911,10 +911,25 @@ class REAMPWebServerState:
         try:
             t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
             app = self.get_tenant_app(t_id)
+            tenant_rec = self.onboarding.tenants.get(t_id)
+            tenant_code = getattr(tenant_rec, "code", None) if tenant_rec else None
+
+            raw_facility_id = payload.get("facility_id", "").strip().upper()
+            if not raw_facility_id:
+                return 400, {"status": "ERROR", "message": "Site ID Code is required."}
+
+            # Enforce fixed prefix based on tenant partition ID
+            facility_id = self.onboarding.validate_or_apply_facility_prefix(
+                raw_facility_id,
+                tenant_id=t_id,
+                tenant_code=tenant_code,
+                enforce=True,
+            )
+
             tech_str = payload.get("technology", "SOLAR_PV").upper()
             tech = TechnologyType[tech_str]
             req = FacilityOnboardingRequest(
-                facility_id=payload.get("facility_id", "").strip(),
+                facility_id=facility_id,
                 name=payload.get("name", "").strip(),
                 portfolio_id=payload.get("portfolio_id", "PORT-SW-UTILITY").strip(),
                 technology=tech,
@@ -927,6 +942,7 @@ class REAMPWebServerState:
                 app,
                 req,
                 actor_id="admin-web",
+                enforce_prefix=True,
             )
             status_code = 200 if res.status == "SUCCESS" else 400
 
@@ -960,9 +976,27 @@ class REAMPWebServerState:
         try:
             t_id = payload.get("tenant_id") or tenant_id or self.default_tenant_id
             app = self.get_tenant_app(t_id)
+            fac_id = payload.get("facility_id", "").strip().upper()
+            if not fac_id or fac_id not in app.sites:
+                return 400, {
+                    "status": "ERROR",
+                    "message": f"Parent facility '{fac_id}' does not exist in tenant partition '{t_id}'."
+                }
+
+            raw_dev_id = payload.get("device_id", "").strip().upper()
+            if not raw_dev_id:
+                return 400, {"status": "ERROR", "message": "Device Asset ID is required."}
+
+            # Enforce fixed prefix based on selected parent facility
+            device_id = self.onboarding.validate_or_apply_device_prefix(
+                raw_dev_id,
+                facility_id=fac_id,
+                enforce=True,
+            )
+
             req = DeviceOnboardingRequest(
-                device_id=payload.get("device_id", "").strip(),
-                facility_id=payload.get("facility_id", "").strip(),
+                device_id=device_id,
+                facility_id=fac_id,
                 name=payload.get("name", "").strip(),
                 asset_type=payload.get("asset_type", "INVERTER").strip(),
                 model=payload.get("model", "Generic-2026").strip(),
@@ -975,6 +1009,7 @@ class REAMPWebServerState:
                 app,
                 req,
                 actor_id="admin-web",
+                enforce_prefix=True,
             )
             status_code = 200 if res.status == "SUCCESS" else 400
 
@@ -1535,6 +1570,22 @@ def dispatch_api_request(method: str, path: str, payload: dict = None, headers: 
             return 200, GLOBAL_STATE.get_users_data(target_tenant)
         elif path == "/api/database/status":
             return 200, GLOBAL_STATE.get_database_status_data()
+        elif path == "/api/onboarding/prefixes":
+            t_id = operator_user.tenant_id if operator_user else tenant_id
+            app = GLOBAL_STATE.get_tenant_app(t_id)
+            tenant_rec = GLOBAL_STATE.onboarding.tenants.get(t_id)
+            tenant_code = getattr(tenant_rec, "code", None) if tenant_rec else None
+            facility_prefix = GLOBAL_STATE.onboarding.derive_facility_prefix(t_id, tenant_code)
+            facilities_map = {
+                site_id: GLOBAL_STATE.onboarding.derive_device_prefix(site_id)
+                for site_id in app.sites.keys()
+            }
+            return 200, {
+                "tenant_id": t_id,
+                "tenant_code": tenant_code,
+                "facility_prefix": facility_prefix,
+                "device_prefixes": facilities_map,
+            }
         elif path == "/api/soc2/audit":
             auditor = SOC2ComplianceAuditor(GLOBAL_STATE)
             report = auditor.audit_platform()

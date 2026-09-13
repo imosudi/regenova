@@ -785,7 +785,14 @@
                 <div class="row g-2 mb-3">
                   <div class="col-7">
                     <label class="form-label small fw-semibold text-dark">Site ID Code</label>
-                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="facility-id" placeholder="SITE-ATACAMA-03" required>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text font-monospace bg-light fw-bold text-success border-end-0 small px-2" id="facility-id-prefix">SITE-HELIOS-</span>
+                      <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="facility-id" placeholder="ATACAMA-03" required>
+                    </div>
+                    <div class="form-text text-muted mt-1 d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
+                      <span>Fixed tenant prefix: <strong class="text-success font-monospace" id="facility-partition-code">SITE-HELIOS-</strong></span>
+                      <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace" id="facility-id-preview">SITE-HELIOS-ATACAMA-03</span>
+                    </div>
                   </div>
                   <div class="col-5">
                     <label class="form-label small fw-semibold text-dark">Capacity (MW)</label>
@@ -839,14 +846,21 @@
                 </div>
                 <div class="row g-2 mb-3">
                   <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Device Asset ID</label>
-                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="device-id" placeholder="INV-CENTRAL-04" required>
-                  </div>
-                  <div class="col-6">
                     <label class="form-label small fw-semibold text-dark">Parent Facility</label>
                     <select class="form-select form-select-sm" id="device-facility" required>
                       <!-- Dynamically populated from active facilities -->
                     </select>
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark">Device Asset ID</label>
+                    <div class="input-group input-group-sm">
+                      <span class="input-group-text font-monospace bg-light fw-bold text-info border-end-0 small px-2" id="device-id-prefix">SITE-...-</span>
+                      <input type="text" class="form-control form-control-sm font-monospace text-uppercase" id="device-id" placeholder="INV-04" required>
+                    </div>
+                    <div class="form-text text-muted mt-1 d-flex justify-content-between align-items-center" style="font-size:0.75rem;">
+                      <span>Fixed facility prefix</span>
+                      <span class="badge bg-info-subtle text-info border border-info-subtle font-monospace" id="device-id-preview">SITE-...-INV-04</span>
+                    </div>
                   </div>
                 </div>
                 <div class="row g-2 mb-3">

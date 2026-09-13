@@ -88,6 +88,8 @@ function unlockPortal(authData) {
 
       const userTenantDisplay = document.getElementById("user-tenant-display");
       if (userTenantDisplay) userTenantDisplay.value = `${u.tenant_id} (${t.name || u.tenant_name || 'Active Partition'})`;
+
+      updateFacilityPrefix();
     }
     const nameEl = document.getElementById("sidebar-user-name");
     if (nameEl) nameEl.innerText = u.name || "Operator";
@@ -378,6 +380,7 @@ async function fetchSites() {
     if (currentVal && sites.some(s => s.site_id === currentVal)) {
       facSelect.value = currentVal;
     }
+    updateDevicePrefix();
   }
 }
 
@@ -854,6 +857,8 @@ function populateTenantDropdowns() {
 
     const filterUserTenantBadge = document.getElementById("filter-user-tenant-badge");
     if (filterUserTenantBadge) filterUserTenantBadge.innerText = currentTenant.tenant_id;
+
+    updateFacilityPrefix();
   }
 }
 
@@ -883,6 +888,10 @@ function switchTenant(tenantId) {
   if (footerTenant) {
     footerTenant.innerText = tenantId;
   }
+
+  // Sync fixed facility prefix for newly selected tenant partition
+  updateFacilityPrefix();
+  syncOnboardingPrefixes();
 
   // Reload all scoped tenant data
   loadAllData();
@@ -1088,6 +1097,46 @@ function initOnboardingForms() {
     });
   }
 
+  // Helper functions for fixed onboarding prefixes
+  const facSelect = document.getElementById("device-facility");
+  if (facSelect) {
+    facSelect.addEventListener("change", updateDevicePrefix);
+  }
+
+  // Real-time input listeners for live canonical ID preview and auto-prefixing
+  const facInput = document.getElementById("facility-id");
+  if (facInput) {
+    facInput.addEventListener("input", updateFacilityIdPreview);
+    facInput.addEventListener("blur", () => {
+      const prefix = document.getElementById("facility-id-prefix")?.innerText.trim() || getTenantSitePrefix(currentTenantId);
+      let v = facInput.value.trim().toUpperCase();
+      if (v.startsWith(prefix)) {
+        facInput.value = v.substring(prefix.length).replace(/^-+/, "");
+        updateFacilityIdPreview();
+      }
+    });
+  }
+
+  const devInput = document.getElementById("device-id");
+  if (devInput) {
+    devInput.addEventListener("input", updateDeviceIdPreview);
+    devInput.addEventListener("blur", () => {
+      const facSelect = document.getElementById("device-facility");
+      const parentFac = facSelect ? facSelect.value : "";
+      const prefix = `${parentFac}-`;
+      let v = devInput.value.trim().toUpperCase();
+      if (v.startsWith(prefix)) {
+        devInput.value = v.substring(prefix.length).replace(/^-+/, "");
+        updateDeviceIdPreview();
+      }
+    });
+  }
+
+  // Initial sync of prefixes and live preview badges
+  updateFacilityPrefix();
+  updateDevicePrefix();
+  syncOnboardingPrefixes();
+
   // 2. Facility Form
   const formFacility = document.getElementById("form-onboard-facility");
   if (formFacility) {
@@ -1098,9 +1147,25 @@ function initOnboardingForms() {
       alertBox.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> Registering generation facility topology...`;
 
       try {
+        const prefix = document.getElementById("facility-id-prefix")?.innerText.trim() || getTenantSitePrefix(currentTenantId);
+        let rawId = document.getElementById("facility-id").value.trim().toUpperCase();
+        if (!rawId) {
+          throw new Error("Site ID Code is required.");
+        }
+
+        let canonicalId;
+        if (rawId.startsWith(prefix)) {
+          canonicalId = rawId;
+        } else if (rawId.startsWith("SITE-")) {
+          // Send as-is so tenant partition validation rule flags cross-partition mismatch
+          canonicalId = rawId;
+        } else {
+          canonicalId = `${prefix}${rawId.replace(/^-+/, "")}`;
+        }
+
         const payload = {
           name: document.getElementById("facility-name").value.trim(),
-          facility_id: document.getElementById("facility-id").value.trim().toUpperCase(),
+          facility_id: canonicalId,
           rated_capacity_mw: parseFloat(document.getElementById("facility-capacity").value),
           technology: document.getElementById("facility-tech").value,
           latitude: parseFloat(document.getElementById("facility-lat").value),
@@ -1116,6 +1181,7 @@ function initOnboardingForms() {
           alertBox.className = "alert alert-success mt-3 small py-2 d-block";
           alertBox.innerHTML = `<strong>Success:</strong> Facility <code>${data.entity_id}</code> successfully registered and added to portfolio.`;
           formFacility.reset();
+          updateFacilityPrefix();
           fetchSites();
           fetchOverview();
           fetchAuditChain();
@@ -1140,10 +1206,30 @@ function initOnboardingForms() {
       alertBox.innerHTML = `<div class="spinner-border spinner-border-sm me-1"></div> Provisioning device, generating HMAC secret & registering sensors...`;
 
       try {
+        const parentFac = document.getElementById("device-facility").value;
+        if (!parentFac) {
+          throw new Error("A Parent Facility must be selected.");
+        }
+        const prefix = `${parentFac}-`;
+        let rawDevId = document.getElementById("device-id").value.trim().toUpperCase();
+        if (!rawDevId) {
+          throw new Error("Device Asset ID is required.");
+        }
+
+        let canonicalDevId;
+        if (rawDevId.startsWith(prefix)) {
+          canonicalDevId = rawDevId;
+        } else if (rawDevId.startsWith("SITE-")) {
+          // Send as-is so facility prefix rule flags cross-facility mismatch
+          canonicalDevId = rawDevId;
+        } else {
+          canonicalDevId = `${prefix}${rawDevId.replace(/^-+/, "")}`;
+        }
+
         const payload = {
           name: document.getElementById("device-name").value.trim(),
-          device_id: document.getElementById("device-id").value.trim().toUpperCase(),
-          facility_id: document.getElementById("device-facility").value,
+          device_id: canonicalDevId,
+          facility_id: parentFac,
           asset_type: document.getElementById("device-type").value,
           rated_power_kw: parseFloat(document.getElementById("device-power").value),
           model: document.getElementById("device-model").value.trim(),
@@ -1159,6 +1245,7 @@ function initOnboardingForms() {
           alertBox.className = "alert alert-success mt-3 small py-2 d-block";
           alertBox.innerHTML = `<strong>Success:</strong> Device <code>${data.entity_id}</code> onboarded with ${data.details.sensors_count} telemetry channels.<br>Edge Secret: <code class="user-select-all">${data.details.device_secret}</code>`;
           formDevice.reset();
+          updateDevicePrefix();
           fetchAssets();
           fetchSites();
           fetchOverview();
@@ -1172,6 +1259,110 @@ function initOnboardingForms() {
         alertBox.innerText = `Network error: ${err.message}`;
       }
     });
+  }
+}
+
+function getTenantSitePrefix(tenantId) {
+  if (!tenantId) return "SITE-HELIOS-";
+  const tenantObj = (typeof allTenants !== "undefined" && Array.isArray(allTenants))
+    ? allTenants.find(t => t.tenant_id === tenantId)
+    : null;
+  if (tenantObj && tenantObj.code) {
+    return `SITE-${tenantObj.code.toUpperCase().replace("SITE-", "").replace(/-+$/, "")}-`;
+  }
+  let code = tenantId;
+  if (tenantId.startsWith("ORG-")) {
+    const parts = tenantId.split("-");
+    code = parts[1] || tenantId.replace("ORG-", "");
+  }
+  return `SITE-${code.toUpperCase().replace(/-+$/, "")}-`;
+}
+
+function updateFacilityPrefix() {
+  const facPrefixEl = document.getElementById("facility-id-prefix");
+  const partCodeEl = document.getElementById("facility-partition-code");
+  const prefix = getTenantSitePrefix(currentTenantId);
+  if (facPrefixEl) {
+    facPrefixEl.innerText = prefix;
+  }
+  if (partCodeEl) {
+    partCodeEl.innerText = prefix;
+  }
+  updateFacilityIdPreview();
+}
+
+function updateFacilityIdPreview() {
+  const inputEl = document.getElementById("facility-id");
+  const previewEl = document.getElementById("facility-id-preview");
+  const prefixEl = document.getElementById("facility-id-prefix");
+  if (!inputEl || !previewEl) return;
+  const prefix = prefixEl ? prefixEl.innerText.trim() : getTenantSitePrefix(currentTenantId);
+  let val = inputEl.value.trim().toUpperCase();
+  if (!val) {
+    previewEl.innerText = `${prefix}ENTER-SUFFIX`;
+    return;
+  }
+  if (val.startsWith(prefix)) {
+    val = val.substring(prefix.length).replace(/^-+/, "");
+  } else if (val.startsWith("SITE-")) {
+    previewEl.innerText = val;
+    return;
+  }
+  previewEl.innerText = `${prefix}${val.replace(/^-+/, "")}`;
+}
+
+function updateDevicePrefix() {
+  const facSelect = document.getElementById("device-facility");
+  const devPrefixEl = document.getElementById("device-id-prefix");
+  if (facSelect && devPrefixEl) {
+    const selectedFac = facSelect.value;
+    if (selectedFac) {
+      devPrefixEl.innerText = `${selectedFac}-`;
+    } else {
+      devPrefixEl.innerText = "SITE-...-";
+    }
+  }
+  updateDeviceIdPreview();
+}
+
+function updateDeviceIdPreview() {
+  const facSelect = document.getElementById("device-facility");
+  const inputEl = document.getElementById("device-id");
+  const previewEl = document.getElementById("device-id-preview");
+  const devPrefixEl = document.getElementById("device-id-prefix");
+  if (!inputEl || !previewEl) return;
+  const prefix = devPrefixEl ? devPrefixEl.innerText.trim() : (facSelect?.value ? `${facSelect.value}-` : "SITE-...-");
+  let val = inputEl.value.trim().toUpperCase();
+  if (!val) {
+    previewEl.innerText = `${prefix}ENTER-SUFFIX`;
+    return;
+  }
+  if (val.startsWith(prefix)) {
+    val = val.substring(prefix.length).replace(/^-+/, "");
+  } else if (val.startsWith("SITE-")) {
+    previewEl.innerText = val;
+    return;
+  }
+  previewEl.innerText = `${prefix}${val.replace(/^-+/, "")}`;
+}
+
+async function syncOnboardingPrefixes() {
+  try {
+    const res = await apiFetch("/api/onboarding/prefixes");
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.facility_prefix) {
+      const facPrefixEl = document.getElementById("facility-id-prefix");
+      const partCodeEl = document.getElementById("facility-partition-code");
+      if (facPrefixEl) facPrefixEl.innerText = data.facility_prefix;
+      if (partCodeEl) partCodeEl.innerText = data.facility_prefix;
+      updateFacilityIdPreview();
+    }
+    if (data.device_prefixes) {
+      updateDevicePrefix();
+    }
+  } catch (err) {
+    console.warn("Unable to sync onboarding prefixes from API:", err);
   }
 }
 

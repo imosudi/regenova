@@ -88,16 +88,163 @@ class OnboardingManager:
 
         return user
 
+    @staticmethod
+    def derive_facility_prefix(tenant_id: str, tenant_code: Optional[str] = None) -> str:
+        """
+        Derives standard facility site ID prefix based on the tenant partition ID.
+        Examples:
+        - ORG-HELIOS-GLOBAL -> SITE-HELIOS-
+        - ORG-AURORA-NORDIC -> SITE-AURORA-
+        - ORG-SOLARIA-ESP -> SITE-SOLARIA-
+        """
+        if tenant_code and tenant_code.strip():
+            code = tenant_code.strip().upper().replace("SITE-", "").strip("-")
+        elif tenant_id.startswith("ORG-"):
+            parts = tenant_id.split("-")
+            code = parts[1].upper() if len(parts) > 1 else tenant_id.replace("ORG-", "").upper()
+        else:
+            code = tenant_id.strip().upper()
+        return f"SITE-{code}-"
+
+    @classmethod
+    def validate_or_apply_facility_prefix(
+        cls,
+        facility_id: str,
+        tenant_id: str,
+        tenant_code: Optional[str] = None,
+        enforce: bool = True,
+    ) -> str:
+        """
+        Ensures the facility site ID code begins with the fixed prefix based on tenant partition ID.
+        If only the suffix is supplied, automatically prepends the prefix.
+        If a conflicting prefix is supplied and enforce is True, raises ValueError.
+        """
+        prefix = cls.derive_facility_prefix(tenant_id, tenant_code)
+        fid = facility_id.strip().upper()
+        if not fid or not fid.replace("-", "").strip():
+            raise ValueError("Facility Site ID cannot be empty.")
+
+        # Deduplicate repeated prefix if user entered or pasted it twice (e.g. SITE-HELIOS-SITE-HELIOS-ATACAMA)
+        while fid.startswith(f"{prefix}{prefix}"):
+            fid = fid[len(prefix):]
+
+        # Exact match with standard prefix
+        if fid.startswith(prefix):
+            suffix = fid[len(prefix):].lstrip("-")
+            if not suffix:
+                raise ValueError("Facility Site ID cannot be empty after prefix.")
+            return f"{prefix}{suffix}"
+
+        # If user entered code without SITE- (e.g. HELIOS-ATACAMA-03)
+        code = prefix.replace("SITE-", "").rstrip("-")
+        if fid.startswith(f"{code}-"):
+            suffix = fid[len(code) + 1:].lstrip("-")
+            if not suffix:
+                raise ValueError("Facility Site ID cannot be empty after prefix.")
+            return f"{prefix}{suffix}"
+
+        # Match with tenant_id directly (e.g. SITE-ORG-HELIOS-GLOBAL- or ORG-HELIOS-GLOBAL-)
+        if fid.startswith(f"SITE-{tenant_id.upper()}-"):
+            suffix = fid[len(f"SITE-{tenant_id.upper()}-"):].lstrip("-")
+            return f"SITE-{tenant_id.upper()}-{suffix}"
+        if fid.startswith(f"{tenant_id.upper()}-"):
+            suffix = fid[len(f"{tenant_id.upper()}-"):].lstrip("-")
+            return f"SITE-{tenant_id.upper()}-{suffix}"
+
+        # Suffix-only provided (e.g. ATACAMA-03 or -ATACAMA-03)
+        if not fid.startswith("SITE-"):
+            clean_suffix = fid.lstrip("-")
+            return f"{prefix}{clean_suffix}"
+
+        # If not enforced and already formatted as a SITE- ID (e.g. legacy/test SITE-SONORA-SOLAR)
+        if not enforce:
+            return fid
+
+        # Starts with SITE- but does not match tenant partition prefix
+        raise ValueError(
+            f"Facility Site ID '{fid}' violates tenant partition rules: "
+            f"must have fixed prefix '{prefix}' based on tenant partition '{tenant_id}'."
+        )
+
+    @staticmethod
+    def derive_device_prefix(facility_id: str) -> str:
+        """
+        Derives standard device asset ID prefix based on the selected parent facility.
+        Examples:
+        - SITE-MOJAVE-01 -> SITE-MOJAVE-01-
+        - SITE-HELIOS-ATACAMA-03 -> SITE-HELIOS-ATACAMA-03-
+        """
+        clean_fac = facility_id.strip().upper().rstrip("-")
+        return f"{clean_fac}-"
+
+    @classmethod
+    def validate_or_apply_device_prefix(
+        cls,
+        device_id: str,
+        facility_id: str,
+        enforce: bool = True,
+    ) -> str:
+        """
+        Ensures the device asset ID begins with the fixed prefix based on the selected parent facility.
+        If only the suffix is supplied, automatically prepends the prefix.
+        If a conflicting prefix is supplied and enforce is True, raises ValueError.
+        """
+        prefix = cls.derive_device_prefix(facility_id)
+        did = device_id.strip().upper()
+        if not did or not did.replace("-", "").strip():
+            raise ValueError("Device Asset ID cannot be empty.")
+
+        # Deduplicate repeated prefix if user pasted or typed it twice (e.g. SITE-MOJAVE-01-SITE-MOJAVE-01-INV-04)
+        while did.startswith(f"{prefix}{prefix}"):
+            did = did[len(prefix):]
+
+        # Exact match with facility prefix
+        if did.startswith(prefix):
+            suffix = did[len(prefix):].lstrip("-")
+            if not suffix:
+                raise ValueError("Device Asset ID cannot be empty after prefix.")
+            return f"{prefix}{suffix}"
+
+        # Match with short facility code if facility starts with SITE- (e.g. MOJAVE-01-INV-01)
+        if facility_id.upper().startswith("SITE-"):
+            short_fac = facility_id.upper()[5:].rstrip("-")
+            if did.startswith(f"{short_fac}-"):
+                suffix = did[len(short_fac) + 1:].lstrip("-")
+                return f"{prefix}{suffix}"
+
+        # If not enforced and already formatted as an asset ID (e.g. ASSET-INV-SONORA-01)
+        if not enforce and did.startswith("ASSET-"):
+            return did
+
+        # Suffix-only provided (e.g. INV-04 or WTG-02 or -INV-04)
+        if not did.startswith("SITE-") and not did.startswith("ASSET-"):
+            clean_suffix = did.lstrip("-")
+            return f"{prefix}{clean_suffix}"
+
+        # Starts with a foreign facility prefix or non-matching asset ID when enforced
+        if enforce:
+            raise ValueError(
+                f"Device Asset ID '{did}' violates parent facility rules: "
+                f"must have fixed prefix '{prefix}' based on selected parent facility '{facility_id}'."
+            )
+        return did
+
     def onboard_facility(
         self,
         app: Any,
         request: FacilityOnboardingRequest,
         actor_id: str = "SYSTEM_ADMIN",
+        enforce_prefix: bool = False,
     ) -> OnboardingResult:
         """
         Onboards a new renewable energy power plant / facility.
         Registers site within the tenant topology.
         """
+        request.facility_id = self.validate_or_apply_facility_prefix(
+            request.facility_id,
+            app.tenant_id,
+            enforce=enforce_prefix,
+        )
         if request.facility_id in app.sites:
             return OnboardingResult(
                 status="ERROR",
@@ -150,6 +297,7 @@ class OnboardingManager:
         app: Any,
         request: DeviceOnboardingRequest,
         actor_id: str = "SYSTEM_ADMIN",
+        enforce_prefix: bool = False,
     ) -> OnboardingResult:
         """
         Onboards a new generation or storage device (e.g. Inverter, Turbine, BESS).
@@ -162,6 +310,12 @@ class OnboardingManager:
                 entity_type="DEVICE",
                 message=f"Parent facility '{request.facility_id}' does not exist.",
             )
+
+        request.device_id = self.validate_or_apply_device_prefix(
+            request.device_id,
+            request.facility_id,
+            enforce=enforce_prefix,
+        )
 
         if request.device_id in app.assets:
             return OnboardingResult(
