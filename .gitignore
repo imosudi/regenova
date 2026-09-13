@@ -219,7 +219,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# AI / Agent working material
+# AI / Agent working material and operational contracts
+AGENTS.md
+actions/
 .agent/
 .agents/
 .antigravity/
@@ -233,6 +235,9 @@ agent-output/
 agent-artifacts/
 agent-logs/
 agent-cache/
+*agent*prompt*
+*Agent*Prompt*
+*Operating*Contract*
 
 # Temporary development material
 .tmp/
