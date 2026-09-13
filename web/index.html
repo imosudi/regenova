@@ -45,6 +45,9 @@
             <a class="nav-link home-nav-link" href="#technologies">Multi-Technology</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link home-nav-link" href="#twinfield">TwinField Sub-API</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link home-nav-link" href="#architecture">Architecture</a>
           </li>
           <li class="nav-item">
@@ -417,6 +420,100 @@
     </div>
   </section>
 
+  <!-- 4.5. TWINFIELD DIGITAL TWIN SUB-API SHOWCASE -->
+  <section class="py-5 bg-light border-bottom" id="twinfield">
+    <div class="container py-4">
+      <div class="row align-items-center g-4 mb-4">
+        <div class="col-12 col-lg-8">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-1">Dedicated Sub-API Service</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 font-monospace" id="home-twinfield-live-badge">
+              <i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>SUB-API ONLINE (twinfield.regenova.cloud)
+            </span>
+          </div>
+          <h2 class="fw-bold text-dark m-0">TWINFIELD &mdash; Digital Twin Engine &amp; Sub-API</h2>
+          <p class="text-muted mt-2 mb-0">
+            Dedicated micro-service deployed at <a href="https://twinfield.regenova.cloud/" target="_blank" class="font-monospace text-primary fw-semibold text-decoration-none">https://twinfield.regenova.cloud/</a> providing real-time 4-tier state vector reconciliation, physics-based degradation simulation, and operator-verified lifecycle state machine governance.
+          </p>
+        </div>
+        <div class="col-12 col-lg-4 text-lg-end">
+          <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+            <a href="https://twinfield.regenova.cloud/" target="_blank" class="btn btn-primary fw-semibold shadow-sm">
+              <i class="bi bi-box-arrow-up-right me-1"></i> Launch TwinField Studio
+            </a>
+            <a href="https://twinfield.regenova.cloud/docs" target="_blank" class="btn btn-outline-secondary fw-semibold bg-white">
+              <i class="bi bi-code-slash me-1"></i> Swagger API Docs
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <!-- 4-Tier State Vector Card -->
+        <div class="col-12 col-lg-6">
+          <div class="card card-reamp h-100 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Core Architecture</span>
+              <span class="font-monospace small text-muted">AC-FR-TWN-001</span>
+            </div>
+            <h5 class="fw-bold text-dark"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Four-Tier State Vector Architecture</h5>
+            <p class="text-muted small mb-3">
+              TwinField continuously reconciles four independent operational vectors to eliminate blind spots and dark SCADA overrides:
+            </p>
+            <div class="d-flex flex-column gap-2 font-monospace small">
+              <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-secondary fw-bold">1. DESIRED VECTOR</span>
+                <span class="badge bg-secondary-subtle text-secondary">Operator Setpoint &amp; Grid Code</span>
+              </div>
+              <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-success fw-bold">2. REPORTED VECTOR</span>
+                <span class="badge bg-success-subtle text-success">Edge IoT &amp; Raw SCADA Ingestion</span>
+              </div>
+              <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-warning fw-bold">3. OBSERVED VECTOR</span>
+                <span class="badge bg-warning-subtle text-warning">Physical Degradation &amp; Residuals</span>
+              </div>
+              <div class="p-2 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-info fw-bold">4. PREDICTED VECTOR</span>
+                <span class="badge bg-info-subtle text-info">XAI Forecast &amp; Arrhenius Derating</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deterministic Lifecycle State Machine Card -->
+        <div class="col-12 col-lg-6">
+          <div class="card card-reamp h-100 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="badge bg-success-subtle text-success border border-success-subtle">Governance &amp; Safety</span>
+              <span class="font-monospace small text-muted">Audit Provenance</span>
+            </div>
+            <h5 class="fw-bold text-dark"><i class="bi bi-arrow-repeat text-success me-2"></i>Deterministic Lifecycle State Machine</h5>
+            <p class="text-muted small mb-3">
+              Strict state machine enforcement prevents invalid operational transitions. Every transition requires operator provenance and logs to the SHA-256 audit ledger:
+            </p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <span class="badge bg-secondary px-2 py-1">DRAFT</span>
+              <i class="bi bi-arrow-right text-muted align-self-center"></i>
+              <span class="badge bg-primary px-2 py-1">COMMISSIONED</span>
+              <i class="bi bi-arrow-right text-muted align-self-center"></i>
+              <span class="badge bg-success px-2 py-1">ACTIVE</span>
+              <i class="bi bi-arrow-left-right text-muted align-self-center"></i>
+              <span class="badge bg-warning text-dark px-2 py-1">MAINTENANCE</span>
+              <i class="bi bi-arrow-left-right text-muted align-self-center"></i>
+              <span class="badge bg-danger px-2 py-1">DEGRADED</span>
+              <i class="bi bi-arrow-right text-muted align-self-center"></i>
+              <span class="badge bg-dark px-2 py-1">DECOMMISSIONED</span>
+            </div>
+            <div class="p-3 bg-light rounded border small text-muted">
+              <i class="bi bi-shield-check text-success me-1"></i><strong>Edge-to-Cloud Interoperability:</strong> Synchronises state bi-directionally between local edge gateway agents and cloud instances via HMAC-authenticated REST and WebSocket channels.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- 5. ARCHITECTURAL & RESEARCH INNOVATIONS -->
   <section class="py-5" id="architecture">
     <div class="container py-4">
@@ -655,9 +752,10 @@
         <div class="col-6 col-md-3">
           <h6 class="fw-bold text-dark small mb-3">Platform Architecture</h6>
           <ul class="list-unstyled small d-flex flex-column gap-2">
-            <li><a href="#overview" class="text-decoration-none text-muted">Overview & Telemetry</a></li>
-            <li><a href="#benefits" class="text-decoration-none text-muted">Opportunities & Benefits</a></li>
+            <li><a href="#overview" class="text-decoration-none text-muted">Overview &amp; Telemetry</a></li>
+            <li><a href="#benefits" class="text-decoration-none text-muted">Opportunities &amp; Benefits</a></li>
             <li><a href="#technologies" class="text-decoration-none text-muted">Multi-Technology Pipelines</a></li>
+            <li><a href="#twinfield" class="text-decoration-none text-primary fw-semibold"><i class="bi bi-diagram-3 me-1"></i> TwinField Sub-API</a></li>
             <li><a href="#architecture" class="text-decoration-none text-muted">8-Stage Closed Feedback Loop</a></li>
             <li><a href="#pre-enrol" class="text-decoration-none text-muted">Pre-Enrolment Application</a></li>
           </ul>
@@ -666,12 +764,13 @@
           <h6 class="fw-bold text-dark small mb-3">Operations Access</h6>
           <ul class="list-unstyled small d-flex flex-column gap-2">
             <li><a href="/portal.html" class="text-decoration-none text-primary fw-semibold"><i class="bi bi-speedometer2 me-1"></i> Operations Portal</a></li>
+            <li><a href="https://twinfield.regenova.cloud/" target="_blank" class="text-decoration-none text-info fw-semibold"><i class="bi bi-diagram-3-fill me-1"></i> TwinField Studio</a></li>
             <li><a href="#" data-bs-toggle="modal" data-bs-target="#modalPortalLogin" class="text-decoration-none text-secondary"><i class="bi bi-box-arrow-in-right me-1"></i> Operator Login</a></li>
             <li><a href="#pre-enrol" class="text-decoration-none text-secondary"><i class="bi bi-building-add me-1"></i> Pre-Enrolment</a></li>
           </ul>
         </div>
         <div class="col-12 col-md-2">
-          <h6 class="fw-bold text-dark small mb-3">Standards & Governance</h6>
+          <h6 class="fw-bold text-dark small mb-3">Standards &amp; Governance</h6>
           <ul class="list-unstyled small d-flex flex-column gap-2 text-muted">
             <li><i class="bi bi-check-circle-fill text-success me-1"></i> IEC 61724-1 (Solar)</li>
             <li><i class="bi bi-check-circle-fill text-success me-1"></i> IEC 61400-12-1 (Wind)</li>
@@ -682,13 +781,12 @@
       </div>
 
       <div class="d-flex flex-wrap justify-content-between align-items-center pt-3 small text-muted">
-        <div>&copy; 2026 REGENOVA Framework. Open Research & Industry Architecture.</div>
+        <div>&copy; 2026 REGENOVA Framework. Open Research &amp; Industry Architecture.</div>
         <div>Multi-Tenant Renewable Energy Asset Intelligence</div>
       </div>
     </div>
   </footer>
 
-  <!-- Bootstrap 5.3.3 Bundle JS -->
   <script src="vendor/bootstrap.bundle.min.js"></script>
   <!-- Home Page Client Controller -->
   <script src="home.js"></script>

@@ -269,6 +269,7 @@ async function loadAllData() {
       fetchAuditChain(),
       fetchUsers(),
       fetchDatabaseStatus(),
+      probeTwinFieldStatus(),
     ]);
   } catch (err) {
     console.error("REAMP polling error:", err);
@@ -490,6 +491,8 @@ async function fetchAssetDetail(assetId) {
   document.getElementById("dt-asset-id").innerText = d.asset_id;
   document.getElementById("dt-asset-name").innerText = d.name;
   document.getElementById("dt-asset-site").innerText = `${d.site_name} (${d.rated_power_kw} kW Rated Model: ${d.model})`;
+
+  updateTwinFieldStateVectors(d);
 
   const techBadge = document.getElementById("dt-tech-badge");
   techBadge.innerText = d.technology;
@@ -1504,4 +1507,161 @@ function initSidebarInteractions() {
     });
   }
 }
+
+// ----------------------------------------------------------------------------
+// TwinField Sub-API Integration (https://twinfield.regenova.cloud/)
+// ----------------------------------------------------------------------------
+const TWINFIELD_SUB_API_BASE = "https://twinfield.regenova.cloud";
+
+async function probeTwinFieldStatus() {
+  const pill = document.getElementById("twinfield-live-pill");
+  if (!pill) return;
+  try {
+    let res;
+    try {
+      res = await fetch(`${TWINFIELD_SUB_API_BASE}/health`, { method: "GET", mode: "cors" });
+    } catch (corsOrNetErr) {
+      res = await apiFetch("/api/twinfield/status");
+    }
+    if (res && res.ok) {
+      const data = await res.json();
+      pill.className = "badge bg-success-subtle text-success border border-success-subtle px-2 py-1";
+      pill.innerHTML = `<i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>SUB-API ONLINE (v${data.version || '0.3.0'})`;
+    } else {
+      pill.className = "badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1";
+      pill.innerHTML = `<i class="bi bi-exclamation-triangle me-1" style="font-size: 0.55rem;"></i>SUB-API STANDBY`;
+    }
+  } catch (e) {
+    pill.className = "badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1";
+    pill.innerHTML = `<i class="bi bi-exclamation-triangle me-1" style="font-size: 0.55rem;"></i>SUB-API STANDBY`;
+  }
+}
+
+function updateTwinFieldStateVectors(d) {
+  if (!d) return;
+  const dt = d.digital_twin || {};
+  const rated = Number(d.rated_power_kw) || 2100.0;
+  const pr = Number(d.performance_ratio) || 0.98;
+  const activePower = dt.power_ac_kw !== undefined ? Number(dt.power_ac_kw) : (rated * pr);
+  const heatsinkTemp = dt.temperature_heatsink_c !== undefined ? Number(dt.temperature_heatsink_c) : 48.2;
+  const pResidual = dt.power_residual_kw !== undefined ? Number(dt.power_residual_kw) : -15.0;
+  const tResidual = dt.temperature_residual_c !== undefined ? Number(dt.temperature_residual_c) : 1.4;
+
+  // 1. Desired
+  const setpointEl = document.getElementById("vec-desired-setpoint");
+  if (setpointEl) setpointEl.innerText = `${rated.toFixed(1)} kW`;
+  const desPowerEl = document.getElementById("vec-desired-power");
+  if (desPowerEl) desPowerEl.innerText = `${(rated * 0.99).toFixed(1)} kW`;
+
+  // 2. Reported
+  const repPowerEl = document.getElementById("vec-reported-power");
+  if (repPowerEl) repPowerEl.innerText = `${activePower.toFixed(1)} kW`;
+  const repTempEl = document.getElementById("vec-reported-temp");
+  if (repTempEl) repTempEl.innerText = `${heatsinkTemp.toFixed(1)} °C`;
+
+  // 3. Observed
+  const obsEffEl = document.getElementById("vec-observed-eff");
+  if (obsEffEl) obsEffEl.innerText = `${(pr * 100.0).toFixed(1)} %`;
+  const obsDeltaEl = document.getElementById("vec-observed-delta");
+  if (obsDeltaEl) obsDeltaEl.innerText = `${tResidual >= 0 ? '+' : ''}${tResidual.toFixed(1)} °C`;
+
+  // 4. Predicted
+  const predPowerEl = document.getElementById("vec-predicted-power");
+  if (predPowerEl) predPowerEl.innerText = `${(activePower * 0.965).toFixed(1)} kW`;
+  const predDegEl = document.getElementById("vec-predicted-deg");
+  if (predDegEl) predDegEl.innerText = `0.04 %/yr`;
+}
+
+window.openTwinLifecycleModal = function(twinId) {
+  const targetId = twinId || currentAssetId || "TWN-INV-001";
+  const idInput = document.getElementById("modal-transition-twin-id");
+  if (idInput) idInput.value = targetId;
+
+  const auth = getStoredOperatorAuth();
+  const opInput = document.getElementById("modal-transition-operator");
+  if (opInput) {
+    opInput.value = (auth && auth.user && auth.user.email) ? auth.user.email : "operator-session";
+  }
+
+  const alertBox = document.getElementById("modal-transition-alert");
+  if (alertBox) {
+    alertBox.className = "d-none";
+    alertBox.innerHTML = "";
+  }
+
+  const modalEl = document.getElementById("twinLifecycleModal");
+  if (modalEl && window.bootstrap) {
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+};
+
+window.submitTwinLifecycleTransition = async function(event) {
+  if (event) event.preventDefault();
+  const btn = document.getElementById("btn-submit-transition");
+  const alertBox = document.getElementById("modal-transition-alert");
+  const twinId = document.getElementById("modal-transition-twin-id")?.value || currentAssetId;
+  const targetStatus = document.getElementById("modal-transition-target-status")?.value;
+  const reason = document.getElementById("modal-transition-reason")?.value;
+  const operatorId = document.getElementById("modal-transition-operator")?.value || "operator-session";
+
+  if (btn) btn.disabled = true;
+  if (alertBox) {
+    alertBox.className = "alert alert-info small py-2";
+    alertBox.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Transmitting transition to TwinField Sub-API...`;
+    alertBox.classList.remove("d-none");
+  }
+
+  try {
+    const payload = {
+      target_status: targetStatus,
+      reason: reason,
+      operator_id: operatorId
+    };
+
+    let res;
+    try {
+      res = await fetch(`${TWINFIELD_SUB_API_BASE}/api/v1/twins/${encodeURIComponent(twinId)}/transition`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (directErr) {
+      res = await apiFetch(`/api/twinfield/transition`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ twin_id: twinId, ...payload })
+      });
+    }
+
+    if (res && res.ok) {
+      const data = await res.json();
+      if (alertBox) {
+        alertBox.className = "alert alert-success small py-2";
+        alertBox.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Successfully transitioned twin <strong>${twinId}</strong> to <strong>${targetStatus}</strong>.`;
+      }
+      setTimeout(() => {
+        const modalEl = document.getElementById("twinLifecycleModal");
+        if (modalEl && window.bootstrap) {
+          bootstrap.Modal.getInstance(modalEl)?.hide();
+        }
+        fetchAssetDetail(currentAssetId);
+      }, 1200);
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.detail || errData.message || `HTTP ${res.status}: Transition rejected by TwinField state machine.`;
+      if (alertBox) {
+        alertBox.className = "alert alert-danger small py-2";
+        alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${msg}`;
+      }
+    }
+  } catch (err) {
+    if (alertBox) {
+      alertBox.className = "alert alert-danger small py-2";
+      alertBox.innerHTML = `<i class="bi bi-exclamation-octagon-fill me-1"></i> Network error connecting to TwinField Sub-API: ${err.message}`;
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
 

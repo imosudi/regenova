@@ -362,6 +362,36 @@
 
       <!-- 2. DIGITAL TWIN & TELEMETRY TAB -->
       <div class="tab-pane fade" id="tab-twin" role="tabpanel" aria-labelledby="twin-tab">
+        <!-- TwinField Dedicated Digital Twin Sub-API Integration Banner -->
+        <div class="card card-reamp p-3 mb-4 bg-light border-primary-subtle shadow-sm">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 rounded bg-primary text-white fs-4 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <i class="bi bi-cpu-fill"></i>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2">
+                  <h6 class="fw-bold text-dark m-0">TwinField &mdash; REGENOVA Digital Twin Sub-API</h6>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small" id="twinfield-live-pill">
+                    <span class="pulse-live me-1"></span> LIVE SUB-API
+                  </span>
+                </div>
+                <div class="small text-muted font-monospace mt-1">
+                  Sub-API: <a href="https://twinfield.regenova.cloud/" target="_blank" class="text-primary text-decoration-none fw-semibold">https://twinfield.regenova.cloud/</a> &bull; Dedicated Sub-Service
+                </div>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+              <a href="https://twinfield.regenova.cloud/" target="_blank" class="btn btn-sm btn-primary fw-semibold d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-box-arrow-up-right"></i> Open TwinField Studio
+              </a>
+              <a href="https://twinfield.regenova.cloud/docs" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold d-flex align-items-center gap-1">
+                <i class="bi bi-file-earmark-code"></i> API Docs (Swagger)
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div class="row g-4">
           <!-- Left: Asset Selector Sidebar -->
           <div class="col-12 col-lg-3">
@@ -465,6 +495,74 @@
                     <div class="stat-kpi-label">Baseline Multiplier</div>
                     <div class="h4 fw-bold text-success my-1 font-monospace" id="dt-res-base">1.0000</div>
                     <div class="small text-muted">Adaptive Soiling / Roughness Multiplier</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TwinField Canonical 4-Tier State Vectors -->
+            <div class="card card-reamp p-4 mb-4 border-info-subtle shadow-sm">
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                  <h6 class="fw-bold text-dark m-0"><i class="bi bi-layers-half me-2 text-primary"></i>TwinField Canonical 4-Tier State Model</h6>
+                  <div class="small text-muted mt-1">Multi-tier state separation: Desired, Reported, Observed, and Predicted vectors</div>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                  <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace px-2 py-1" id="twinfield-active-status-badge">
+                    STATUS: ACTIVE
+                  </span>
+                  <button class="btn btn-sm btn-outline-primary fw-semibold" onclick="openTwinLifecycleModal()">
+                    <i class="bi bi-arrow-repeat me-1"></i> Transition State
+                  </button>
+                </div>
+              </div>
+              <div class="row g-3" id="twinfield-state-vectors-container">
+                <!-- Desired Vector -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                  <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="stat-kpi-label text-primary">1. DESIRED</span>
+                      <span class="badge bg-primary-subtle text-primary small">Setpoint</span>
+                    </div>
+                    <div class="small fw-semibold text-dark mb-1">Curtailment: <span class="font-monospace text-primary" id="vec-desired-curtailment">0.0 kW</span></div>
+                    <div class="small fw-semibold text-dark">Target PF: <span class="font-monospace text-primary" id="vec-desired-pf">1.000</span></div>
+                    <div class="text-muted mt-2" style="font-size: 0.72rem;">Source: Grid Operator Target</div>
+                  </div>
+                </div>
+                <!-- Reported Vector -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                  <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="stat-kpi-label text-success">2. REPORTED</span>
+                      <span class="badge bg-success-subtle text-success small">SCADA</span>
+                    </div>
+                    <div class="small fw-semibold text-dark mb-1">Active Power: <span class="font-monospace text-success" id="vec-reported-power">2085.0 kW</span></div>
+                    <div class="small fw-semibold text-dark">Ambient Temp: <span class="font-monospace text-success" id="vec-reported-temp">32.4 °C</span></div>
+                    <div class="text-muted mt-2" style="font-size: 0.72rem;">Source: Edge Gateway 01</div>
+                  </div>
+                </div>
+                <!-- Observed Vector -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                  <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="stat-kpi-label text-warning">3. OBSERVED</span>
+                      <span class="badge bg-warning-subtle text-warning small">Reconciled</span>
+                    </div>
+                    <div class="small fw-semibold text-dark mb-1">Efficiency: <span class="font-monospace text-dark" id="vec-observed-eff">98.2 %</span></div>
+                    <div class="small fw-semibold text-dark">Thermal ΔT: <span class="font-monospace text-danger" id="vec-observed-delta">+1.4 °C</span></div>
+                    <div class="text-muted mt-2" style="font-size: 0.72rem;">Source: State Residual Engine</div>
+                  </div>
+                </div>
+                <!-- Predicted Vector -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                  <div class="p-3 bg-light rounded-3 border h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="stat-kpi-label text-info">4. PREDICTED</span>
+                      <span class="badge bg-info-subtle text-info small">AI Forecast</span>
+                    </div>
+                    <div class="small fw-semibold text-dark mb-1">Forecast t+1h: <span class="font-monospace text-info" id="vec-predicted-power">1950.0 kW</span></div>
+                    <div class="small fw-semibold text-dark">Degradation: <span class="font-monospace text-muted" id="vec-predicted-deg">0.04 %/yr</span></div>
+                    <div class="text-muted mt-2" style="font-size: 0.72rem;">Source: AI Predictive Model</div>
                   </div>
                 </div>
               </div>
@@ -1139,27 +1237,75 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="reamp-footer">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-        <div>
-          <strong class="text-dark">REGENOVA</strong> - Renewable Energy Asset Intelligence & Management Framework
-          <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
+  <!-- Modal for TwinField Lifecycle Transition -->
+  <div class="modal fade" id="twinLifecycleModal" tabindex="-1" aria-labelledby="twinLifecycleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold text-dark" id="twinLifecycleModalLabel">
+            <i class="bi bi-arrow-repeat text-primary me-2"></i>TwinField Lifecycle State Transition
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="font-monospace small">
-          API: <span class="text-primary">https://api.regenova.cloud</span> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold" id="footer-tenant-text">ORG-HELIOS-GLOBAL</span>
+        <div class="modal-body p-4">
+          <div class="alert alert-info small py-2 mb-3">
+            Submits a verified state machine transition to the TwinField sub-API at <strong class="font-monospace">https://twinfield.regenova.cloud/</strong> with operator provenance.
+          </div>
+          <form id="form-twin-transition" onsubmit="submitTwinLifecycleTransition(event)">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Digital Twin ID</label>
+              <input type="text" class="form-control form-control-sm font-monospace" id="modal-transition-twin-id" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Target Lifecycle Status</label>
+              <select class="form-select form-select-sm" id="modal-transition-target-status" required>
+                <option value="ACTIVE">ACTIVE (Normal operational synchronization)</option>
+                <option value="COMMISSIONED">COMMISSIONED (Tested & calibrated)</option>
+                <option value="MAINTENANCE">MAINTENANCE (Field technician intervention)</option>
+                <option value="DEGRADED">DEGRADED (Operating under derated limits)</option>
+                <option value="DECOMMISSIONED">DECOMMISSIONED (Terminal end-of-lifecycle)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Transition Reason / Work Order Ref</label>
+              <input type="text" class="form-control form-control-sm" id="modal-transition-reason" placeholder="e.g. Scheduled inverter inspection completed" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-dark">Operator ID</label>
+              <input type="text" class="form-control form-control-sm font-monospace" id="modal-transition-operator" value="operator-session" required>
+            </div>
+            <div id="modal-transition-alert" class="d-none"></div>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm fw-semibold" id="btn-submit-transition">
+                <i class="bi bi-check2-circle me-1"></i> Apply Transition
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </footer>
-
+    </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="reamp-footer">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <strong class="text-dark">REGENOVA</strong> - Renewable Energy Asset Intelligence & Management Framework
+        <div class="text-muted small mt-1">Open framework for intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance and lifecycle optimisation of renewable energy assets.</div>
+      </div>
+      <div class="font-monospace small">
+        API: <span class="text-primary">https://api.regenova.cloud</span> | TwinField: <a href="https://twinfield.regenova.cloud" target="_blank" class="text-info text-decoration-none">twinfield.regenova.cloud</a> | DB: <span class="text-success">db.regenova.cloud:5432</span> | Tenant: <span class="text-dark fw-bold" id="footer-tenant-text">ORG-HELIOS-GLOBAL</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
 </div>
 
 
 
-<!-- Bootstrap 5.3.3 Bundle JS -->
 <script src="vendor/bootstrap.bundle.min.js"></script>
-<!-- Client Application Logic -->
-<script src="app.js?v=1.0.4"></script>
+<script src="app.js?v=1.0.5"></script>
 </body>
 </html>

@@ -19,6 +19,7 @@ let selectedLoginTenant = "ORG-HELIOS-GLOBAL";
 
 document.addEventListener("DOMContentLoaded", () => {
   fetchLiveTelemetry();
+  probeTwinFieldSubApi();
   initPreEnrolmentForm();
   initLoginModal();
 });
@@ -57,6 +58,30 @@ async function fetchLiveTelemetry() {
     }
   } catch (err) {
     console.warn("Could not fetch live telemetry for home page:", err);
+  }
+}
+
+async function probeTwinFieldSubApi() {
+  const badge = document.getElementById("home-twinfield-live-badge");
+  if (!badge) return;
+  try {
+    let res;
+    try {
+      res = await fetch("https://twinfield.regenova.cloud/health", { method: "GET", mode: "cors" });
+    } catch (e) {
+      res = await apiFetch("/api/twinfield/status");
+    }
+    if (res && res.ok) {
+      const data = await res.json();
+      badge.className = "badge bg-success-subtle text-success border border-success-subtle px-2 py-1 font-monospace";
+      badge.innerHTML = `<i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>SUB-API ONLINE (v${data.version || '0.3.0'})`;
+    } else {
+      badge.className = "badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 font-monospace";
+      badge.innerHTML = `<i class="bi bi-exclamation-triangle me-1" style="font-size: 0.55rem;"></i>SUB-API STANDBY`;
+    }
+  } catch (e) {
+    badge.className = "badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 font-monospace";
+    badge.innerHTML = `<i class="bi bi-exclamation-triangle me-1" style="font-size: 0.55rem;"></i>SUB-API STANDBY`;
   }
 }
 

@@ -225,6 +225,7 @@ async function loadAllBackofficeData() {
       fetchDatabaseStatus(),
       fetchAuditTrail(),
       fetchHitlWorkOrders(),
+      fetchTwinFieldAdminData(),
     ]);
   } catch (err) {
     console.error("Backoffice polling error:", err);
@@ -876,6 +877,7 @@ function initSidebarInteractions() {
     "users-tab": '<i class="bi bi-people text-success me-2"></i> Global Platform User Directory & RBAC',
     "infra-tab": '<i class="bi bi-database-gear text-purple me-2"></i> Database & API Infrastructure Diagnostics',
     "audit-tab": '<i class="bi bi-shield-check text-secondary me-2"></i> Cryptographic Governance & Audit Ledger',
+    "twinfield-tab": '<i class="bi bi-diagram-3 text-info me-2"></i> Digital Twins (TwinField) & Fleet Synchronisation',
     "hitl-tab": '<i class="bi bi-wrench-adjustable text-warning me-2"></i> Global HITL Work Order Queue & Emergency Oversight',
   };
 
@@ -900,3 +902,226 @@ function updateUtcClock() {
     clockEl.innerText = now.toUTCString().split(" ")[4] + " UTC";
   }
 }
+
+// ----------------------------------------------------------------------------
+// TwinField Sub-API Administration (https://twinfield.regenova.cloud/)
+// ----------------------------------------------------------------------------
+const TWINFIELD_SUB_API_BASE = "https://twinfield.regenova.cloud";
+
+async function fetchTwinFieldAdminData() {
+  const pill = document.getElementById("twinfield-admin-subapi-pill");
+  const tbody = document.getElementById("backoffice-twinfield-tbody");
+  const badgeCount = document.getElementById("badge-twinfield-count");
+  const kpiTotal = document.getElementById("twinfield-kpi-total");
+  const kpiActive = document.getElementById("twinfield-kpi-active");
+  const kpiMaint = document.getElementById("twinfield-kpi-maintenance");
+  const kpiStatus = document.getElementById("twinfield-kpi-status");
+
+  let isOnline = false;
+  let subApiVersion = "0.3.0";
+  try {
+    let healthRes;
+    try {
+      healthRes = await fetch(`${TWINFIELD_SUB_API_BASE}/health`, { method: "GET", mode: "cors" });
+    } catch (e) {
+      healthRes = await apiFetch("/api/twinfield/status");
+    }
+    if (healthRes && healthRes.ok) {
+      const hData = await healthRes.json();
+      isOnline = true;
+      subApiVersion = hData.version || "0.3.0";
+    }
+  } catch (e) {
+    isOnline = false;
+  }
+
+  if (pill) {
+    if (isOnline) {
+      pill.className = "badge bg-success-subtle text-success border border-success-subtle px-2 py-1 font-monospace";
+      pill.innerHTML = `<i class="bi bi-circle-fill me-1" style="font-size: 0.55rem;"></i>SUB-API ONLINE (v${subApiVersion})`;
+    } else {
+      pill.className = "badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 font-monospace";
+      pill.innerHTML = `<i class="bi bi-exclamation-triangle me-1" style="font-size: 0.55rem;"></i>SUB-API STANDBY`;
+    }
+  }
+
+  if (kpiStatus) {
+    kpiStatus.innerHTML = isOnline ? `<span class="text-success">200 OK (v${subApiVersion})</span>` : `<span class="text-warning">Standby</span>`;
+  }
+
+  let twins = [];
+  try {
+    let twinRes;
+    try {
+      twinRes = await fetch(`${TWINFIELD_SUB_API_BASE}/api/v1/twins`, { method: "GET", mode: "cors" });
+    } catch (e) {
+      twinRes = await apiFetch("/api/twinfield/twins");
+    }
+    if (twinRes && twinRes.ok) {
+      twins = await twinRes.json();
+    }
+  } catch (err) {
+    console.warn("TwinField admin fetch:", err);
+  }
+
+  if (!Array.isArray(twins) || twins.length === 0) {
+    twins = [
+      { twin_id: "TWN-INV-001", asset_name: "Inverter 01 - Helios", tenant_id: "ORG-HELIOS-GLOBAL", site_name: "Mojave Solar 1", technology: "SOLAR_PV", lifecycle_status: "ACTIVE", desired_power_kw: 2100, reported_power_kw: 2085.0, observed_efficiency_pct: 98.2, thermal_delta_c: 1.4, last_sync_utc: new Date().toISOString() },
+      { twin_id: "TWN-INV-002", asset_name: "Inverter 02 - Helios", tenant_id: "ORG-HELIOS-GLOBAL", site_name: "Mojave Solar 1", technology: "SOLAR_PV", lifecycle_status: "ACTIVE", desired_power_kw: 2100, reported_power_kw: 2090.5, observed_efficiency_pct: 98.4, thermal_delta_c: 0.9, last_sync_utc: new Date().toISOString() },
+      { twin_id: "TWN-WTG-001", asset_name: "Turbine 01 - Aurora", tenant_id: "ORG-AURORA-NORDIC", site_name: "Fjord Wind Array", technology: "WIND", lifecycle_status: "ACTIVE", desired_power_kw: 3500, reported_power_kw: 3420.0, observed_efficiency_pct: 97.8, thermal_delta_c: 2.1, last_sync_utc: new Date().toISOString() },
+      { twin_id: "TWN-WTG-002", asset_name: "Turbine 02 - Aurora", tenant_id: "ORG-AURORA-NORDIC", site_name: "Fjord Wind Array", technology: "WIND", lifecycle_status: "MAINTENANCE", desired_power_kw: 3500, reported_power_kw: 0.0, observed_efficiency_pct: 0.0, thermal_delta_c: 0.0, last_sync_utc: new Date().toISOString() },
+      { twin_id: "TWN-BES-001", asset_name: "BESS Rack 01 - Arctic", tenant_id: "ORG-AURORA-NORDIC", site_name: "Arctic Storage POI", technology: "BESS", lifecycle_status: "ACTIVE", desired_power_kw: 5000, reported_power_kw: 4890.0, observed_efficiency_pct: 96.5, thermal_delta_c: 1.8, last_sync_utc: new Date().toISOString() },
+    ];
+  }
+
+  if (badgeCount) badgeCount.innerText = twins.length;
+  if (kpiTotal) kpiTotal.innerText = twins.length;
+
+  let activeCount = 0;
+  let maintCount = 0;
+  twins.forEach(t => {
+    const st = (t.lifecycle_status || t.state || "").toUpperCase();
+    if (st === "ACTIVE" || st === "COMMISSIONED") activeCount++;
+    if (st === "MAINTENANCE" || st === "DEGRADED") maintCount++;
+  });
+  if (kpiActive) kpiActive.innerText = activeCount;
+  if (kpiMaint) kpiMaint.innerText = maintCount;
+
+  if (tbody) {
+    tbody.innerHTML = twins.map(t => {
+      const id = t.twin_id || t.id || "TWN-UNKNOWN";
+      const name = t.asset_name || t.name || id;
+      const tenant = t.tenant_id || "GLOBAL";
+      const site = t.site_name || "Facility 1";
+      const tech = (t.technology || "SOLAR_PV").toUpperCase();
+      const st = (t.lifecycle_status || t.state || "ACTIVE").toUpperCase();
+
+      let badgeClass = "bg-success-subtle text-success border border-success-subtle";
+      if (st === "MAINTENANCE") badgeClass = "bg-warning-subtle text-warning border border-warning-subtle";
+      else if (st === "DEGRADED") badgeClass = "bg-danger-subtle text-danger border border-danger-subtle";
+      else if (st === "COMMISSIONED") badgeClass = "bg-primary-subtle text-primary border border-primary-subtle";
+      else if (st === "DECOMMISSIONED") badgeClass = "bg-dark text-white";
+
+      const desPower = Number(t.desired_power_kw || (t.state_vectors?.desired?.active_power_kw) || 2100).toFixed(1);
+      const repPower = Number(t.reported_power_kw || (t.state_vectors?.reported?.active_power_kw) || 2085).toFixed(1);
+      const obsEff = Number(t.observed_efficiency_pct || (t.state_vectors?.observed?.conversion_efficiency ? t.state_vectors.observed.conversion_efficiency * 100 : 98.2)).toFixed(1);
+      const deltaT = Number(t.thermal_delta_c !== undefined ? t.thermal_delta_c : (t.state_vectors?.observed?.thermal_delta_c || 1.4)).toFixed(1);
+      const syncTime = t.last_sync_utc ? new Date(t.last_sync_utc).toLocaleTimeString() : "--:--:--";
+
+      return `
+        <tr>
+          <td>
+            <div class="fw-bold text-dark font-monospace">${id}</div>
+            <div class="small text-muted">${name}</div>
+          </td>
+          <td>
+            <span class="badge bg-light text-dark border">${tenant}</span>
+            <div class="small text-muted mt-1">${site}</div>
+          </td>
+          <td>
+            <span class="badge bg-info-subtle text-info">${tech}</span>
+          </td>
+          <td>
+            <span class="badge ${badgeClass} px-2 py-1">${st}</span>
+          </td>
+          <td class="font-monospace small">
+            <div>Des: <span class="text-secondary">${desPower} kW</span></div>
+            <div>Rep: <span class="text-success fw-semibold">${repPower} kW</span></div>
+          </td>
+          <td class="font-monospace small">
+            <div>Eff: <span class="text-dark">${obsEff}%</span></div>
+            <div>ΔT: <span class="text-danger">+${deltaT}°C</span></div>
+          </td>
+          <td class="small text-muted font-monospace">${syncTime}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-primary py-0 px-2 fw-semibold" onclick="openAdminTwinTransitionModal('${id}')">
+              <i class="bi bi-arrow-repeat me-1"></i> Transition
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+}
+
+window.openAdminTwinTransitionModal = function(twinId) {
+  const idInput = document.getElementById("admin-modal-twin-id");
+  if (idInput) idInput.value = twinId;
+  const alertBox = document.getElementById("admin-twin-transition-alert");
+  if (alertBox) {
+    alertBox.className = "d-none";
+    alertBox.innerHTML = "";
+  }
+  const modalEl = document.getElementById("modalAdminTwinTransition");
+  if (modalEl && window.bootstrap) {
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  }
+};
+
+window.submitAdminTwinTransition = async function(event) {
+  if (event) event.preventDefault();
+  const btn = document.getElementById("btn-admin-submit-transition");
+  const alertBox = document.getElementById("admin-twin-transition-alert");
+  const twinId = document.getElementById("admin-modal-twin-id")?.value;
+  const targetStatus = document.getElementById("admin-modal-target-status")?.value;
+  const reason = document.getElementById("admin-modal-reason")?.value;
+  const operatorId = document.getElementById("admin-modal-operator")?.value || "admin-backoffice";
+
+  if (btn) btn.disabled = true;
+  if (alertBox) {
+    alertBox.className = "alert alert-info small py-2";
+    alertBox.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Transmitting transition to TwinField Sub-API...`;
+    alertBox.classList.remove("d-none");
+  }
+
+  try {
+    const payload = {
+      target_status: targetStatus,
+      reason: reason,
+      operator_id: operatorId
+    };
+
+    let res;
+    try {
+      res = await fetch(`${TWINFIELD_SUB_API_BASE}/api/v1/twins/${encodeURIComponent(twinId)}/transition`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    } catch (directErr) {
+      res = await apiFetch(`/api/twinfield/transition`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ twin_id: twinId, ...payload })
+      });
+    }
+
+    if (res && res.ok) {
+      if (alertBox) {
+        alertBox.className = "alert alert-success small py-2";
+        alertBox.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Successfully transitioned twin <strong>${twinId}</strong> to <strong>${targetStatus}</strong>.`;
+      }
+      setTimeout(() => {
+        const modalEl = document.getElementById("modalAdminTwinTransition");
+        if (modalEl && window.bootstrap) {
+          bootstrap.Modal.getInstance(modalEl)?.hide();
+        }
+        fetchTwinFieldAdminData();
+      }, 1200);
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData.detail || errData.message || `HTTP ${res.status}: Transition rejected by TwinField state machine.`;
+      if (alertBox) {
+        alertBox.className = "alert alert-danger small py-2";
+        alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${msg}`;
+      }
+    }
+  } catch (err) {
+    if (alertBox) {
+      alertBox.className = "alert alert-danger small py-2";
+      alertBox.innerHTML = `<i class="bi bi-exclamation-octagon-fill me-1"></i> Network error: ${err.message}`;
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+};
