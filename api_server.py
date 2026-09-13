@@ -60,7 +60,7 @@ def build_discovery_payload() -> dict:
         "service": SERVICE_NAME,
         "status": "healthy",
         "version": API_VERSION,
-        "framework": "REAMP-MVP-Phase1-15",
+        "framework": "REGENOVA (incorporating REAMP Engine Architecture)",
         "web_client_url": "https://regenova.cloud/",
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "endpoints": KNOWN_ENDPOINTS,

@@ -6,7 +6,7 @@
 [![UI Framework](https://img.shields.io/badge/Frontend-Bootstrap%205.3%20Light%20Theme-7952b3.svg)](https://getbootstrap.com/)
 [![Independent Gate](https://img.shields.io/badge/Phase%20Gate-PASS%20%E2%80%94%20PROCEED-blue.svg)](docs/research/evaluation_matrix.md)
 
-> **REGENOVA** is an open, research-grade, production-oriented framework for the intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance, and lifecycle optimisation of heterogeneous renewable energy assets.
+> **REGENOVA** (incorporating the **REAMP** — Renewable Energy Asset Intelligence and Management Framework core engine architecture) is an open, research-grade, production-oriented framework for the intelligent management, monitoring, health assessment, anomaly detection, predictive maintenance, and lifecycle optimisation of heterogeneous renewable energy assets.
 
 ---
 

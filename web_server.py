@@ -1217,8 +1217,12 @@ class REAMPWebServerState:
             email = (payload.get("email") or payload.get("username") or "").strip().lower()
             password = payload.get("password") or ""
 
-            admin_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
-            admin_password = os.environ.get("REAMP_ADMIN_PASSWORD", "password")
+            admin_email = os.environ.get(
+                "REGENOVA_ADMIN_EMAIL", os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com")
+            ).strip().lower()
+            admin_password = os.environ.get(
+                "REGENOVA_ADMIN_PASSWORD", os.environ.get("REAMP_ADMIN_PASSWORD", "password")
+            )
 
             if email == admin_email and password == admin_password:
                 token_hash = hashlib.sha256(f"{email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
@@ -1269,7 +1273,9 @@ class REAMPWebServerState:
     def admin_verify_api(self, token: str) -> tuple:
         """Verifies active administrator session token."""
         try:
-            expected_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
+            expected_email = os.environ.get(
+                "REGENOVA_ADMIN_EMAIL", os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com")
+            ).strip().lower()
             token_hash = hashlib.sha256(f"{expected_email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
             expected_token = f"ADM-SEC-{token_hash[:16].upper()}"
 
@@ -1462,13 +1468,16 @@ class REAMPWebServerState:
         if not token:
             return False
         tok_clean = token.strip().replace("Bearer ", "")
-        expected_email = os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com").strip().lower()
+        expected_email = os.environ.get(
+            "REGENOVA_ADMIN_EMAIL", os.environ.get("REAMP_ADMIN_EMAIL", "imosudi@gmail.com")
+        ).strip().lower()
         token_hash = hashlib.sha256(f"{expected_email}:REGENOVA-ADMIN-SALT-2026".encode("utf-8")).hexdigest()
         expected_token = f"ADM-SEC-{token_hash[:16].upper()}"
         return tok_clean == expected_token
 
 
 GLOBAL_STATE = REAMPWebServerState()
+REGENOVAWebServerState = REAMPWebServerState
 
 
 def dispatch_api_request(method: str, path: str, payload: dict = None, headers: dict = None, query_params: dict = None) -> tuple:
@@ -1870,6 +1879,9 @@ def application(environ, start_response):
     ]
     start_response("200 OK", headers)
     return [file_content]
+
+
+REGENOVARequestHandler = REAMPRequestHandler
 
 
 def run_server(port=8000):

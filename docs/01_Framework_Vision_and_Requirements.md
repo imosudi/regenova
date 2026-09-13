@@ -1,4 +1,4 @@
-# REAMP - Framework Vision and System Overview
+# REGENOVA (REAMP) - Framework Vision and System Overview
 
 **Document Identifier**: `REAMP-DOC-01`  
 **Phase**: Phase 1 - Framework Vision and Requirements  
@@ -9,11 +9,11 @@
 
 ## 1. Executive Vision & Purpose
 
-The **Renewable Energy Asset Intelligence and Management Framework (REAMP)** is an open, production-oriented, research-grade software framework engineered to optimize the lifecycle, operational performance, health assessment, anomaly detection, predictive maintenance, and risk-adjusted financial returns of heterogeneous renewable energy assets.
+**REGENOVA** is an open, production-oriented, research-grade software framework engineered to optimize the lifecycle, operational performance, health assessment, anomaly detection, predictive maintenance, and risk-adjusted financial returns of heterogeneous renewable energy assets, consolidating and incorporating the **Renewable Energy Asset Intelligence and Management Framework (REAMP)** core architecture.
 
 Modern renewable energy infrastructure suffers from severe operational fragmentation: disparate telemetry formats, proprietary SCADA silos, dark data, uncalibrated anomaly alerts, opaque AI models ("black boxes"), and disconnected computerised maintenance management systems (CMMS).
 
-REAMP solves this by establishing a unified, technology-agnostic data and analytical framework that transforms high-frequency, noisy raw telemetry into actionable, explainable, and audited decision support.
+REGENOVA (incorporating REAMP) solves this by establishing a unified, technology-agnostic data and analytical framework that transforms high-frequency, noisy raw telemetry into actionable, explainable, and audited decision support.
 
 ---
 

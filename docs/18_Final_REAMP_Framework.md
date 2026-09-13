@@ -1,4 +1,4 @@
-# REAMP - Renewable Energy Asset Intelligence and Management Framework
+# REGENOVA (incorporating REAMP) - Renewable Energy Asset Intelligence & Management Framework
 
 ## Final Capstone Architecture Document (Phase 18)
 
@@ -6,9 +6,9 @@
 
 ## 1. Executive Summary & Vision
 
-The **Renewable Energy Asset Intelligence and Management Framework (REAMP)** is a production-oriented, research-grade, modular software architecture designed for heterogeneous utility-scale and distributed renewable-energy assets. 
+**REGENOVA** is a production-oriented, research-grade, modular software architecture designed for heterogeneous utility-scale and distributed renewable-energy assets, culminating and unifying the **Renewable Energy Asset Intelligence and Management Framework (REAMP)** core engine. 
 
-Moving beyond traditional Supervisory Control and Data Acquisition (SCADA) dashboards, REAMP unifies:
+Moving beyond traditional Supervisory Control and Data Acquisition (SCADA) dashboards, REGENOVA (incorporating REAMP) unifies:
 - Edge/fog store-and-forward telemetry buffering with guaranteed offline data integrity;
 - Multi-technology physical performance intelligence (Solar PV, Wind Turbines, Battery Energy Storage Systems [BESS], and co-located Hybrid power plants);
 - Multi-dimensional deterministic asset health scoring (IEC 61724-1, IEC 61400-12-1, Arrhenius thermal acceleration);

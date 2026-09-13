@@ -1,10 +1,12 @@
-# REAMP - Global AI Agent Operating Contract
+# REGENOVA (incorporating REAMP) - Global AI Agent Operating Contract
 
 ## Project
 
 Build a production-oriented, research-grade:
 
-**Renewable Energy Asset Intelligence and Management Framework (REAMP)**
+**REGENOVA — Renewable Energy Asset Intelligence and Management Framework (incorporating the REAMP engine architecture)**
+
+**REGENOVA** is the canonical brand and preferred framework identity for the platform, consolidating and unifying the underlying **Renewable Energy Asset Intelligence and Management Framework (REAMP)** core architecture and engine components.
 
 The framework shall support heterogeneous renewable-energy assets, initially Solar PV and subsequently Wind, BESS and hybrid renewable-energy systems.
 
