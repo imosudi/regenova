@@ -1,15 +1,13 @@
 # ==============================================================================
-# REGENOVA — Unified Microservices Docker Compose Orchestration
+# REGENOVA — Standardized Microservices Docker Compose Orchestration
 # ==============================================================================
-# Repeatable deployment across local workstations and production servers:
-#   - flowfield:           Node-RED IoT Integration Microservice (1880)
-#   - twinfield:           FastAPI Digital Twin Sub-API (9000)
-#   - regenova-api:        Core Telemetry & Asset Intelligence API (8101:8001)
-#   - regenova-backoffice: Multi-tenant Superadmin Console (8102:8002)
-#   - regenova-web:        Operations Portal & Web Application (8100:8000)
-#   - mosquitto:           Eclipse Mosquitto MQTT Broker (1883, 9001)
-#   - redis:               In-Memory State & Buffer Store (6380:6379)
-#   - timescaledb:         TimescaleDB container (profile: standalone)
+# Standardized Container Directories under docker/:
+#   - docker/flowfield/Dockerfile     -> Node-RED IoT Telemetry & Event Microservice
+#   - docker/twinfield/Dockerfile     -> FastAPI Digital Twin Sub-API
+#   - docker/api/Dockerfile           -> Core Telemetry & Asset Intelligence API
+#   - docker/backoffice/Dockerfile    -> Multi-tenant Superadmin Console
+#   - docker/web/Dockerfile           -> Operations Portal & Web Application
+#   - docker/mosquitto/mosquitto.conf -> Eclipse Mosquitto MQTT Broker
 # ==============================================================================
 
 services:
@@ -18,8 +16,8 @@ services:
   # ----------------------------------------------------------------------------
   flowfield:
     build:
-      context: ${FLOWFIELD_DIR:-./flowfield}
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/flowfield/Dockerfile
     container_name: regenova-flowfield
     restart: unless-stopped
     ports:
@@ -53,7 +51,7 @@ services:
   twinfield:
     build:
       context: ${TWINFIELD_DIR:-../iot-digital-twin/backend}
-      dockerfile: Dockerfile
+      dockerfile: ${TWINFIELD_DOCKERFILE:-Dockerfile}
     container_name: regenova-twinfield
     restart: unless-stopped
     ports:
@@ -73,7 +71,7 @@ services:
   regenova-api:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: docker/api/Dockerfile
     container_name: regenova-api
     restart: unless-stopped
     ports:
@@ -95,7 +93,7 @@ services:
   regenova-backoffice:
     build:
       context: .
-      dockerfile: Dockerfile.backoffice
+      dockerfile: docker/backoffice/Dockerfile
     container_name: regenova-backoffice
     restart: unless-stopped
     ports:
@@ -120,7 +118,7 @@ services:
   regenova-web:
     build:
       context: .
-      dockerfile: Dockerfile.web
+      dockerfile: docker/web/Dockerfile
     container_name: regenova-web
     restart: unless-stopped
     ports:
