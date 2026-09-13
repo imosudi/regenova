@@ -8,6 +8,7 @@
 #   - docker/backoffice/Dockerfile    -> Multi-tenant Superadmin Console
 #   - docker/web/Dockerfile           -> Operations Portal & Web Application
 #   - docker/mosquitto/mosquitto.conf -> Eclipse Mosquitto MQTT Broker
+#   - docker/timescaledb/Dockerfile   -> TimescaleDB Time-Series & Telemetry Container
 # ==============================================================================
 
 services:
@@ -28,11 +29,16 @@ services:
       - FLOWFIELD_HOST=0.0.0.0
       - FLOWFIELD_CREDENTIAL_SECRET=${FLOWFIELD_CREDENTIAL_SECRET:-regenova-flowfield-credential-secret-key-2026}
       - FLOWFIELD_ADMIN_HASH=${FLOWFIELD_ADMIN_HASH:-$$2b$$10$$678EDfJxsYaWMk5hSUqvuOiHgE4yEFgVufQxc1tyc/ONppTSaG41O}
-      - FLOWFIELD_DB_HOST=${DB_HOST:-host.docker.internal}
-      - FLOWFIELD_DB_PORT=${DB_PORT:-5432}
+      - FLOWFIELD_DB_HOST=${FLOWFIELD_DB_HOST:-timescaledb}
+      - FLOWFIELD_DB_PORT=${FLOWFIELD_DB_PORT:-5432}
       - FLOWFIELD_DB_NAME=${TIMESERIES_DB_NAME:-regenova_timeseries_db}
       - FLOWFIELD_DB_USER=${TIMESERIES_DB_USER:-regenova_timeseries_db}
       - FLOWFIELD_DB_PASSWORD=${TIMESERIES_DB_PASSWORD:-OmolileOtilile}
+      - HOST_PG_HOST=${DB_HOST:-host.docker.internal}
+      - HOST_PG_PORT=${DB_PORT:-5432}
+      - HOST_PG_NAME=${REAMP_DB_NAME:-regenova_db}
+      - HOST_PG_USER=${REAMP_DB_USER:-regenova_db}
+      - HOST_PG_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
       - REGENOVA_API_URL=http://regenova-api:8001
       - TWINFIELD_API_URL=http://twinfield:9000
       - FLOWFIELD_MQTT_URL=mqtt://mosquitto:1883
@@ -44,6 +50,7 @@ services:
       - regenova-net
     depends_on:
       - mosquitto
+      - timescaledb
 
   # ----------------------------------------------------------------------------
   # 2. TwinField — Digital Twin Sub-API
@@ -82,10 +89,17 @@ services:
       - REAMP_DB_NAME=${REAMP_DB_NAME:-regenova_db}
       - REAMP_DB_USER=${REAMP_DB_USER:-regenova_db}
       - REAMP_DB_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
+      - TIMESCALEDB_HOST=timescaledb
+      - TIMESCALEDB_PORT=5432
+      - TIMESCALEDB_NAME=${TIMESERIES_DB_NAME:-regenova_timeseries_db}
+      - TIMESCALEDB_USER=${TIMESERIES_DB_USER:-regenova_timeseries_db}
+      - TIMESCALEDB_PASSWORD=${TIMESERIES_DB_PASSWORD:-OmolileOtilile}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - regenova-net
+    depends_on:
+      - timescaledb
 
   # ----------------------------------------------------------------------------
   # 4. REGENOVA Backoffice — Multi-Tenant Administration Console
@@ -165,20 +179,27 @@ services:
       - regenova-net
 
   # ----------------------------------------------------------------------------
-  # 8. TimescaleDB (Optional Standalone Profile)
+  # 8. TimescaleDB — Dedicated Time-Series & Telemetry Storage Container
   # ----------------------------------------------------------------------------
   timescaledb:
-    image: timescale/timescaledb:latest-pg16
+    build:
+      context: .
+      dockerfile: docker/timescaledb/Dockerfile
     container_name: regenova-timescaledb
     restart: unless-stopped
-    profiles:
-      - standalone
     ports:
       - "127.0.0.1:5433:5432"
     environment:
       - POSTGRES_DB=${TIMESERIES_DB_NAME:-regenova_timeseries_db}
       - POSTGRES_USER=${TIMESERIES_DB_USER:-regenova_timeseries_db}
       - POSTGRES_PASSWORD=${TIMESERIES_DB_PASSWORD:-OmolileOtilile}
+      - HOST_PG_HOST=host.docker.internal
+      - HOST_PG_PORT=5432
+      - HOST_PG_DB=${REAMP_DB_NAME:-regenova_db}
+      - HOST_PG_USER=${REAMP_DB_USER:-regenova_db}
+      - HOST_PG_PASSWORD=${REAMP_DB_PASSWORD:-OmolileOtilile}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - timescaledb_data:/var/lib/postgresql/data
     networks:

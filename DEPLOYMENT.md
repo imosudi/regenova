@@ -30,24 +30,33 @@ docker/
 │   └── Dockerfile              # Node-RED IoT Telemetry & Event Ingestion
 ├── twinfield/
 │   └── Dockerfile              # FastAPI Digital Twin Sub-API
-└── mosquitto/
-    └── mosquitto.conf          # MQTT TCP (1883) & WebSockets (9001) Configuration
+├── mosquitto/
+│   └── mosquitto.conf          # MQTT TCP (1883) & WebSockets (9001) Configuration
+└── timescaledb/
+    ├── Dockerfile              # TimescaleDB 2.x Container (pg16 base)
+    └── init/
+        └── 01-init.sql         # Hypertables, indices & postgres_fdw host linkage
 ```
 
 ---
 
-## 3. Microservice Topology
+## 3. Microservice Topology & Hybrid Persistence
 
-| Container Name | Service Name | Dockerfile Path | Host Binding | Upstream Port |
-| :--- | :--- | :--- | :--- | :--- |
-| `regenova-flowfield` | `flowfield` | `docker/flowfield/Dockerfile` | `127.0.0.1:1880` | `1880` |
-| `regenova-twinfield` | `twinfield` | `docker/twinfield/Dockerfile` | `127.0.0.1:9000` | `9000` |
-| `regenova-api` | `regenova-api` | `docker/api/Dockerfile` | `127.0.0.1:8101` | `8001` |
-| `regenova-backoffice` | `regenova-backoffice` | `docker/backoffice/Dockerfile` | `127.0.0.1:8102` | `8002` |
-| `regenova-web` | `regenova-web` | `docker/web/Dockerfile` | `127.0.0.1:8100` | `8000` |
-| `regenova-mosquitto` | `mosquitto` | `eclipse-mosquitto:2` | `0.0.0.0:1883`, `127.0.0.1:9001` | `1883`, `9001` |
-| `regenova-redis` | `redis` | `redis:7-alpine` | `127.0.0.1:6380` | `6379` |
-| `regenova-timescaledb` | `timescaledb` | `timescale/timescaledb:latest-pg16` | `127.0.0.1:5433` | `5432` |
+| Container Name | Service Name | Dockerfile Path | Host Binding | Upstream Port | Primary Persistence |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `regenova-flowfield` | `flowfield` | `docker/flowfield/Dockerfile` | `127.0.0.1:1880` | `1880` | `flowfield_data` (Volume) + TimescaleDB |
+| `regenova-twinfield` | `twinfield` | `docker/twinfield/Dockerfile` | `127.0.0.1:9000` | `9000` | Redis / Host PostgreSQL |
+| `regenova-api` | `regenova-api` | `docker/api/Dockerfile` | `127.0.0.1:8101` | `8001` | Host PostgreSQL + TimescaleDB |
+| `regenova-backoffice` | `regenova-backoffice` | `docker/backoffice/Dockerfile` | `127.0.0.1:8102` | `8002` | Host PostgreSQL 18 (`regenova_db`) |
+| `regenova-web` | `regenova-web` | `docker/web/Dockerfile` | `127.0.0.1:8100` | `8000` | Host PostgreSQL 18 (`regenova_db`) |
+| `regenova-mosquitto` | `mosquitto` | `eclipse-mosquitto:2` | `0.0.0.0:1883`, `127.0.0.1:9001` | `1883`, `9001` | `mosquitto_data` (Volume) |
+| `regenova-redis` | `redis` | `redis:7-alpine` | `127.0.0.1:6380` | `6379` | In-Memory / Ephemeral |
+| `regenova-timescaledb` | `timescaledb` | `docker/timescaledb/Dockerfile` | `127.0.0.1:5433` | `5432` | `timescaledb_data` (Volume) + `postgres_fdw` to Host |
+
+### Dual Database Architecture:
+- **Transactional State & Metadata**: Retained on host PostgreSQL 18 (`host.docker.internal:5432`, database: `regenova_db`). Houses asset hierarchies, tenancy, configurations, health records, and user management.
+- **Time-Series Telemetry**: Managed by containerized TimescaleDB (`timescaledb:5432` on `regenova-net`, host: `127.0.0.1:5433`, database: `regenova_timeseries_db`). Stores chunked high-velocity measurements with automatic partitioning.
+- **Database Federation (`postgres_fdw`)**: The TimescaleDB container configures a foreign server link (`host_postgres`) and maps schema `host_regenova`, allowing seamless cross-database analytical queries without breaking data boundaries.
 
 ---
 
